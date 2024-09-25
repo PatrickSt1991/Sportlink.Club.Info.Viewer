@@ -22,9 +22,11 @@ To set up this project locally, follow these steps:
    cd match-results-viewer
 
 2. **Install dependencies**:
+   ```bash
     npm install
 
 3. **Run the development server:**:
+   ```bash
     npm run dev
 
 4. **Open your browser and navigate to http://localhost:5173 (or the specified port in the terminal) to view the application.**
