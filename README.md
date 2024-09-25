@@ -75,7 +75,7 @@ Contributions are welcome! If you have suggestions or improvements, please creat
 
 ## License
 
-This project is licensed under the MIT License - see the LICENSE file for details.
+This project is licensed under the MIT License - see the [LICENSE](https://github.com/PatrickSt1991/match-info-app/tree/main) file for details.
 
 ## Acknowledgements
 
