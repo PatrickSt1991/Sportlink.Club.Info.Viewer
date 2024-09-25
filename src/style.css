@@ -1,0 +1,202 @@
+:root {
+  font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
+  line-height: 1.5;
+  font-weight: 400;
+
+  color-scheme: light dark;
+  color: rgba(255, 255, 255, 0.87);
+  background-image: url('@/assets/background.jpg'); /* Adjust the path accordingly */
+	height: 100%;
+	background-position: center;
+	background-repeat: no-repeat;
+	background-size: cover;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+a {
+  font-weight: 500;
+  color: #646cff;
+  text-decoration: inherit;
+}
+a:hover {
+  color: #535bf2;
+}
+
+body {
+  margin: 0;
+  display: flex;
+  place-items: center;
+  min-width: 320px;
+  min-height: 100vh;
+}
+
+h1 {
+  font-size: 3.2em;
+  line-height: 1.1;
+}
+
+button {
+  border-radius: 8px;
+  border: 1px solid transparent;
+  padding: 0.6em 1.2em;
+  font-size: 1em;
+  font-weight: 500;
+  font-family: inherit;
+  background-color: #1a1a1a;
+  cursor: pointer;
+  transition: border-color 0.25s;
+}
+button:hover {
+  border-color: #646cff;
+}
+button:focus,
+button:focus-visible {
+  outline: 4px auto -webkit-focus-ring-color;
+}
+
+.card {
+  padding: 2em;
+}
+
+#app {
+  max-width: 1600px;
+  margin: 0 auto;
+  text-align: center;
+}
+
+@media (prefers-color-scheme: light) {
+  :root {
+    color: #213547;
+    background-color: #ffffff;
+  }
+  a:hover {
+    color: #747bff;
+  }
+  button {
+    background-color: #f9f9f9;
+  }
+}
+#contentBox {
+  padding: 20px; /* Padding for inner spacing */
+}
+
+#topbar {
+  background: #f5f5f5;
+  width: inherit;
+  border-radius: 25px;
+  text-align: center;
+  font-weight: bold;
+  font-size: 30px;
+  color:#000000;
+}
+
+#rcorners_matchinfo_fixed {
+  width: 100%;
+  border-radius: 25px;
+  font-size: 20px;
+  font-weight: bold;
+  position: relative;
+  margin-top: 20px; /* Add margin for spacing */
+}
+
+#placeholderDiv_fixed {
+  width: 100%;
+  display: flex;
+  padding: 10px; /* Add padding inside the boxes */
+}
+
+#datumUitslag_fixed,
+#thuisteam_fixed,
+#kleedkamer_fixed, /* Updated to use class instead of id */
+#uitteam_fixed,
+#wedstrijdveld_fixed {
+  font-weight: bold;
+  color: #ffffff; /* White text */
+}
+
+#datumUitslag_fixed {
+  width: 10%;
+  background: #b40808; /* WVV red */
+  padding: 18px 15px;
+  border-top-left-radius: 25px;
+  border-bottom-left-radius: 25px;
+  text-align: center;
+}
+
+#datumProgramma_fixed {
+  width: 10%;
+  background: #b40808; /* WVV red */
+  padding: 5px 15px;
+  border-top-left-radius: 25px;
+  border-bottom-left-radius: 25px;
+  text-align: center;
+}
+
+#thuisteam_fixed,
+#uitteam_fixed {
+  width: 45%; /* Fixed width for team names */
+  background: #000000; /* Black background */
+  padding: 18px 15px;
+}
+
+#kleedkamer_fixed {
+  width: 20%; /* Fixed width for dressing rooms */
+  background: #de0b0b; /* WVV red */
+  padding: 18px 15px;
+}
+
+#wedstrijdveld_fixed {
+  width: 15%; /* Fixed width for field info */
+  background: #b40808; /* WVV red */
+  padding: 18px 15px;
+  border-top-right-radius: 25px;
+  border-bottom-right-radius: 25px;
+}
+
+#noMatchMessage {
+  text-align: center; /* Center the message and image */
+  color: white; /* Change text color as needed */
+  margin-top: 20px; /* Add some space above the message */
+}
+
+#noMatchMessage img {
+  width: 100px; /* Adjust size as needed */
+  height: auto; /* Maintain aspect ratio */
+}
+
+#noMatchMessage h1 {
+  font-size: 24px; /* Adjust the font size */
+  margin-top: 10px; /* Space between image and text */
+}
+
+#scrollingContainer {
+  overflow-y: hidden; /* Disable vertical scrolling since we handle it manually */
+  position: relative;
+}
+
+.matchEntry {
+  display: flex; /* Align matches horizontally */
+  margin: 10px 0; /* Space between match entries */
+  color: white; /* Text color */
+  padding: 10px; /* Padding inside the match entry */
+  border-radius: 5px; /* Rounded corners */
+}
+
+.fade-enter-active, .fade-leave-active {
+  transition: opacity 0.5s;
+}
+.fade-enter, .fade-leave-to {
+  opacity: 0;
+}
+
+#clublogo {
+  width: 10%; /* or set a specific pixel size if necessary */
+  max-width: 75px; /* Set the maximum width */
+  max-height: 75px; /* Set the maximum height */
+  object-fit: contain; /* Ensure image scales to fit within the bounds */
+  background-color: #000000;
+  display: block; /* Ensure no unexpected margin/padding */
+}
