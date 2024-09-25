@@ -2,6 +2,7 @@ import { createRouter, createWebHistory } from 'vue-router';
 import PreMatchInfo from '@/views/PreMatchInfo.vue';
 import MatchInfo from '@/views/MatchInfo.vue';
 import MatchResults from '@/views/MatchResults.vue';
+import { BASE_URL } from '@/config';
 
 const routes = [
   {
@@ -22,7 +23,7 @@ const routes = [
 ];
 
 const router = createRouter({
-  history: createWebHistory(),
+  history: createWebHistory(BASE_URL),
   routes,
 });
 
