@@ -88,7 +88,7 @@ export default {
     },
     calculateScrollingContainerHeight() {
       const windowHeight = window.innerHeight;
-      this.scrollingContainerHeight = `${windowHeight - 100}px`;
+      this.scrollingContainerHeight = `${windowHeight - 245}px`;
     },
     formatKleedkamer(kleedkamer) {
       return kleedkamer ? kleedkamer : '---';
