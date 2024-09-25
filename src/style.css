@@ -99,7 +99,6 @@ button:focus-visible {
   font-size: 20px;
   font-weight: bold;
   position: relative;
-  margin-top: 20px; /* Add margin for spacing */
 }
 
 #placeholderDiv_fixed {
@@ -179,7 +178,6 @@ button:focus-visible {
 
 .matchEntry {
   display: flex; /* Align matches horizontally */
-  margin: 10px 0; /* Space between match entries */
   color: white; /* Text color */
   padding: 10px; /* Padding inside the match entry */
   border-radius: 5px; /* Rounded corners */

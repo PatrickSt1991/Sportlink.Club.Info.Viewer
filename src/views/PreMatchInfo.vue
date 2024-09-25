@@ -14,10 +14,19 @@
       </div>
     </div>
     <div id="rcorners_matchinfo_fixed">
+      <div v-if="loading" id="noMatchMessage">
+        <h1>Wedstrijd Informatie worden geladen...</h1>
+      </div>
+
+      <div v-else-if="error" id="noMatchMessage">
+        <h1>{{ error }}</h1>
+      </div>
+
       <div v-if="matches.length === 0" id="noMatchMessage">
         <img src="../assets/match_bg.png" alt="No Matches" />
         <h1>Er zijn geen aankomende wedstrijden bekend de aankomende drie uur.</h1>
       </div>
+
       <div v-else id="scrollingContainer" :style="{ height: scrollingContainerHeight }">
         <transition-group name="fade" tag="div">
           <div v-for="match in matches" :key="match.id" class="matchEntry">
@@ -41,54 +50,56 @@ export default {
   name: 'PreMatchInfo',
   data() {
     return {
-      matches: [], // Store all matched data
-      scrollInterval: null, // Store the interval ID for scrolling
-      scrollingContainerHeight: '300px', // Default height
-      scrollPosition: 0, // Current scroll position
+      matches: [],
+      error: null,
+      loading: false,
+      scrollInterval: null,
+      scrollingContainerHeight: '300px',
+      scrollPosition: 0,
     };
   },
   methods: {
     async fetchPreMatchInfo() {
+      this.loading = true;
+      this.error = null;
       try {
-        const response = await fetch(
-          'https://data.sportlink.com/programma?gebruiklokaleteamgegevens=NEE&eigenwedstrijden=JA&thuis=JA&uit=NEE&client_id=iLqhgc5Npa'
-        );
+        const response = await fetch('https://data.sportlink.com/programma?gebruiklokaleteamgegevens=NEE&eigenwedstrijden=JA&thuis=JA&uit=NEE&client_id=iLqhgc5Npa');
+
+        if(!response.ok) throw new Error(`HTTP Error! status: ${response.status}`);
+
         const data = await response.json();
 
-        const now = new Date(); // Current date and time
-        const threeHoursLater = new Date(now.getTime() + 3 * 60 * 60 * 1000); // Current time + 3 hours
+        const now = new Date();
+        const threeHoursLater = new Date(now.getTime() + 3 * 60 * 60 * 1000);
 
-        let dateString = "2024-09-28T08:30:00";
-        let dateObject = new Date(dateString);
-        let tempThree = new Date(dateObject.getTime() + 8 * 60 * 60 * 1000);
-
-        // Filter for home games at 'Sportpark WVV' on today's date with time between now and +3 hours
         this.matches = data.filter(match => {
-          const matchDateTime = new Date(match.wedstrijddatum); // Convert the date string to a Date object
+          const matchDateTime = new Date(match.wedstrijddatum);
           return (
             match.accommodatie === 'Sportpark WVV' &&
-            matchDateTime >= dateObject && //now && // Match time should be greater than or equal to now
-            matchDateTime <= tempThree && //threeHoursLater && // Match time should be less than or equal to three hours from now
-            matchDateTime.toISOString().slice(0, 10) === dateObject.toISOString().slice(0, 10) 
-			//now.toISOString().slice(0, 10) // Ensure the date part matches today
+            matchDateTime >= now &&
+            matchDateTime <=threeHoursLater &&
+            matchDateTime.toISOString().slice(0, 10) === now.toISOString().slice(0, 10)
           );
         });
 
-        // Duplicate matches for seamless scrolling
         this.matches = [...this.matches, ...this.matches];
       } catch (error) {
+        this.error = 'Error tijdens het laden van de wedstrijd informatie...';
         console.error('Error fetching pre-match info:', error);
+      }finally{
+        console.log('done loading PreMatchInfo');
+        this.loading = false;
       }
     },
     calculateScrollingContainerHeight() {
-      const windowHeight = window.innerHeight; // Get the height of the viewport
-      this.scrollingContainerHeight = `${windowHeight - 100}px`; // Set height minus 100px for sponsor bar
+      const windowHeight = window.innerHeight;
+      this.scrollingContainerHeight = `${windowHeight - 100}px`;
     },
     formatKleedkamer(kleedkamer) {
       return kleedkamer ? kleedkamer : '---';
     },
     formatVeld(veld) {
-      if (!veld) return ''; // Handle empty string
+      if (!veld) return '-';
       return veld.charAt(0).toUpperCase() + veld.slice(1);
     },
     formatDate(dateString) {
@@ -102,21 +113,16 @@ export default {
         return;
       }
 
-      // Initialize scroll position
       this.scrollPosition = 0;
 
       this.scrollInterval = setInterval(() => {
-        // Move scroll position
-        this.scrollPosition += 1; // Adjust speed here
+        this.scrollPosition += 1;
 
-        // Reset scroll position to the beginning if it reaches the end
-        if (this.scrollPosition >= container.scrollHeight / 2) {
-          this.scrollPosition = 0; // Reset to the start of the first set
-        }
+        if (this.scrollPosition >= container.scrollHeight / 2)
+          this.scrollPosition = 0;
         
-        // Set the scroll position
         container.scrollTop = this.scrollPosition;
-      }, 100); // Adjust the interval for smoother scrolling
+      }, 100);
     },
     stopScrolling() {
       if (this.scrollInterval) {
@@ -126,20 +132,20 @@ export default {
     },
   },
   mounted() {
-    this.calculateScrollingContainerHeight(); // Calculate height on mount
-    window.addEventListener('resize', this.calculateScrollingContainerHeight); // Update height on window resize
+    this.calculateScrollingContainerHeight();
+    window.addEventListener('resize', this.calculateScrollingContainerHeight);
 
     this.fetchPreMatchInfo().then(() => {
       nextTick(() => {
         if (this.matches.length > 0) {
-          this.startScrolling(); // Start the scrolling effect after data is fetched and DOM is updated
+          this.startScrolling();
         }
       });
     });
   },
   beforeDestroy() {
-    this.stopScrolling(); // Clean up the scrolling when the component is destroyed
-    window.removeEventListener('resize', this.calculateScrollingContainerHeight); // Clean up resize listener
+    this.stopScrolling();
+    window.removeEventListener('resize', this.calculateScrollingContainerHeight);
   }
 };
 </script>
