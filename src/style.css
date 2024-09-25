@@ -79,12 +79,9 @@ button:focus-visible {
     background-color: #f9f9f9;
   }
 }
-#contentBox {
-  padding: 20px; /* Padding for inner spacing */
-}
 
 #topbar {
-  background: #f5f5f5;
+  background-color: rgba(245, 245, 245, 0.8); 
   width: inherit;
   border-radius: 25px;
   text-align: center;
