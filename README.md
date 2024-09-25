@@ -2,11 +2,14 @@
 
 ## Overview
 
-The **Match Results Viewer** is a Vue.js application that provides users with real-time information about upcoming matches over the next week. Built using **Vue 3** and **Vite**, this app fetches match data from an external API and displays it in a user-friendly interface. The app allows sports enthusiasts, team members, and fans to stay updated on match schedules, team lineups, and more.
+The **Sportlink Club Info Viewer** is a Vue.js application that provides users with real-time information about upcoming matches over the next week, match results over the last week and pre match information containing information of the dressing room and field to play. Built using **Vue 3** and **Vite**, this app fetches match data from an external (Sportlink) API and displays it in a user-friendly interface. The app allows sports enthusiasts, team members, and fans to stay updated on match schedules, and more.
+
+## Disclaimer
+This version isn't currently active at my old soccer club, cause I don't play there anymore but it could be easly implemented there and for any other soccer club or and other sports club that fetches information from Sportlink API
 
 ## Features
 
-- **Real-time Data Fetching**: Automatically retrieves match schedules for the next 7 days.
+- **Real-time Data Fetching**: Automatically retrieves match schedules for the next 7 days for match program information, past 7 days for match results information and next three hours for post match information.
 - **Responsive Design**: Adapts to various screen sizes for an optimal viewing experience on desktops, tablets, and mobile devices.
 - **User Notifications**: Displays loading messages and error alerts to keep users informed about the data retrieval status.
 - **Scrolling Match Information**: Automatically scrolls through match information for easy viewing.
