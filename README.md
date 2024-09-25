@@ -24,7 +24,7 @@ To set up this project locally, follow these steps:
 1. **Clone the repository**:
    ```bash
    git clone https://github.com/PatrickSt1991/Sportlink.Club.Info.Viewer.git
-   cd match-results-viewer
+   cd Sportlink.Club.Info.Viewer
 
 2. **Install dependencies**:
    ```bash
