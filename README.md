@@ -59,9 +59,9 @@ If there are no matches scheduled or if an error occurs during data fetching, ap
 ## API Reference
 
 The application fetches match data from the following endpoints:
-- MatchInfo: https://data.sportlink.com/programma?gebruiklokaleteamgegevens=NEE&aantaldagen=7&eigenwedstrijden=JA&thuis=JA&uit=JA&client_id=iLqhgc5Npa
-- MatchResults: https://data.sportlink.com/uitslagen?gebruiklokaleteamgegevens=NEE&thuis=JA&uit=JA&client_id=iLqhgc5Npa
-- PreMatchInfo: https://data.sportlink.com/programma?gebruiklokaleteamgegevens=NEE&eigenwedstrijden=JA&thuis=JA&uit=NEE&client_id=iLqhgc5Npa
+- [MatchInfo:](https://data.sportlink.com/programma?gebruiklokaleteamgegevens=NEE&aantaldagen=7&eigenwedstrijden=JA&thuis=JA&uit=JA&client_id=iLqhgc5Npa)
+- [MatchResults:](https://data.sportlink.com/uitslagen?gebruiklokaleteamgegevens=NEE&thuis=JA&uit=JA&client_id=iLqhgc5Npa)
+- [PreMatchInfo:](https://data.sportlink.com/programma?gebruiklokaleteamgegevens=NEE&eigenwedstrijden=JA&thuis=JA&uit=NEE&client_id=iLqhgc5Npa)
 
 ## Data Structure
 
@@ -80,7 +80,7 @@ Contributions are welcome! If you have suggestions or improvements, please creat
 
 ## License
 
-This project is licensed under the MIT License - see the [LICENSE](https://github.com/PatrickSt1991/match-info-app/tree/main) file for details.
+This project is licensed under the MIT License - see the [LICENSE](/LICENSE) file for details.
 
 ## Acknowledgements
 
@@ -90,3 +90,8 @@ This project is licensed under the MIT License - see the [LICENSE](https://githu
 ## Contact
 
 For questions or feedback, please reach out to via an issue.
+
+## Screenshots
+![Screenshot of the PreMatch Section.](/.screenshots/PreMatchInfo.png)
+![Screenshot of the comming matches](/.screenshots/matchProgram.png)
+![Screenshot of the match results](/.screenshots/matchResults.png)
