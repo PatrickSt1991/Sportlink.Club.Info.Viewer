@@ -7,6 +7,8 @@ The **Sportlink Club Info Viewer** is a Vue.js application that provides users w
 ## Disclaimer
 This version isn't currently active at my old soccer club, cause I don't play there anymore but it could be easly implemented there and for any other soccer club or and other sports club that fetches information from Sportlink API
 
+Please bear in mind, the API's called are with the clientId of my previous soccer club, you will need to replace that for your own to get the correct data.
+
 ## Features
 
 - **Real-time Data Fetching**: Automatically retrieves match schedules for the next 7 days for match program information, past 7 days for match results information and next three hours for post match information.
@@ -59,9 +61,9 @@ If there are no matches scheduled or if an error occurs during data fetching, ap
 ## API Reference
 
 The application fetches match data from the following endpoints:
-- [MatchInfo:](https://data.sportlink.com/programma?gebruiklokaleteamgegevens=NEE&aantaldagen=7&eigenwedstrijden=JA&thuis=JA&uit=JA&client_id=iLqhgc5Npa)
-- [MatchResults:](https://data.sportlink.com/uitslagen?gebruiklokaleteamgegevens=NEE&thuis=JA&uit=JA&client_id=iLqhgc5Npa)
-- [PreMatchInfo:](https://data.sportlink.com/programma?gebruiklokaleteamgegevens=NEE&eigenwedstrijden=JA&thuis=JA&uit=NEE&client_id=iLqhgc5Npa)
+- [MatchInfo - Sportlink API with client_id](https://data.sportlink.com/programma?gebruiklokaleteamgegevens=NEE&aantaldagen=7&eigenwedstrijden=JA&thuis=JA&uit=JA&client_id=iLqhgc5Npa)
+- [MatchResults - Sportlink API with client_id](https://data.sportlink.com/uitslagen?gebruiklokaleteamgegevens=NEE&thuis=JA&uit=JA&client_id=iLqhgc5Npa)
+- [PreMatchInfo - Sportlink API with client_id](https://data.sportlink.com/programma?gebruiklokaleteamgegevens=NEE&eigenwedstrijden=JA&thuis=JA&uit=NEE&client_id=iLqhgc5Npa)
 
 ## Data Structure
 
