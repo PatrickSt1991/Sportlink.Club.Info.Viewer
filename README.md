@@ -9,6 +9,9 @@ This version isn't currently active at my old soccer club, cause I don't play th
 
 Please bear in mind, the API's called are with the clientId of my previous soccer club, you will need to replace that for your own to get the correct data.
 
+Our Samsung Smart TVs were to old to handle Vue3 + Vite so I've backed it into a [Sportlink Club Info Viewer Tizen app](
+https://github.com/PatrickSt1991/Sportlink.Club.Info.Viewer.Tizen/tree/main) that way it can pull the required resources and still work.
+
 ## Features
 
 - **Real-time Data Fetching**: Automatically retrieves match schedules for the next 7 days for match program information, past 7 days for match results information and next three hours for post match information.
