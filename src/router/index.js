@@ -20,6 +20,10 @@ const routes = [
     name: 'MatchResults',
     component: MatchResults,
   },
+  {
+    path: '/:pathMatch(.*)*',
+    redirect: '/match-info',
+  },
 ];
 
 const router = createRouter({

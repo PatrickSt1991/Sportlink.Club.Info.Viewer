@@ -1,1 +1,1 @@
-export const BASE_URL = '/SportlinkClubInfoViewer/';
+export const BASE_URL = '';
