@@ -1,1 +1,1 @@
-export const BASE_URL = '/wvv_vue/';
+export const BASE_URL = '/SportlinkClubInfoViewer/';
