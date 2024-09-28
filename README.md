@@ -5,6 +5,9 @@
 The **Sportlink Club Info Viewer** is a Vue.js application that provides users with real-time information about upcoming matches over the next week, match results over the last week and pre match information containing information of the dressing room and field to play. Built using **Vue 3** and **Vite**, this app fetches match data from an external (Sportlink) API and displays it in a user-friendly interface. The app allows sports enthusiasts, team members, and fans to stay updated on match schedules, and more.
 
 ## Disclaimer
+
+[Read for usage and setup of Build and Tizen App for full explanation](https://patrickst1991.github.io/Sportlink.Club.Info.Viewer/)
+
 This version isn't currently active at my old soccer club, cause I don't play there anymore but it could be easly implemented there and for any other soccer club or and other sports club that fetches information from Sportlink API
 
 Please bear in mind, the API's called are with the clientId of my previous soccer club, you will need to replace that for your own to get the correct data.
