@@ -45,6 +45,7 @@
 
 <script>
 import { nextTick } from 'vue';
+import { CLIENT_ID } from '@/config';
 
 export default {
   name: 'PreMatchInfo',
@@ -63,7 +64,7 @@ export default {
       this.loading = true;
       this.error = null;
       try {
-        const response = await fetch('https://data.sportlink.com/programma?gebruiklokaleteamgegevens=NEE&eigenwedstrijden=JA&thuis=JA&uit=NEE&client_id=iLqhgc5Npa');
+        const response = await fetch('https://data.sportlink.com/programma?gebruiklokaleteamgegevens=NEE&eigenwedstrijden=JA&thuis=JA&uit=NEE&client_id=' + CLIENT_ID);
 
         if(!response.ok) throw new Error(`HTTP Error! status: ${response.status}`);
 

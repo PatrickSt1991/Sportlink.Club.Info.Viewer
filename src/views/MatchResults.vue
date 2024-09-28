@@ -1,7 +1,7 @@
 <template>
   <main role="main" class="container-fluid" id="contentBox">
     <div id="rcorners">
-      <p id="topbar">Wedstrijduitslagen afgelopen 7 dagen</p>
+      <p id="topbar">Wedstrijduitslagen afgelopen {{ uitslageDagen}} dagen</p>
     </div>
     <div id="rcorners_matchinfo_fixed">
       <div v-if="loading" id="noMatchMessage">
@@ -37,6 +37,7 @@
 <script>
 import { nextTick } from 'vue';
 import fallbackLogo from '../assets/knvb.png';
+import { CLIENT_ID,UITSLAG_DAGEN } from '@/config';
 
 export default {
   name: 'MatchResults',
@@ -49,6 +50,7 @@ export default {
       scrollingContainerHeight: '300px',
       scrollPosition: 0,
       scrollCycleCount: 0,
+      uitslageDagen: UITSLAG_DAGEN,
     };
   },
   methods: {
@@ -57,7 +59,7 @@ export default {
       this.error = null;
 
       try {
-        const response = await fetch('https://data.sportlink.com/uitslagen?gebruiklokaleteamgegevens=NEE&thuis=JA&uit=JA&client_id=iLqhgc5Npa');
+        const response = await fetch('https://data.sportlink.com/uitslagen?gebruiklokaleteamgegevens=NEE&thuis=JA&uit=JA&client_id=' + CLIENT_ID);
 
         if(!response.ok) throw new Error(`HTTP Error! Status: ${response.status}`);
 
@@ -65,7 +67,7 @@ export default {
 
         const now = new Date();
         const oneWeekAgo = new Date(now);
-        oneWeekAgo.setDate(now.getDate() - 7);
+        oneWeekAgo.setDate(now.getDate() - UITSLAG_DAGEN);
 
         this.matches = data.filter(match => {
           const matchDateTime = new Date(match.wedstrijddatum);

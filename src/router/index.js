@@ -2,7 +2,7 @@ import { createRouter, createWebHistory } from 'vue-router';
 import PreMatchInfo from '@/views/PreMatchInfo.vue';
 import MatchInfo from '@/views/MatchInfo.vue';
 import MatchResults from '@/views/MatchResults.vue';
-import { BASE_URL } from '@/config';
+import { BASE_URL,HOMESCREEN } from '@/config';
 
 const routes = [
   {
@@ -22,7 +22,7 @@ const routes = [
   },
   {
     path: '/:pathMatch(.*)*',
-    redirect: '/match-info',
+    redirect: HOMESCREEN,
   },
 ];
 

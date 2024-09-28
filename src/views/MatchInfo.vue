@@ -1,7 +1,7 @@
 <template>
   <main role="main" class="container-fluid" id="contentBox">
     <div id="rcorners">
-      <p id="topbar">Wedstrijd programma aankomende 7 dagen</p>
+      <p id="topbar">Wedstrijd programma aankomende {{ programmaDagen }} dagen</p>
     </div>
     <div id="rcorners_matchinfo_fixed">
       <div v-if="loading" id="noMatchMessage">
@@ -37,6 +37,7 @@
 <script>
 import { nextTick } from 'vue';
 import fallbackLogo from '../assets/knvb.png';
+import { CLIENT_ID, PROGRAMMA_DAGEN } from '@/config';
 
 export default {
   name: 'MatchInfo',
@@ -49,6 +50,7 @@ export default {
       scrollingContainerHeight: '300px',
       scrollPosition: 0,
       scrollCycleCount: 0,
+      programmaDagen: PROGRAMMA_DAGEN,
     };
   },
   methods: {
@@ -57,7 +59,7 @@ export default {
       this.loading = true;
 
       try {
-        const response = await fetch('https://data.sportlink.com/programma?gebruiklokaleteamgegevens=NEE&aantaldagen=7&eigenwedstrijden=JA&thuis=JA&uit=JA&client_id=iLqhgc5Npa');
+        const response = await fetch('https://data.sportlink.com/programma?gebruiklokaleteamgegevens=NEE&aantaldagen=' + PROGRAMMA_DAGEN + '&eigenwedstrijden=JA&thuis=JA&uit=JA&client_id=' + CLIENT_ID);
 
         if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
 
