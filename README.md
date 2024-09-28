@@ -9,6 +9,9 @@ This version isn't currently active at my old soccer club, cause I don't play th
 
 Please bear in mind, the API's called are with the clientId of my previous soccer club, you will need to replace that for your own to get the correct data.
 
+Our Samsung Smart TVs were to old to handle Vue3 + Vite so I've backed it into a [Sportlink Club Info Viewer Tizen app](
+https://github.com/PatrickSt1991/Sportlink.Club.Info.Viewer.Tizen/tree/main) that way it can pull the required resources and still work.
+
 ## Features
 
 - **Real-time Data Fetching**: Automatically retrieves match schedules for the next 7 days for match program information, past 7 days for match results information and next three hours for post match information.
@@ -30,11 +33,18 @@ To set up this project locally, follow these steps:
    ```bash
     npm install
 
-3. **Run the development server:**:
+ 3. Change the settings in config.js
+    - BASE_URL -> Should be empty if you want to run it in the Tizen app
+    - CLIENT_ID -> Should be the clientId of your club
+    - PROGRAMMA_DAGEN -> Used for MatchInfo, shows the amount of days ahead for upcomming matches
+    - UITSLAG_DAGEN -> Used for MatchResults, shows the amount of days in the past for match results
+    - HOMESCREEN -> Used for what screen should be visable if you go to http://localhost
+
+4. **Run the development server:**:
    ```bash
     npm run dev
 
-4. **Open your browser and navigate to http://localhost:5173 (or the specified port in the terminal) to view the application.**
+5. **Open your browser and navigate to http://localhost:5173 (or the specified port in the terminal) to view the application.**
 
 ## Usage
 
