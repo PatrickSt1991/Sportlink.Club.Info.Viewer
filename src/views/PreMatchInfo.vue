@@ -71,6 +71,8 @@ export default {
         const data = await response.json();
 
         const now = new Date();
+        now.setHours(now.getHours() - 1);
+
         const threeHoursLater = new Date(now.getTime() + 3 * 60 * 60 * 1000);
 
         this.matches = data.filter(match => {
@@ -94,7 +96,7 @@ export default {
     },
     calculateScrollingContainerHeight() {
       const windowHeight = window.innerHeight;
-      this.scrollingContainerHeight = `${windowHeight - 100}px`;
+      this.scrollingContainerHeight = `${windowHeight - 325}px`;
     },
     formatKleedkamer(kleedkamer) {
       return kleedkamer ? kleedkamer : '---';
