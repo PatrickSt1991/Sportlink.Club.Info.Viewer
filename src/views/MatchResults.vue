@@ -21,11 +21,11 @@
         <transition-group name="fade" tag="div">
           <div v-for="match in matches" :key="match.id" class="matchEntry">
             <div id="datumUitslag_fixed">{{ match.datumopgemaakt }}</div>
-            <img id="clublogo" :src="formatClubIcon(match.thuisteamclubrelatiecode)">
+            <img id="clublogo" :src="match.thuisteamlogo">
             <div id="thuisteam_fixed">{{ match.thuisteam }}</div>
             <div id="kleedkamer_fixed">{{ match.uitslag }}</div>
             <div id="uitteam_fixed">{{ match.uitteam }}</div>
-            <img id="clublogo" :src="formatClubIcon(match.uitteamclubrelatiecode)">
+            <img id="clublogo" :src="match.uitteamlogo">
             <div id="wedstrijdveld_fixed">{{ formatCompType(match.competitiesoort) }}</div>
           </div>
         </transition-group>
@@ -36,8 +36,7 @@
 
 <script>
 import { nextTick } from 'vue';
-import fallbackLogo from '../assets/knvb.png';
-import { CLIENT_ID,UITSLAG_DAGEN,GAME_TYPE } from '@/config';
+import { CLIENT_ID,UITSLAG_DAGEN } from '@/config';
 
 export default {
   name: 'MatchResults',
@@ -101,14 +100,6 @@ export default {
     formatDate(dateString) {
       const options = { hour: '2-digit', minute: '2-digit' };
       return new Date(dateString).toLocaleString('nl-NL', options).replace(',', '');
-    },
-    formatClubIcon(clubrelatiecode) {
-      if(GAME_TYPE == 'voetbal'){
-        if (!clubrelatiecode)
-          return fallbackLogo;
-      
-        return `https://logoapi.voetbal.nl/logo.php?clubcode=${clubrelatiecode}`;
-      }
     },
     formatCompType(compType) {
     switch (compType) {

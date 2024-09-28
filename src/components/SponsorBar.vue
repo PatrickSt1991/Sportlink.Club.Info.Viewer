@@ -20,7 +20,7 @@
       </div>
     </div>
   </div>
-  <p class="copyright">© {{ year }} Patrick Stel. Released under the MIT License.</p>
+  <p class="copyright"><a href="https://github.com/PatrickSt1991" target="_blank">{{ year }} Patrick Stel. Released under the MIT License.</a> </p>
 </template>
 
 <script>

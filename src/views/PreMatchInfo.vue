@@ -67,12 +67,12 @@ export default {
       try {
         const response = await fetch('https://data.sportlink.com/programma?gebruiklokaleteamgegevens=NEE&eigenwedstrijden=JA&thuis=JA&uit=NEE&client_id=' + CLIENT_ID);
 
-        if(!response.ok) throw new Error(`HTTP Error! status: ${response.status}`);
+        if (!response.ok) throw new Error(`HTTP Error! status: ${response.status}`);
 
         const data = await response.json();
 
         const now = new Date();
-        now.setHours(now.getHours() - 1);
+        now.setHours(now.getHours() - 3);
 
         const threeHoursLater = new Date(now.getTime() + 3 * 60 * 60 * 1000);
 
@@ -81,16 +81,22 @@ export default {
           return (
             match.accommodatie === 'Sportpark WVV' &&
             matchDateTime >= now &&
-            matchDateTime <=threeHoursLater &&
+            matchDateTime <= threeHoursLater &&
             matchDateTime.toISOString().slice(0, 10) === now.toISOString().slice(0, 10)
           );
         });
 
-        this.matches = [...this.matches, ...this.matches];
+        const containerHeight = parseInt(this.scrollingContainerHeight);
+        const matchEntryHeight = 86;
+        const totalHeightNeeded = this.matches.length * matchEntryHeight;
+
+        if (totalHeightNeeded > containerHeight)
+          this.matches = [...this.matches, ...this.matches];
+        
       } catch (error) {
         this.error = 'Error tijdens het laden van de wedstrijd informatie...';
         console.error('Error fetching pre-match info:', error);
-      }finally{
+      } finally {
         console.log('done loading PreMatchInfo');
         this.loading = false;
       }
