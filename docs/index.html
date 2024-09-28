@@ -4,123 +4,141 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sportlink Club Info Viewer</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f0f0f0;
-            color: #333;
-            margin: 0;
-            padding: 0;
-        }
-        header {
-            background-color: #2c3e50;
-            color: #ecf0f1;
-            text-align: center;
-            padding: 1rem 0;
-            margin-bottom: 2rem;
-        }
-        main {
-            width: 80%;
-            max-width: 1000px;
-            margin: 0 auto;
-            background-color: #ffffff;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-            border-radius: 8px;
-            padding: 2rem;
-        }
-        h1, h2, h3 {
-            color: #2c3e50;
-        }
-        section {
-            margin-bottom: 2rem;
-        }
-        .feature-list, .installation-steps, .usage-list, .api-endpoints {
-            list-style-type: none;
-            padding: 0;
-        }
-        .feature-list li, .installation-steps li, .usage-list li, .api-endpoints li {
-            background-color: #ecf0f1;
-            border: 1px solid #bdc3c7;
-            margin: 0.5rem 0;
-            padding: 0.75rem;
-            border-radius: 4px;
-        }
-        .screenshot {
-            max-width: 100%;
-            margin-top: 1rem;
-            border: 1px solid #bdc3c7;
-            border-radius: 4px;
-        }
-        footer {
-            text-align: center;
-            padding: 1rem;
-            background-color: #2c3e50;
-            color: #ecf0f1;
-            margin-top: 2rem;
-        }
-    </style>
+    <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
+    <!-- Header Section -->
     <header>
         <h1>Sportlink Club Info Viewer</h1>
-        <p>A Vue.js application providing real-time match information.</p>
+        <p>Een Vue.js applicatie die real-time wedstrijdinformatie biedt.</p>
     </header>
+
+    <!-- Navigation Bar -->
+    <nav>
+        <ul>
+            <li><a href="#overview">Overzicht</a></li>
+            <li><a href="#features">Kenmerken</a></li>
+            <li><a href="#installationNormal">Installatie</a></li>
+            <li><a href="#installationTizenApp">Tizen App</a></li>
+            <li><a href="#usage">Gebruik</a></li>
+            <li><a href="#api-reference">API Referentie</a></li>
+            <li><a href="#screenshots">Screenshots</a></li>
+        </ul>
+    </nav>
+
+    <!-- Main Content -->
     <main>
         <section id="overview">
-            <h2>Overview</h2>
-            <p>The <strong>Sportlink Club Info Viewer</strong> is a Vue.js application that provides users with real-time information about upcoming matches over the next week, match results over the last week, and pre-match information including dressing room and field information. Built using <strong>Vue 3</strong> and <strong>Vite</strong>, the app fetches match data from an external (Sportlink) API and displays it in a user-friendly interface.</p>
+            <h2>Overzicht</h2>
+            <p>De <strong>Sportlink Club Info Viewer</strong> is een Vue.js applicatie die gebruikers voorziet van real-time informatie over aankomende wedstrijden in de komende week, wedstrijdresultaten van de afgelopen week en informatie voor de wedstrijd zoals kleedkamer- en veldinformatie. Gebouwd met <strong>Vue 3</strong> en <strong>Vite</strong>, haalt de app wedstrijdgegevens op van een externe (Sportlink) API en toont deze in een gebruiksvriendelijke interface.</p>
         </section>
         
         <section id="features">
-            <h2>Features</h2>
+            <h2>Kenmerken</h2>
             <ul class="feature-list">
-                <li><strong>Real-time Data Fetching</strong>: Automatically retrieves match schedules for the next 7 days, past 7 days for match results, and the next 3 hours for pre-match information.</li>
-                <li><strong>Responsive Design</strong>: Adapts to various screen sizes for optimal viewing on desktops, tablets, and mobile devices.</li>
-                <li><strong>User Notifications</strong>: Displays loading messages and error alerts to keep users informed about the data retrieval status.</li>
-                <li><strong>Scrolling Match Information</strong>: Automatically scrolls through match information for easy viewing.</li>
-                <li><strong>Fallbacks</strong>: Provides default club logos in case specific team logos are unavailable.</li>
+                <li><strong>Real-time Gegevens Ophalen:</strong><br/>
+                    Haalt automatisch wedstrijdschema's op voor de komende 7 dagen, de afgelopen 7 dagen voor wedstrijdresultaten, en de komende 3 uur voor informatie voor de wedstrijd.</li>
+                <li><strong>Responsief Ontwerp:</strong><br/>
+                    Past zich aan verschillende schermformaten aan voor optimale weergave op desktops, tablets en mobiele apparaten.</li>
+                <li><strong>Gebruikersmeldingen:</strong><br/>
+                    Toont laadberichten en foutmeldingen om gebruikers op de hoogte te houden van de status van gegevensophalingen.</li>
+                <li><strong>Scrollende Wedstrijdinformatie:</strong><br/>
+                    Scrolt automatisch door wedstrijdinformatie voor gemakkelijke weergave.</li>
+                <li><strong>Fallbacks:</strong><br/>Biedt standaard clublogo's in geval van onbeschikbaarheid van specifieke teamlogo's.<br/>
+                    <u>Op dit moment is er alleen een API ingebouwd voor voetbal, als er een andere API beschikbaar is voor bijvoorbeeld basketbal kan die ook ingebouwd worden.</u>
+                </li>
             </ul>
         </section>
 
-        <section id="installation">
-            <h2>Installation</h2>
+        <section id="installationNormal">
+            <h2>Installatie</h2>
             <ol class="installation-steps">
-                <li><strong>Clone the repository:</strong>
-                    <pre><code>git clone https://github.com/PatrickSt1991/Sportlink.Club.Info.Viewer.git</code></pre>
-                    <pre><code>cd Sportlink.Club.Info.Viewer</code></pre>
+                <li><strong>Clone de repository:</strong>
+                    <code>git clone https://github.com/PatrickSt1991/Sportlink.Club.Info.Viewer.git</code>
+                    <code>cd Sportlink.Club.Info.Viewer</code>
                 </li>
-                <li><strong>Install dependencies:</strong>
-                    <pre><code>npm install</code></pre>
+                <li><strong>Installeer afhankelijkheden:</strong>
+                    <code>npm install</code>
                 </li>
-                <li><strong>Update config.js:</strong>
+                <li><strong>Pas src/config.js aan naar jou settings:</strong>
                     <ul>
-                        <li><code>BASE_URL</code>: Should be empty if you want to run it in the Tizen app.</li>
-                        <li><code>CLIENT_ID</code>: Should be the clientId of your club.</li>
-                        <li><code>PROGRAMMA_DAGEN</code>: Number of days ahead for upcoming matches.</li>
-                        <li><code>UITSLAG_DAGEN</code>: Number of days in the past for match results.</li>
-                        <li><code>HOMESCREEN</code>: Screen visible at <code>http://localhost</code>.</li>
+                        <li><code>BASE_URL = '';</code>Dit moet leeg zijn als je het in de <a href="#installationTizenApp">Tizen App</a> wilt uitvoeren, anders kan je elke willekeurige folder gaan gebruiken</li>
+                        <li><code>CLIENT_ID = '';</code>Geef het ClientId van jouw club in</li>
+                        <li><code>PROGRAMMA_DAGEN = 7;</code>Aantal dagen vooruit voor aankomende wedstrijden</li>
+                        <li><code>UITSLAG_DAGEN = 7;</code>Aantal dagen in het verleden voor wedstrijdresultaten</li>
+                        <li><code>PREMATCH_REFRESH = 15;</code>Aantal minuten tussen verversen van /prematch-info (Wedstrijd informatie)</li>
+                        <li><code>HOMESCREEN = '/match-info';</code>De weergave die per default moet starten, keuze uit;
+                            <ul>
+                                <li><code>/match-info</code>Gaat na 2 rotaties automatisch naar /match-results (Uitslagen)</li>
+                                <li><code>/match-results</code>Gaat naar 2 rotaties automatisch naar /match-info (Programma)</li>
+                                <li><code>/prematch-info</code>Ververst automatisch na ingestelde minuten in PREMATCH_REFRESH</li>
+                            </ul>
+                        </li>
                     </ul>
                 </li>
-                <li><strong>Run the development server:</strong>
-                    <pre><code>npm run dev</code></pre>
+                <li><strong>Start de ontwikkelingsserver:</strong>
+                    <code>npm run dev</code>
                 </li>
-                <li><strong>Open the application:</strong>
-                    Navigate to <a href="http://localhost:5173">http://localhost:5173</a> in your browser.</li>
+                <li><strong>Open de applicatie</strong><br/>
+                    Navigeer naar <a href="http://localhost:5173">http://localhost:5173</a> in je browser. of de gespecificeerde poort in je prompt.
+                </li>
             </ol>
         </section>
 
+        <section id="installationTizenApp">
+            <h2>Tizen App (Oude Samsung Smart TV)</h2>
+            <p>Oudere Samsung Smart TVs ondersteunen niet altijd vue v3,  omdat tegen te gaan kan je de build van Sportlink Club Info Viewer verwerken in een Tizen App.<br/><br/>
+            
+            Deze App wordt geinstalleerd op de Smart TV en heeft modules geinclude die ervoor zorgen dat de nieuwe codes toch werken op een oude Tizen OS.</p>
+            <ol class="installation-steps">
+                <li><strong>Installeer Tizen Studio:</strong>
+                    <p>Er zijn meerdere opties om dit te doen;</p>
+                    <ul>
+                        <li><a href="https://developer.tizen.org/development/tizen-studio/download">Tizen Studio 5.6 with IDE installer / Tizen Studio 5.6 with CLI</a></li>
+                        <li><a href="https://marketplace.visualstudio.com/items?itemName=tizen.VSToolsforTizen">Visual Studio 2022 - Visual Studio Tools for Tizen</a></li>
+                        <li><a href="https://marketplace.visualstudio.com/items?itemName=tizen.vscode-tizen-csharp">Visual Studio Code - Tizen Extension</a></li>
+                    </ul>
+                    <p style="font-size: xx-small;">Ik gebruik zelf Tizen Studio 5.6 with IDE installer</p>
+
+                    <ul><strong>Installeer vanuit Package Manager</strong>
+                        <li>8.0 Tizen - Compleet (Main SDK)</li>
+                        <li>Tizen SDK tools - Compleet (Main SDK)</li>
+                        <li>Extras - TV Extensions-8.0 (Extension SDK)</li>
+                        <li>Extras - Samsung Certificate Extension (Extension SDK)</li>
+                        <li>Extras - TV Extensions Tools (Extension SDK)</li>
+                    </ul>
+                </li>
+                <strong><p>Maak in Certificate Manager een Samsung Certificaat aan</p></strong>
+                <p>
+                    Hiervoor heb je een gratis samsung account nodig,<br/>
+                    tijdens het aanmaken moet je ID's opgeven, handig is om ook direct het Id van je emmulator toe te voegen.<br/>
+                    Mijn certificaat bevat de twee TV's van mijn oude club en mijn emmulator.
+                </p>
+                <li><strong>Clone de repository:</strong>
+                    <code>git clone https://github.com/PatrickSt1991/Sportlink.Club.Info.Viewer.Tizen.git</code>
+                </li>
+            </ol>
+            <br/>
+            <p>
+                Open de folder in Tizen Studio / Visual Studio / VS Code.<br/>
+                Vervang de index.html en assets folder door je eigen gebuilde index.html en assets folder.<br/><br/>
+
+                <strong>Run of Debug je applicatie vanuit je IDE om de app op je Smart TV te krijgen.</strong>
+            </p>
+        </section>
+
         <section id="usage">
-            <h2>Usage</h2>
-            <ul class="usage-list">
-                <li>Upon launching, the main screen displays the upcoming match schedules for the next week.</li>
-                <li>Users can view match date, time, home and away team details, and competition type.</li>
-                <li>If there are no matches or an error occurs, appropriate messages will be displayed.</li>
-            </ul>
+            <h2>Gebruik</h2>
+            <p>
+                Na het openen van de app toont wordt de weergave geladen die je hebt ingevoerd in de config.js<br/>
+                Op het scherm kun je de komende wedstrijden, afgelopen wedstrijden en wedstrijd informatie bekijken<br/>
+                Als er geen wedstrijden zijn of als er een fout optreedt, worden passende berichten weergegeven.
+            </p>    
         </section>
 
         <section id="api-reference">
-            <h2>API Reference</h2>
-            <p>The application fetches match data from the following endpoints:</p>
+            <h2>API Referentie</h2>
+            <p>De applicatie haalt wedstrijdgegevens op van de volgende eindpunten:</p>
             <ul class="api-endpoints">
                 <li><a href="https://data.sportlink.com/programma?gebruiklokaleteamgegevens=NEE&aantaldagen=7&eigenwedstrijden=JA&thuis=JA&uit=JA&client_id=iLqhgc5Npa">MatchInfo - Sportlink API</a></li>
                 <li><a href="https://data.sportlink.com/uitslagen?gebruiklokaleteamgegevens=NEE&thuis=JA&uit=JA&client_id=iLqhgc5Npa">MatchResults - Sportlink API</a></li>
@@ -130,13 +148,17 @@
 
         <section id="screenshots">
             <h2>Screenshots</h2>
-            <img src="/.screenshots/PreMatchInfo.png" alt="Screenshot of the PreMatch Section" class="screenshot">
-            <img src="/.screenshots/matchProgram.png" alt="Screenshot of the coming matches" class="screenshot">
-            <img src="/.screenshots/matchResults.png" alt="Screenshot of the match results" class="screenshot">
+            <div class="screenshots">
+                <img src="../.screenshots/PreMatchInfo.png" alt="Screenshot van de PreMatch Sectie">
+                <img src="../.screenshots/matchProgram.png" alt="Screenshot van de komende wedstrijden">
+                <img src="../.screenshots/matchResults.png" alt="Screenshot van de wedstrijdresultaten">
+            </div>
         </section>
     </main>
+
+    <!-- Footer Section -->
     <footer>
-        <p>© 2024 Sportlink Club Info Viewer. Licensed under the MIT License.</p>
+        <p>© 2023 Sportlink Club Info Viewer. Gelicentieerd onder de MIT Licentie.</p>
     </footer>
 </body>
 </html>

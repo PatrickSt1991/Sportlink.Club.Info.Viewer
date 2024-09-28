@@ -45,7 +45,7 @@
 
 <script>
 import { nextTick } from 'vue';
-import { CLIENT_ID } from '@/config';
+import { CLIENT_ID, PREMATCH_REFRESH } from '@/config';
 
 export default {
   name: 'PreMatchInfo',
@@ -55,6 +55,7 @@ export default {
       error: null,
       loading: false,
       scrollInterval: null,
+      refreshInterval: null,
       scrollingContainerHeight: '300px',
       scrollPosition: 0,
     };
@@ -133,6 +134,18 @@ export default {
         this.scrollInterval = null;
       }
     },
+    startPeriodicRefresh() {
+      const refreshIntervalMs = PREMATCH_REFRESH * 60000;
+      this.refreshInterval = setInterval(() => {
+        this.fetchPreMatchInfo();
+      }, refreshIntervalMs);
+    },
+    stopPeriodicRefresh() {
+      if (this.refreshInterval) {
+        clearInterval(this.refreshInterval);
+        this.refreshInterval = null;
+      }
+    },
   },
   mounted() {
     this.calculateScrollingContainerHeight();
@@ -145,9 +158,11 @@ export default {
         }
       });
     });
+    this.startPeriodicRefresh();
   },
   beforeDestroy() {
     this.stopScrolling();
+    this.stopPeriodicRefresh();
     window.removeEventListener('resize', this.calculateScrollingContainerHeight);
   }
 };

@@ -37,7 +37,7 @@
 <script>
 import { nextTick } from 'vue';
 import fallbackLogo from '../assets/knvb.png';
-import { CLIENT_ID,UITSLAG_DAGEN } from '@/config';
+import { CLIENT_ID,UITSLAG_DAGEN,GAME_TYPE } from '@/config';
 
 export default {
   name: 'MatchResults',
@@ -103,10 +103,12 @@ export default {
       return new Date(dateString).toLocaleString('nl-NL', options).replace(',', '');
     },
     formatClubIcon(clubrelatiecode) {
-      if (!clubrelatiecode)
-        return fallbackLogo;
+      if(GAME_TYPE == 'voetbal'){
+        if (!clubrelatiecode)
+          return fallbackLogo;
       
-      return `https://logoapi.voetbal.nl/logo.php?clubcode=${clubrelatiecode}`;
+        return `https://logoapi.voetbal.nl/logo.php?clubcode=${clubrelatiecode}`;
+      }
     },
     formatCompType(compType) {
     switch (compType) {
