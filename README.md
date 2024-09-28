@@ -33,11 +33,18 @@ To set up this project locally, follow these steps:
    ```bash
     npm install
 
-3. **Run the development server:**:
+ 3. Change the settings in config.js
+    - BASE_URL -> Should be empty if you want to run it in the Tizen app
+    - CLIENT_ID -> Should be the clientId of your club
+    - PROGRAMMA_DAGEN -> Used for MatchInfo, shows the amount of days ahead for upcomming matches
+    - UITSLAG_DAGEN -> Used for MatchResults, shows the amount of days in the past for match results
+    - HOMESCREEN -> Used for what screen should be visable if you go to http://localhost
+
+4. **Run the development server:**:
    ```bash
     npm run dev
 
-4. **Open your browser and navigate to http://localhost:5173 (or the specified port in the terminal) to view the application.**
+5. **Open your browser and navigate to http://localhost:5173 (or the specified port in the terminal) to view the application.**
 
 ## Usage
 
