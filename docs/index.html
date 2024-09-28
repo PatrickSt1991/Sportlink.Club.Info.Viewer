@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sportlink Club Info Viewer</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f0f0;
+            color: #333;
+            margin: 0;
+            padding: 0;
+        }
+        header {
+            background-color: #2c3e50;
+            color: #ecf0f1;
+            text-align: center;
+            padding: 1rem 0;
+            margin-bottom: 2rem;
+        }
+        main {
+            width: 80%;
+            max-width: 1000px;
+            margin: 0 auto;
+            background-color: #ffffff;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+            padding: 2rem;
+        }
+        h1, h2, h3 {
+            color: #2c3e50;
+        }
+        section {
+            margin-bottom: 2rem;
+        }
+        .feature-list, .installation-steps, .usage-list, .api-endpoints {
+            list-style-type: none;
+            padding: 0;
+        }
+        .feature-list li, .installation-steps li, .usage-list li, .api-endpoints li {
+            background-color: #ecf0f1;
+            border: 1px solid #bdc3c7;
+            margin: 0.5rem 0;
+            padding: 0.75rem;
+            border-radius: 4px;
+        }
+        .screenshot {
+            max-width: 100%;
+            margin-top: 1rem;
+            border: 1px solid #bdc3c7;
+            border-radius: 4px;
+        }
+        footer {
+            text-align: center;
+            padding: 1rem;
+            background-color: #2c3e50;
+            color: #ecf0f1;
+            margin-top: 2rem;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Sportlink Club Info Viewer</h1>
+        <p>A Vue.js application providing real-time match information.</p>
+    </header>
+    <main>
+        <section id="overview">
+            <h2>Overview</h2>
+            <p>The <strong>Sportlink Club Info Viewer</strong> is a Vue.js application that provides users with real-time information about upcoming matches over the next week, match results over the last week, and pre-match information including dressing room and field information. Built using <strong>Vue 3</strong> and <strong>Vite</strong>, the app fetches match data from an external (Sportlink) API and displays it in a user-friendly interface.</p>
+        </section>
+        
+        <section id="features">
+            <h2>Features</h2>
+            <ul class="feature-list">
+                <li><strong>Real-time Data Fetching</strong>: Automatically retrieves match schedules for the next 7 days, past 7 days for match results, and the next 3 hours for pre-match information.</li>
+                <li><strong>Responsive Design</strong>: Adapts to various screen sizes for optimal viewing on desktops, tablets, and mobile devices.</li>
+                <li><strong>User Notifications</strong>: Displays loading messages and error alerts to keep users informed about the data retrieval status.</li>
+                <li><strong>Scrolling Match Information</strong>: Automatically scrolls through match information for easy viewing.</li>
+                <li><strong>Fallbacks</strong>: Provides default club logos in case specific team logos are unavailable.</li>
+            </ul>
+        </section>
+
+        <section id="installation">
+            <h2>Installation</h2>
+            <ol class="installation-steps">
+                <li><strong>Clone the repository:</strong>
+                    <pre><code>git clone https://github.com/PatrickSt1991/Sportlink.Club.Info.Viewer.git</code></pre>
+                    <pre><code>cd Sportlink.Club.Info.Viewer</code></pre>
+                </li>
+                <li><strong>Install dependencies:</strong>
+                    <pre><code>npm install</code></pre>
+                </li>
+                <li><strong>Update config.js:</strong>
+                    <ul>
+                        <li><code>BASE_URL</code>: Should be empty if you want to run it in the Tizen app.</li>
+                        <li><code>CLIENT_ID</code>: Should be the clientId of your club.</li>
+                        <li><code>PROGRAMMA_DAGEN</code>: Number of days ahead for upcoming matches.</li>
+                        <li><code>UITSLAG_DAGEN</code>: Number of days in the past for match results.</li>
+                        <li><code>HOMESCREEN</code>: Screen visible at <code>http://localhost</code>.</li>
+                    </ul>
+                </li>
+                <li><strong>Run the development server:</strong>
+                    <pre><code>npm run dev</code></pre>
+                </li>
+                <li><strong>Open the application:</strong>
+                    Navigate to <a href="http://localhost:5173">http://localhost:5173</a> in your browser.</li>
+            </ol>
+        </section>
+
+        <section id="usage">
+            <h2>Usage</h2>
+            <ul class="usage-list">
+                <li>Upon launching, the main screen displays the upcoming match schedules for the next week.</li>
+                <li>Users can view match date, time, home and away team details, and competition type.</li>
+                <li>If there are no matches or an error occurs, appropriate messages will be displayed.</li>
+            </ul>
+        </section>
+
+        <section id="api-reference">
+            <h2>API Reference</h2>
+            <p>The application fetches match data from the following endpoints:</p>
+            <ul class="api-endpoints">
+                <li><a href="https://data.sportlink.com/programma?gebruiklokaleteamgegevens=NEE&aantaldagen=7&eigenwedstrijden=JA&thuis=JA&uit=JA&client_id=iLqhgc5Npa">MatchInfo - Sportlink API</a></li>
+                <li><a href="https://data.sportlink.com/uitslagen?gebruiklokaleteamgegevens=NEE&thuis=JA&uit=JA&client_id=iLqhgc5Npa">MatchResults - Sportlink API</a></li>
+                <li><a href="https://data.sportlink.com/programma?gebruiklokaleteamgegevens=NEE&eigenwedstrijden=JA&thuis=JA&uit=NEE&client_id=iLqhgc5Npa">PreMatchInfo - Sportlink API</a></li>
+            </ul>
+        </section>
+
+        <section id="screenshots">
+            <h2>Screenshots</h2>
+            <img src="/.screenshots/PreMatchInfo.png" alt="Screenshot of the PreMatch Section" class="screenshot">
+            <img src="/.screenshots/matchProgram.png" alt="Screenshot of the coming matches" class="screenshot">
+            <img src="/.screenshots/matchResults.png" alt="Screenshot of the match results" class="screenshot">
+        </section>
+    </main>
+    <footer>
+        <p>© 2024 Sportlink Club Info Viewer. Licensed under the MIT License.</p>
+    </footer>
+</body>
+</html>
