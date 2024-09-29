@@ -13,7 +13,7 @@
       </div>
 
       <div v-else-if="matches.length === 0" id="noMatchMessage">
-        <img src="../assets/match_bg.png" alt="No Matches"/>
+        <img src="../assets/no_data.jpg" alt="No Matches"/>
         <h1>Er is momenteel geen wedstrijd data beschikbaar...</h1>
       </div>
 
@@ -80,7 +80,7 @@ export default {
     },
     calculateScrollingContainerHeight() {
       const windowHeight = window.innerHeight;
-      this.scrollingContainerHeight = `${windowHeight - 245}px`;
+      this.scrollingContainerHeight = `${windowHeight - 265}px`;
     },
     formatDate(dateString) {
       const options = {
@@ -124,10 +124,12 @@ export default {
             this.scrollCycleCount += 1;
 
             if(this.scrollCycleCount >= 2){
-              clearInterval(this.scrollInterval);
-              this.scrollInterval = null;
+              if(ENABLE_SCREEN_SWITCH == true){
+                clearInterval(this.scrollInterval);
+                this.scrollInterval = null;
 
-              this.goToMatchResults();
+                this.goToMatchResults();
+              }
             }
           }
           container.scrollTop = this.scrollPosition;

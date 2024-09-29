@@ -10,14 +10,17 @@
   },
   "dependencies": {
     "@babel/plugin-transform-runtime": "^7.25.4",
+    "@vitejs/plugin-vue": "^4.0.0",
     "vue": "^3.4.37",
     "vue-router": "^4.4.5"
   },
   "devDependencies": {
     "@babel/preset-env": "^7.25.4",
-    "@vitejs/plugin-vue": "^5.1.2",
+    "@vitejs/plugin-legacy": "^4.0.0",
     "core-js": "^3.38.1",
-    "vite": "^5.4.1",
+    "terser": "^5.34.1",
+    "vite": "^4.0.0",
+    "vite-plugin-html-inline": "^0.1.6",
     "whatwg-fetch": "^3.6.20"
   }
 }

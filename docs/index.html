@@ -60,21 +60,34 @@
                 <li><strong>Installeer afhankelijkheden:</strong>
                     <code>npm install</code>
                 </li>
-                <li><strong>Pas src/config.js aan naar jou settings:</strong>
+                <li><strong>Pas src/config.js aan:</strong>
                     <ul>
-                        <li><code>BASE_URL = '';</code>Dit moet leeg zijn als je het in de <a href="#installationTizenApp">Tizen App</a> wilt uitvoeren, anders kan je elke willekeurige folder gaan gebruiken</li>
+                        <li><code>BASE_URL = './';</code>Laat default als je het in de <a href="#installationTizenApp">Tizen App</a> wilt uitvoeren, anders kan je elke willekeurige folder gaan gebruiken</li>
                         <li><code>CLIENT_ID = '';</code>Geef het ClientId van jouw club in</li>
                         <li><code>PROGRAMMA_DAGEN = 7;</code>Aantal dagen vooruit voor aankomende wedstrijden</li>
                         <li><code>UITSLAG_DAGEN = 7;</code>Aantal dagen in het verleden voor wedstrijdresultaten</li>
                         <li><code>PREMATCH_REFRESH = 15;</code>Aantal minuten tussen verversen van /prematch-info (Wedstrijd informatie)</li>
+                        <li><code>ENABLE_SCREEN_SWITCH = true;</code>Mag /match-info na twee rotaties de weergave overgeven aan /match-results en visa versa./li>
                         <li><code>HOMESCREEN = '/match-info';</code>De weergave die per default moet starten, keuze uit;
                             <ul>
-                                <li><code>/match-info</code>Gaat na 2 rotaties automatisch naar /match-results (Uitslagen)</li>
-                                <li><code>/match-results</code>Gaat naar 2 rotaties automatisch naar /match-info (Programma)</li>
-                                <li><code>/prematch-info</code>Ververst automatisch na ingestelde minuten in PREMATCH_REFRESH</li>
+                                <li><code>/match-info</code>Uitslagen informatie <br/><p style="font-size: small;">Afhankelijk van ENABLE_SCREEN_SWITCH als deze na 2 rotaties naar /match-results overschakelt</p></li>
+                                <li><code>/match-results</code>Programma informatie<br/><p style="font-size: small;">Afhankelijk van ENABLE_SCREEN_SWITCH als deze na 2 rotaties naar /match-info overschakelt</p></li>
+                                <li><code>/prematch-info</code>Wedstrijd informatie<br/><p style="font-size: small;">Ververst zichzelf automatisch na ingestelde minuten in PREMATCH_REFRESH</p></li>
                             </ul>
                         </li>
                     </ul>
+                </li>
+                <li>
+                    <p style="font-style: italic; font-weight: bold ;">Deze stap is alleen noodzakelijk als je de Tizen App wilt gaan gebruiken.</p>
+                    <strong>Installeer vite-plugin-html-inline</strong>
+                    <code>npm install vite-plugin-html-inline --save-dev</code>
+                    <p style="font-size: small;">Oude samsungs zijn namelijk inline nodig anders krijg je MIME Type errors.</p>
+                    <br/>
+                    Zorg ervoor dat dit stukje code in the vite.config.js staat
+                    <code>plugins: [vue(),<br/>
+                        &emsp;&emsp;htmlInline({<br/>
+                            &emsp;&emsp;&emsp;&emsp;injectTo: 'head',<br/>
+                        &emsp;&emsp;}),</code>
                 </li>
                 <li><strong>Start de ontwikkelingsserver:</strong>
                     <code>npm run dev</code>
@@ -114,17 +127,18 @@
                     tijdens het aanmaken moet je ID's opgeven, handig is om ook direct het Id van je emmulator toe te voegen.<br/>
                     Mijn certificaat bevat de twee TV's van mijn oude club en mijn emmulator.
                 </p>
-                <li><strong>Clone de repository:</strong>
+                <li>
+                    <strong>Clone de repository:</strong>
                     <code>git clone https://github.com/PatrickSt1991/Sportlink.Club.Info.Viewer.Tizen.git</code>
                 </li>
-            </ol>
-            <br/>
-            <p>
-                Open de folder in Tizen Studio / Visual Studio / VS Code.<br/>
-                Vervang de index.html en assets folder door je eigen gebuilde index.html en assets folder.<br/><br/>
+                <br/>
+                <p>
+                    Open de folder in Tizen Studio / Visual Studio / VS Code.<br/>
+                    Vervang de index.html en assets folder door je eigen gebuilde index.html en assets folder.<br/><br/>
 
-                <strong>Run of Debug je applicatie vanuit je IDE om de app op je Smart TV te krijgen.</strong>
-            </p>
+                    <strong>Run of Debug je applicatie vanuit je IDE om de app op je Smart TV te krijgen.</strong>
+                </p>
+            </ol>
         </section>
 
         <section id="usage">

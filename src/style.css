@@ -153,18 +153,22 @@ button:focus-visible {
 
 #noMatchMessage {
   text-align: center; /* Center the message and image */
-  color: white; /* Change text color as needed */
   margin-top: 20px; /* Add some space above the message */
+  background-color: white;
+  border-radius: 25px;
+  color: #000000;
+  padding-top: 10px;
 }
 
 #noMatchMessage img {
-  width: 100px; /* Adjust size as needed */
+  width: auto; /* Adjust size as needed */
   height: auto; /* Maintain aspect ratio */
 }
 
 #noMatchMessage h1 {
   font-size: 24px; /* Adjust the font size */
   margin-top: 10px; /* Space between image and text */
+  padding-bottom: 10px;
 }
 
 #scrollingContainer {
@@ -193,4 +197,44 @@ button:focus-visible {
   object-fit: contain; /* Ensure image scales to fit within the bounds */
   background-color: #000000;
   display: block; /* Ensure no unexpected margin/padding */
+}
+
+.sponsor-bar-container {
+  overflow: hidden;
+  width: 100%;
+  background-color: transparent;
+  display: flex;
+  flex-direction: column; /* Stack elements vertically */
+}
+
+.sponsor-bar {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-wrap: wrap; /* Allow items to wrap to the next line */
+}
+
+.sponsor-images {
+  display: flex;
+  flex-wrap: wrap; /* Allow images to wrap to the next line */
+  justify-content: space-between; /* Evenly space images */
+  width: 100%; /* Ensure full width */
+}
+
+.sponsor-image {
+  height: 40px; /* Set height of images to 40px */
+  margin: 5px; /* Space between images */
+  flex: 1 1 calc(14.2857% - 10px); /* 7 images per row, adjust for margin */
+  max-width: calc(14.2857% - 10px); /* Set max-width for 7 images */
+  background-color: rgba(245, 245, 245, 0.8); ;
+}
+
+.copyright {
+  font-size: 14px;
+  color: #000;
+  text-align: center;
+  padding: 10px;
+  margin-top: 5px;
+  background-color: rgba(245, 245, 245, 0.8);
+  border-radius: 25px;
 }

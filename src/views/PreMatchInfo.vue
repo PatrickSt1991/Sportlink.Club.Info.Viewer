@@ -23,7 +23,7 @@
       </div>
 
       <div v-if="matches.length === 0" id="noMatchMessage">
-        <img src="../assets/match_bg.png" alt="No Matches" />
+        <img src="../assets/no_data.jpg" alt="No Matches" />
         <h1>Er zijn geen aankomende wedstrijden bekend de aankomende drie uur.</h1>
       </div>
 
@@ -103,7 +103,7 @@ export default {
     },
     calculateScrollingContainerHeight() {
       const windowHeight = window.innerHeight;
-      this.scrollingContainerHeight = `${windowHeight - 325}px`;
+      this.scrollingContainerHeight = `${windowHeight - 265}px`; //325
     },
     formatKleedkamer(kleedkamer) {
       return kleedkamer ? kleedkamer : '---';

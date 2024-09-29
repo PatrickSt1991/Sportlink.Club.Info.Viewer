@@ -13,7 +13,7 @@
       </div>
 
       <div v-if="matches.length === 0" id="noMatchMessage">
-        <img src="../assets/match_bg.png" alt="No Matches"/>
+        <img src="../assets/no_data.jpg" alt="No Matches"/>
         <h1>Het is niet gelukt om de wedstrijd uitslagen in te laden...</h1>
       </div>
 
@@ -21,11 +21,13 @@
         <transition-group name="fade" tag="div">
           <div v-for="match in matches" :key="match.id" class="matchEntry">
             <div id="datumUitslag_fixed">{{ match.datumopgemaakt }}</div>
-            <img id="clublogo" :src="match.thuisteamlogo">
+            <img id="clublogo" v-if="gameType !== 'basketbal'" :src="formatClubIcon(match.thuisteamclubrelatiecode)"> <!-- For Voetbal and other sports that return just a single URL -->
+            <img id="clublogo" v-if="gameType === 'basketbal'" :src="formatClubIcon(match.thuisteamclubrelatiecode, match.thuisteam, match.uitteam).thuisteamLogo"> <!-- For Basketball (since it returns both thuisteam and uitteam logos) -->
             <div id="thuisteam_fixed">{{ match.thuisteam }}</div>
             <div id="kleedkamer_fixed">{{ match.uitslag }}</div>
             <div id="uitteam_fixed">{{ match.uitteam }}</div>
-            <img id="clublogo" :src="match.uitteamlogo">
+            <img id="clublogo" v-if="gameType !== 'basketbal'" :src="formatClubIcon(match.uitteamclubrelatiecode)"> <!-- For Voetbal and other sports that return just a single URL -->
+            <img id="clublogo" v-if="gameType === 'basketbal'" :src="formatClubIcon(match.uitteamclubrelatiecode, match.thuisteam, match.uitteam).uitteamLogo"> <!-- For Basketball (since it returns both thuisteam and uitteam logos) -->
             <div id="wedstrijdveld_fixed">{{ formatCompType(match.competitiesoort) }}</div>
           </div>
         </transition-group>
@@ -36,7 +38,8 @@
 
 <script>
 import { nextTick } from 'vue';
-import { CLIENT_ID,UITSLAG_DAGEN } from '@/config';
+import { CLIENT_ID,UITSLAG_DAGEN, GAME_TYPE, LOGO_URLS,ENABLE_SCREEN_SWITCH } from '@/config';
+import fallbackLogo from '../assets/no_image.png';
 
 export default {
   name: 'MatchResults',
@@ -89,7 +92,7 @@ export default {
     },
     calculateScrollingContainerHeight() {
       const windowHeight = window.innerHeight;
-      this.scrollingContainerHeight = `${windowHeight - 245}px`;
+      this.scrollingContainerHeight = `${windowHeight - 265}px`;
     },
     formatKleedkamer(kleedkamer) {
       return kleedkamer ? kleedkamer : '---';
@@ -100,6 +103,36 @@ export default {
     formatDate(dateString) {
       const options = { hour: '2-digit', minute: '2-digit' };
       return new Date(dateString).toLocaleString('nl-NL', options).replace(',', '');
+    },
+    formatTeamName(teamName) {
+      return teamName
+        .replace(/,\s*\w+\d.*$/, '') // Remove ", M16-1" or similar patterns
+        .replace(/\s*\w+\d.*$/, '')  // Remove " M16-1" or similar patterns without comma
+        .replace(/\s+/g, '_')        // Replace spaces with underscores
+        .replace(/,$/, '');          // Remove trailing comma if it exists
+    },
+    formatClubIcon(clubrelatiecode, thuisteam, uitteam) {
+      if (!clubrelatiecode && GAME_TYPE.toLowerCase() !== 'basketbal') return fallbackLogo;
+
+      const baseUrl = LOGO_URLS[GAME_TYPE.toLowerCase()];
+      if (!baseUrl) return fallbackLogo;
+
+      switch (GAME_TYPE.toLowerCase()) {
+        case 'basketbal':
+          if (!thuisteam || !uitteam) return fallbackLogo;
+
+          const formattedThuisteam = formatTeamName(thuisteam);
+          const formattedUitteam = formatTeamName(uitteam);
+
+          return {
+            thuisteamLogo: `${baseUrl}${formattedThuisteam}-550x200.jpg`,
+            uitteamLogo: `${baseUrl}${formattedUitteam}-550x200.jpg`
+          };
+        case 'voetbal':
+          return `${baseUrl}${clubrelatiecode}`; // Voetbal specific logic
+        default:
+          return `${baseUrl}${clubrelatiecode}`; // Other sports (use the default pattern)
+      }
     },
     formatCompType(compType) {
     switch (compType) {
@@ -128,10 +161,12 @@ export default {
           this.scrollCycleCount += 1;
 
           if(this.scrollCycleCount >= 2){
-            clearInterval(this.scrollInterval);
-            this.scrollInterval = null;
+            if(ENABLE_SCREEN_SWITCH == true){
+              clearInterval(this.scrollInterval);
+              this.scrollInterval = null;
 
-            this.goToMatchInfo();
+              this.goToMatchInfo();
+            }
           }
         }
         
