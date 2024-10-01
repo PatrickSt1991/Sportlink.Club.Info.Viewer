@@ -37,17 +37,33 @@
             <h2>Kenmerken</h2>
             <ul class="feature-list">
                 <li><strong>Real-time Gegevens Ophalen:</strong><br/>
-                    Haalt automatisch wedstrijdschema's op voor de komende 7 dagen, de afgelopen 7 dagen voor wedstrijdresultaten, en de komende 3 uur voor informatie voor de wedstrijd.</li>
-                <li><strong>Responsief Ontwerp:</strong><br/>
-                    Past zich aan verschillende schermformaten aan voor optimale weergave op desktops, tablets en mobiele apparaten.</li>
-                <li><strong>Gebruikersmeldingen:</strong><br/>
-                    Toont laadberichten en foutmeldingen om gebruikers op de hoogte te houden van de status van gegevensophalingen.</li>
-                <li><strong>Scrollende Wedstrijdinformatie:</strong><br/>
-                    Scrolt automatisch door wedstrijdinformatie voor gemakkelijke weergave.</li>
-                <li><strong>Fallbacks:</strong><br/>Biedt standaard clublogo's in geval van onbeschikbaarheid van specifieke teamlogo's.<br/>
-                    <u>Op dit moment is er alleen een API ingebouwd voor voetbal, als er een andere API beschikbaar is voor bijvoorbeeld basketbal kan die ook ingebouwd worden.</u>
+                    Automatisch ophalen van wedstrijdschema's voor de komende 7 dagen, resultaten van de afgelopen 7 dagen, en informatie over wedstrijden die binnen 3 uur beginnen.
                 </li>
-            </ul>
+                <li><strong>Responsief Ontwerp:</strong><br/>
+                    Het ontwerp past zich dynamisch aan verschillende schermformaten aan voor optimale weergave op desktops, tablets en mobiele apparaten.
+                </li>
+                <li><strong>Gebruikersmeldingen:</strong><br/>
+                    Geeft laadberichten en foutmeldingen weer om gebruikers te informeren over de voortgang van gegevensophalingen.
+                </li>
+                <li><strong>Scrollende Wedstrijdinformatie:</strong><br/>
+                    Wedstrijdinformatie wordt automatisch gescrold voor een eenvoudige en overzichtelijke weergave.
+                </li>
+                <li><strong>Fallbacks voor Teamlogo's:</strong><br/>
+                    Standaard clublogo's worden weergegeven wanneer specifieke teamlogo's niet beschikbaar zijn.<br/>
+                    <strong>Ondersteunde Sporten:</strong>
+                    <ul>
+                        <li>KNVB (Voetbal) - <strong>Actief</strong></li>
+                        <li>NBB (Basketbal) - <strong>Actief</strong></li>
+                        <li>Atletiekunie - Geen API beschikbaar</li>
+                        <li>Honkbal - Geen API beschikbaar</li>
+                        <li>Softbal - Geen API beschikbaar</li>
+                        <li>Korfbal - Geen API beschikbaar</li>
+                        <li>Volleybal - Geen API beschikbaar</li>
+                        <li>Zwemmen - Geen API beschikbaar</li>
+                    </ul>
+                    <em>Momenteel beschikt alleen voetbal en basketbal over een logo-API.<br/>Indien er een API voor andere sporten, zoals Honkbal, beschikbaar komt, kan deze ook worden geïntegreerd.</em>
+                </li>
+            </ul>            
         </section>
 
         <section id="installationNormal">
@@ -76,18 +92,6 @@
                             </ul>
                         </li>
                     </ul>
-                </li>
-                <li>
-                    <p style="font-style: italic; font-weight: bold ;">Deze stap is alleen noodzakelijk als je de Tizen App wilt gaan gebruiken.</p>
-                    <strong>Installeer vite-plugin-html-inline</strong>
-                    <code>npm install vite-plugin-html-inline --save-dev</code>
-                    <p style="font-size: small;">Oude samsungs zijn namelijk inline nodig anders krijg je MIME Type errors.</p>
-                    <br/>
-                    Zorg ervoor dat dit stukje code in the vite.config.js staat
-                    <code>plugins: [vue(),<br/>
-                        &emsp;&emsp;htmlInline({<br/>
-                            &emsp;&emsp;&emsp;&emsp;injectTo: 'head',<br/>
-                        &emsp;&emsp;}),</code>
                 </li>
                 <li><strong>Start de ontwikkelingsserver:</strong>
                     <code>npm run dev</code>
