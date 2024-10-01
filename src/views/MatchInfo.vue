@@ -36,7 +36,7 @@
 
 <script>
 import { nextTick } from 'vue';
-import { CLIENT_ID, PROGRAMMA_DAGEN } from '@/config';
+import { CLIENT_ID, PROGRAMMA_DAGEN, ENABLE_SCREEN_SWITCH } from '@/config';
 
 export default {
   name: 'MatchInfo',

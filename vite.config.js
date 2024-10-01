@@ -8,7 +8,6 @@ export default defineConfig({
   base: BASE_URL,
   plugins: [
     vue(),
-    // Commenting out the htmlInline for testing
     legacy({
       targets: ['defaults', 'not IE 11'],
       additionalLegacyPolyfills: ['regenerator-runtime/runtime'],

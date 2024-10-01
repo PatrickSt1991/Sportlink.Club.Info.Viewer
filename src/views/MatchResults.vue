@@ -38,7 +38,7 @@
 
 <script>
 import { nextTick } from 'vue';
-import { CLIENT_ID,UITSLAG_DAGEN, GAME_TYPE, LOGO_URLS,ENABLE_SCREEN_SWITCH } from '@/config';
+import { CLIENT_ID,UITSLAG_DAGEN, GAME_TYPE, LOGO_URLS, ENABLE_SCREEN_SWITCH } from '@/config';
 import fallbackLogo from '../assets/no_image.png';
 
 export default {
