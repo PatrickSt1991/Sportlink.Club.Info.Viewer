@@ -19,7 +19,7 @@
     "@vitejs/plugin-legacy": "^4.0.0",
     "core-js": "^3.38.1",
     "terser": "^5.34.1",
-    "vite": "^4.0.0",
+    "vite": "^4.5.9",
     "vite-plugin-html-inline": "^0.1.6",
     "whatwg-fetch": "^3.6.20"
   }
