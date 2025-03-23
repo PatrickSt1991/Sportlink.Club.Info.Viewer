@@ -114,7 +114,6 @@ button:focus-visible {
 
 #datumUitslag_fixed {
   width: 10%;
-  background: #b40808; /* WVV red */
   padding: 18px 15px;
   border-top-left-radius: 25px;
   border-bottom-left-radius: 25px;
@@ -123,7 +122,6 @@ button:focus-visible {
 
 #datumProgramma_fixed {
   width: 10%;
-  background: #b40808; /* WVV red */
   padding: 5px 15px;
   border-top-left-radius: 25px;
   border-bottom-left-radius: 25px;
@@ -133,19 +131,16 @@ button:focus-visible {
 #thuisteam_fixed,
 #uitteam_fixed {
   width: 45%; /* Fixed width for team names */
-  background: #000000; /* Black background */
   padding: 18px 15px;
 }
 
 #kleedkamer_fixed {
   width: 20%; /* Fixed width for dressing rooms */
-  background: #de0b0b; /* WVV red */
   padding: 18px 15px;
 }
 
 #wedstrijdveld_fixed {
   width: 15%; /* Fixed width for field info */
-  background: #b40808; /* WVV red */
   padding: 18px 15px;
   border-top-right-radius: 25px;
   border-bottom-right-radius: 25px;

@@ -20,13 +20,13 @@
       <div v-else id="scrollingContainer" :style="{ height: scrollingContainerHeight }">
         <transition-group name="fade" tag="div">
           <div v-for="match in matches" :key="match.id" class="matchEntry">
-            <div id="datumProgramma_fixed">{{ formatDate(match.wedstrijddatum) }}</div>
-            <img id="clublogo" :src="match.thuisteamlogo">
-            <div id="thuisteam_fixed">{{ match.thuisteam }}</div>
-            <div id="kleedkamer_fixed">-</div>
-            <div id="uitteam_fixed">{{ match.uitteam }}</div>
-            <img id="clublogo" :src="match.uitteamlogo">
-            <div id="wedstrijdveld_fixed">{{ formatCompType(match.competitiesoort) }}</div>
+            <div :style="{ background: this.leftBoxColor, color: this.leftBoxText }" id="datumProgramma_fixed">{{ formatDate(match.wedstrijddatum) }}</div>
+            <img :style="{ background: this.leftMidBoxColor, color: this.leftMidBoxText }" id="clublogo" :src="match.thuisteamlogo">
+            <div :style="{ background: this.leftMidBoxColor, color: this.leftMidBoxText }" id="thuisteam_fixed">{{ match.thuisteam }}</div>
+            <div :style="{ background: this.midBoxColor, color: this.midBoxText }" id="kleedkamer_fixed">-</div>
+            <div :style="{ background: this.rightMidBoxColor, color: this.rightMidBoxText }" id="uitteam_fixed">{{ match.uitteam }}</div>
+            <img :style="{ background: this.rightMidBoxColor, color: this.rightMidBoxText }" id="clublogo" :src="match.uitteamlogo">
+            <div :style="{ background: this.rightBoxColor, color: this.rightBoxText }" id="wedstrijdveld_fixed">{{ formatCompType(match.competitiesoort) }}</div>
           </div>
         </transition-group>
       </div>
@@ -36,8 +36,7 @@
 
 <script>
 import { nextTick } from 'vue';
-import { CLIENT_ID, PROGRAMMA_DAGEN, ENABLE_SCREEN_SWITCH } from '@/config';
-
+import { USER_CONFIG } from '@/config';
 export default {
   name: 'MatchInfo',
   data() {
@@ -49,7 +48,19 @@ export default {
       scrollingContainerHeight: '300px',
       scrollPosition: 0,
       scrollCycleCount: 0,
-      programmaDagen: PROGRAMMA_DAGEN,
+      clientId: USER_CONFIG.clientId,
+      programmaDagen: USER_CONFIG.programmaDagen,
+      enableScreenSwitch: USER_CONFIG.enableScreenSwitch,
+      leftBoxText: USER_CONFIG.leftBoxText,
+      leftBoxColor: USER_CONFIG.leftBoxColor,
+      leftMidBoxText: USER_CONFIG.leftMidBoxText,
+      leftMidBoxColor: USER_CONFIG.leftMidBoxColor,
+      midBoxText: USER_CONFIG.midBoxText,
+      midBoxColor: USER_CONFIG.midBoxColor,
+      rightMidBoxText: USER_CONFIG.rightMidBoxText,
+      rightMidBoxColor: USER_CONFIG.rightMidBoxColor,
+      rightBoxText: USER_CONFIG.rightBoxText,
+      rightBoxColor: USER_CONFIG.rightBoxColor,
     };
   },
   methods: {
@@ -58,7 +69,7 @@ export default {
       this.loading = true;
 
       try {
-        const response = await fetch('https://data.sportlink.com/programma?gebruiklokaleteamgegevens=NEE&aantaldagen=' + PROGRAMMA_DAGEN + '&eigenwedstrijden=JA&thuis=JA&uit=JA&client_id=' + CLIENT_ID);
+        const response = await fetch(`https://data.sportlink.com/programma?gebruiklokaleteamgegevens=NEE&aantaldagen=${this.programmaDagen}&eigenwedstrijden=JA&thuis=JA&uit=JA&client_id=${this.clientId}`);
 
         if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
 
@@ -124,7 +135,7 @@ export default {
             this.scrollCycleCount += 1;
 
             if(this.scrollCycleCount >= 2){
-              if(ENABLE_SCREEN_SWITCH == true){
+              if(this.enableScreenSwitch == true){
                 clearInterval(this.scrollInterval);
                 this.scrollInterval = null;
 

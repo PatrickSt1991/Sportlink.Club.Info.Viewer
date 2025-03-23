@@ -3,7 +3,7 @@ import vue from '@vitejs/plugin-vue';
 import legacy from '@vitejs/plugin-legacy';
 import { fileURLToPath, URL } from 'url';
 import { BASE_URL } from './src/config';
-
+console.log(BASE_URL);
 export default defineConfig({
   base: BASE_URL,
   plugins: [

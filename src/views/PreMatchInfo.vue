@@ -5,12 +5,12 @@
     </div>
     <div id="rcornders">
       <div class="matchEntry">
-        <div id="datumUitslag_fixed">Aanvang</div>
-        <div id="thuisteam_fixed">Thuis</div>
-            <div id="kleedkamer_fixed">Kleedkamer</div>
-            <div id="uitteam_fixed">Gasten</div>
-            <div id="kleedkamer_fixed">Kleedkamer</div>
-            <div id="wedstrijdveld_fixed">Veld</div>
+        <div :style="{ background: this.leftBoxColor, color: this.leftBoxText }" id="datumUitslag_fixed">Aanvang</div>
+        <div :style="{ background: this.leftMidBoxColor, color: this.leftMidBoxText }" id="thuisteam_fixed">Thuis</div>
+        <div :style="{ background: this.midBoxColor, color: this.midBoxText }" id="kleedkamer_fixed">Kleedkamer</div>
+        <div :style="{ background: this.rightMidBoxColor, color: this.rightMidBoxText }" id="uitteam_fixed">Gasten</div>
+        <div :style="{ background: this.rightBoxColor, color: this.rightBoxText }" id="kleedkamer_fixed">Kleedkamer</div>
+        <div :style="{ background: this.leftBoxColor, color: this.leftBoxText }" id="wedstrijdveld_fixed">Veld</div>
       </div>
     </div>
     <div id="rcorners_matchinfo_fixed">
@@ -30,12 +30,12 @@
       <div v-else id="scrollingContainer" :style="{ height: scrollingContainerHeight }">
         <transition-group name="fade" tag="div">
           <div v-for="match in matches" :key="match.id" class="matchEntry">
-            <div id="datumUitslag_fixed">{{ formatDate(match.wedstrijddatum) }}</div>
-            <div id="thuisteam_fixed">{{ match.thuisteam }}</div>
-            <div id="kleedkamer_fixed">{{ formatKleedkamer(match.kleedkamerthuisteam) }}</div>
-            <div id="uitteam_fixed">{{ match.uitteam }}</div>
-            <div id="kleedkamer_fixed">{{ formatKleedkamer(match.kleedkamerthuisteam) }}</div>
-            <div id="wedstrijdveld_fixed">{{ formatVeld(match.veld) }}</div>
+            <div :style="{ background: this.leftBoxColor, color: this.leftBoxText }" id="datumUitslag_fixed">{{ formatDate(match.wedstrijddatum) }}</div>
+            <div :style="{ background: this.leftMidBoxColor, color: this.leftMidBoxText }" id="thuisteam_fixed">{{ match.thuisteam }}</div>
+            <div :style="{ background: this.midBoxColor, color: this.midBoxText }" id="kleedkamer_fixed">{{ formatKleedkamer(match.kleedkamerthuisteam) }}</div>
+            <div :style="{ background: this.rightMidBoxColor, color: this.rightMidBoxText }" id="uitteam_fixed">{{ match.uitteam }}</div>
+            <div :style="{ background: this.rightBoxColor, color: this.rightBoxText }" id="kleedkamer_fixed">{{ formatKleedkamer(match.kleedkamerthuisteam) }}</div>
+            <div :style="{ background: this.leftBoxColor, color: this.leftBoxText }" id="wedstrijdveld_fixed">{{ formatVeld(match.veld) }}</div>
           </div>
         </transition-group>
       </div>
@@ -45,7 +45,7 @@
 
 <script>
 import { nextTick } from 'vue';
-import { CLIENT_ID, PREMATCH_REFRESH } from '@/config';
+import { USER_CONFIG } from '@/config';
 
 export default {
   name: 'PreMatchInfo',
@@ -58,6 +58,18 @@ export default {
       refreshInterval: null,
       scrollingContainerHeight: '300px',
       scrollPosition: 0,
+      clientId: USER_CONFIG.clientId,
+      prematchRefresh: USER_CONFIG.prematchRefresh,
+      leftBoxText: USER_CONFIG.leftBoxText,
+      leftBoxColor: USER_CONFIG.leftBoxColor,
+      leftMidBoxText: USER_CONFIG.leftMidBoxText,
+      leftMidBoxColor: USER_CONFIG.leftMidBoxColor,
+      midBoxText: USER_CONFIG.midBoxText,
+      midBoxColor: USER_CONFIG.midBoxColor,
+      rightMidBoxText: USER_CONFIG.rightMidBoxText,
+      rightMidBoxColor: USER_CONFIG.rightMidBoxColor,
+      rightBoxText: USER_CONFIG.rightBoxText,
+      rightBoxColor: USER_CONFIG.rightBoxColor,
     };
   },
   methods: {
@@ -65,7 +77,7 @@ export default {
       this.loading = true;
       this.error = null;
       try {
-        const response = await fetch('https://data.sportlink.com/programma?gebruiklokaleteamgegevens=NEE&eigenwedstrijden=JA&thuis=JA&uit=NEE&client_id=' + CLIENT_ID);
+        const response = await fetch(`https://data.sportlink.com/programma?gebruiklokaleteamgegevens=NEE&eigenwedstrijden=JA&thuis=JA&uit=NEE&client_id=${this.clientId}`);
 
         if (!response.ok) throw new Error(`HTTP Error! status: ${response.status}`);
 
@@ -103,7 +115,7 @@ export default {
     },
     calculateScrollingContainerHeight() {
       const windowHeight = window.innerHeight;
-      this.scrollingContainerHeight = `${windowHeight - 265}px`; //325
+      this.scrollingContainerHeight = `${windowHeight - 265}px`;
     },
     formatKleedkamer(kleedkamer) {
       return kleedkamer ? kleedkamer : '---';
@@ -141,7 +153,7 @@ export default {
       }
     },
     startPeriodicRefresh() {
-      const refreshIntervalMs = PREMATCH_REFRESH * 60000;
+      const refreshIntervalMs = this.prematchRefresh * 60000;
       this.refreshInterval = setInterval(() => {
         this.fetchPreMatchInfo();
       }, refreshIntervalMs);

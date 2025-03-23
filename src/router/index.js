@@ -2,9 +2,15 @@ import { createRouter, createWebHistory } from 'vue-router';
 import PreMatchInfo from '@/views/PreMatchInfo.vue';
 import MatchInfo from '@/views/MatchInfo.vue';
 import MatchResults from '@/views/MatchResults.vue';
-import { BASE_URL,HOMESCREEN } from '@/config';
+import Config from '@/components/Config.vue';
+import { HOME_SCREENS, USER_CONFIG, BASE_URL } from '@/config';
 
 const routes = [
+  {
+    path: '/settings',
+    name: 'Settings',
+    component: Config,
+  },
   {
     path: '/prematch-info',
     name: 'PreMatchInfo',
@@ -22,7 +28,7 @@ const routes = [
   },
   {
     path: '/:pathMatch(.*)*',
-    redirect: HOMESCREEN,
+    redirect: HOME_SCREENS[USER_CONFIG.homeScreen] || '/match-info',
   },
 ];
 

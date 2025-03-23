@@ -1,23 +1,63 @@
-export const BASE_URL = './';
-export const CLIENT_ID = 'iLqhgc5Npa'; //Voetbal
-//export const CLIENT_ID = 'J1jkP9ASKu'; //Korfbal
-//export const CLIENT_ID = 'UkMSNIG9Qy'; //Soft en honkbal
-//export const CLIENT_ID = 'BSRt2sOcG2'; //Basketbal
-export const PROGRAMMA_DAGEN = 7;
-export const UITSLAG_DAGEN = 7;
-export const PREMATCH_REFRESH = 15;
-export const ENABLE_SCREEN_SWITCH = true;
-export const HOMESCREEN = '/match-info';
-export const GAME_TYPE ='voetbal';
-
 export const LOGO_URLS = {
-    voetbal: 'https://logoapi.voetbal.nl/logo.php?clubcode=', //https://logoapi.voetbal.nl/logo.php?clubcode=BBBG24G
-    basketbal: 'https://d26urwx8o7j8vg.cloudfront.net/', //https://d26urwx8o7j8vg.cloudfront.net/BV_Millwings-550x200.jpg
-    //atletiekunie: '', //nog niet gevonden
-    //basebal: '', //nog niet gevonden
-    //softbal: '', //nog niet gevonden
-    //korfbal: '', //nog niet gevonden
-    //volleybal: '', //nog niet gevonden
-    //zwemmen: '', //nog niet gevonden
-    //hockey_belgium: '', //nog niet gevonden
-  };
+  voetbal: 'https://logoapi.voetbal.nl/logo.php?clubcode=',
+  basketbal: 'https://d26urwx8o7j8vg.cloudfront.net/',
+  korfbal: '',
+  basebal: '',
+  softbal: '',
+  volleybal: '',
+  zwemmen: '',
+  hockey_belgium: '',
+};
+
+export const HOME_SCREENS = {
+  'Wedstrijd Informatie': '/match-info',
+  'Wedstrijd Programma':'/prematch-info',
+  'Wedstrijd Uitslagen': '/match-results'
+}
+
+export const AVAILABLE_GAME_TYPES = Object.keys(LOGO_URLS).filter(
+  (key) => LOGO_URLS[key]
+);
+
+export const AVAILABLE_HOME_SCREENS = Object.keys(HOME_SCREENS).filter(
+  (key) => HOME_SCREENS[key]
+)
+
+const defaultConfig = {
+  clientId: 'iLqhgc5Npa', //iLqhgc5Npa = Voetbal, J1jkP9ASKu = //Korfbal, UkMSNIG9Qy = //Soft en honkbal, BSRt2sOcG2 = //Basketbal
+  programmaDagen: 7,
+  uitslagDagen: 7,
+  prematchRefresh: 15,
+  enableScreenSwitch: true,
+  homeScreen: AVAILABLE_HOME_SCREENS[0] || '/match-info',
+  gameType: AVAILABLE_GAME_TYPES[0] || 'voetbal', // First valid option
+  onPrem: false,
+  activeSponsors: true,
+  leftBoxColor: "#b40808",
+  leftBoxText: "#ffffff",
+  leftMidBoxColor: "#000000",
+  leftMidBoxText: "#ffffff",
+  midBoxColor: "#de0b0b",
+  midBoxText: "#ffffff",
+  rightMidBoxColor: "#000000",
+  rightMidBoxText: "#ffffff",
+  rightBoxColor: "#b40808",
+  rightBoxText: "#ffffff",
+};
+
+export const BASE_URL = defaultConfig.onPrem ? './' : '/Sportlink.Club.Info.Viewer/';
+defaultConfig.baseUrl = BASE_URL;
+
+let USER_CONFIG = defaultConfig;
+if (typeof window !== 'undefined' && window.localStorage) {
+  USER_CONFIG = JSON.parse(localStorage.getItem('userConfig')) || defaultConfig;
+}
+
+export const updateUserConfig = (newConfig) => {
+  if (typeof window !== 'undefined' && window.localStorage) {
+    localStorage.setItem('userConfig', JSON.stringify(newConfig));
+  }
+  Object.assign(USER_CONFIG, newConfig);
+};
+
+export { USER_CONFIG };

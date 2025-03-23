@@ -7,6 +7,7 @@
           :key="index" 
           :src="getImage(image)" 
           class="sponsor-image" 
+          :style="activeSponsors ? {} : { visibility: 'hidden' }" 
         />
         <img 
           v-if="imageSrc" 
@@ -20,14 +21,16 @@
     </p>
   </div>
 </template>
-
 <script>
+import { USER_CONFIG } from '@/config';
+console.log(USER_CONFIG);
 export default {
   name: 'SponsorBar',
   data() {
     return {
       year: new Date().getFullYear(),
       imageSrc: null,
+      activeSponsors: USER_CONFIG.activeSponsors,
       images: [
         'caravan.jpg',
         'detreffer.png',
@@ -61,7 +64,7 @@ export default {
     },
   },
   mounted() {
-    this.loadBinaryImage(); // Load the binary image when the component is mounted
+    this.loadBinaryImage();
   },
 };
 </script>

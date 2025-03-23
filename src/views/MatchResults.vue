@@ -20,15 +20,15 @@
       <div v-else id="scrollingContainer" :style="{ height: scrollingContainerHeight }">
         <transition-group name="fade" tag="div">
           <div v-for="match in matches" :key="match.id" class="matchEntry">
-            <div id="datumUitslag_fixed">{{ match.datumopgemaakt }}</div>
-            <img id="clublogo" v-if="gameType !== 'basketbal'" :src="formatClubIcon(match.thuisteamclubrelatiecode)"> <!-- For Voetbal and other sports that return just a single URL -->
-            <img id="clublogo" v-if="gameType === 'basketbal'" :src="formatClubIcon(match.thuisteamclubrelatiecode, match.thuisteam, match.uitteam).thuisteamLogo"> <!-- For Basketball (since it returns both thuisteam and uitteam logos) -->
-            <div id="thuisteam_fixed">{{ match.thuisteam }}</div>
-            <div id="kleedkamer_fixed">{{ match.uitslag }}</div>
-            <div id="uitteam_fixed">{{ match.uitteam }}</div>
-            <img id="clublogo" v-if="gameType !== 'basketbal'" :src="formatClubIcon(match.uitteamclubrelatiecode)"> <!-- For Voetbal and other sports that return just a single URL -->
-            <img id="clublogo" v-if="gameType === 'basketbal'" :src="formatClubIcon(match.uitteamclubrelatiecode, match.thuisteam, match.uitteam).uitteamLogo"> <!-- For Basketball (since it returns both thuisteam and uitteam logos) -->
-            <div id="wedstrijdveld_fixed">{{ formatCompType(match.competitiesoort) }}</div>
+            <div :style="{ background: this.leftBoxColor, color: this.leftBoxText }" id="datumUitslag_fixed">{{ match.datumopgemaakt }}</div>
+            <img :style="{ background: this.leftMidBoxColor, color: this.leftMidBoxText }" id="clublogo" v-if="gameType !== 'basketbal'" :src="formatClubIcon(match.thuisteamclubrelatiecode)"> <!-- For Voetbal and other sports that return just a single URL -->
+            <img :style="{ background: this.leftMidBoxColor, color: this.leftMidBoxText }" id="clublogo" v-if="gameType === 'basketbal'" :src="formatClubIcon(match.thuisteamclubrelatiecode, match.thuisteam, match.uitteam).thuisteamLogo"> <!-- For Basketball (since it returns both thuisteam and uitteam logos) -->
+            <div :style="{ background: this.leftMidBoxColor, color: this.leftMidBoxText }" id="thuisteam_fixed">{{ match.thuisteam }}</div>
+            <div :style="{ background: this.midBoxColor, color: this.midBoxText }" id="kleedkamer_fixed">{{ match.uitslag }}</div>
+            <div :style="{ background: this.rightMidBoxColor, color: this.rightMidBoxText }" id="uitteam_fixed">{{ match.uitteam }}</div>
+            <img :style="{ background: this.rightMidBoxColor, color: this.rightMidBoxText }" id="clublogo" v-if="gameType !== 'basketbal'" :src="formatClubIcon(match.uitteamclubrelatiecode)"> <!-- For Voetbal and other sports that return just a single URL -->
+            <img :style="{ background: this.rightMidBoxColor, color: this.rightMidBoxText }" id="clublogo" v-if="gameType === 'basketbal'" :src="formatClubIcon(match.uitteamclubrelatiecode, match.thuisteam, match.uitteam).uitteamLogo"> <!-- For Basketball (since it returns both thuisteam and uitteam logos) -->
+            <div :style="{ background: this.rightBoxColor, color: this.rightBoxText }" id="wedstrijdveld_fixed">{{ formatCompType(match.competitiesoort) }}</div>
           </div>
         </transition-group>
       </div>
@@ -38,7 +38,7 @@
 
 <script>
 import { nextTick } from 'vue';
-import { CLIENT_ID,UITSLAG_DAGEN, GAME_TYPE, LOGO_URLS, ENABLE_SCREEN_SWITCH } from '@/config';
+import { USER_CONFIG, LOGO_URLS } from '@/config';
 import fallbackLogo from '../assets/no_image.png';
 
 export default {
@@ -52,7 +52,21 @@ export default {
       scrollingContainerHeight: '300px',
       scrollPosition: 0,
       scrollCycleCount: 0,
-      uitslageDagen: UITSLAG_DAGEN,
+      clientId: USER_CONFIG.clientId,
+      uitslageDagen: USER_CONFIG.uitslagDagen,
+      gameType: USER_CONFIG.gameType,
+      logoUrls: LOGO_URLS,
+      enableScreenSwitch: USER_CONFIG.enableScreenSwitch,
+      leftBoxText: USER_CONFIG.leftBoxText,
+      leftBoxColor: USER_CONFIG.leftBoxColor,
+      leftMidBoxText: USER_CONFIG.leftMidBoxText,
+      leftMidBoxColor: USER_CONFIG.leftMidBoxColor,
+      midBoxText: USER_CONFIG.midBoxText,
+      midBoxColor: USER_CONFIG.midBoxColor,
+      rightMidBoxText: USER_CONFIG.rightMidBoxText,
+      rightMidBoxColor: USER_CONFIG.rightMidBoxColor,
+      rightBoxText: USER_CONFIG.rightBoxText,
+      rightBoxColor: USER_CONFIG.rightBoxColor,
     };
   },
   methods: {
@@ -61,7 +75,7 @@ export default {
       this.error = null;
 
       try {
-        const response = await fetch('https://data.sportlink.com/uitslagen?gebruiklokaleteamgegevens=NEE&thuis=JA&uit=JA&client_id=' + CLIENT_ID);
+        const response = await fetch(`https://data.sportlink.com/uitslagen?gebruiklokaleteamgegevens=NEE&thuis=JA&uit=JA&client_id=${this.clientId}`);
 
         if(!response.ok) throw new Error(`HTTP Error! Status: ${response.status}`);
 
@@ -69,7 +83,7 @@ export default {
 
         const now = new Date();
         const oneWeekAgo = new Date(now);
-        oneWeekAgo.setDate(now.getDate() - UITSLAG_DAGEN);
+        oneWeekAgo.setDate(now.getDate() - this.uitslageDagen);
 
         this.matches = data.filter(match => {
           const matchDateTime = new Date(match.wedstrijddatum);
@@ -106,18 +120,18 @@ export default {
     },
     formatTeamName(teamName) {
       return teamName
-        .replace(/,\s*\w+\d.*$/, '') // Remove ", M16-1" or similar patterns
-        .replace(/\s*\w+\d.*$/, '')  // Remove " M16-1" or similar patterns without comma
-        .replace(/\s+/g, '_')        // Replace spaces with underscores
-        .replace(/,$/, '');          // Remove trailing comma if it exists
+        .replace(/,\s*\w+\d.*$/, '')
+        .replace(/\s*\w+\d.*$/, '')
+        .replace(/\s+/g, '_')
+        .replace(/,$/, '');
     },
     formatClubIcon(clubrelatiecode, thuisteam, uitteam) {
-      if (!clubrelatiecode && GAME_TYPE.toLowerCase() !== 'basketbal') return fallbackLogo;
+      if (!clubrelatiecode && this.gameType.toLowerCase() !== 'basketbal') return fallbackLogo;
 
-      const baseUrl = LOGO_URLS[GAME_TYPE.toLowerCase()];
+      const baseUrl = this.logoUrls[this.gameType.toLowerCase()];
       if (!baseUrl) return fallbackLogo;
 
-      switch (GAME_TYPE.toLowerCase()) {
+      switch (this.gameType.toLowerCase()) {
         case 'basketbal':
           if (!thuisteam || !uitteam) return fallbackLogo;
 
@@ -129,9 +143,9 @@ export default {
             uitteamLogo: `${baseUrl}${formattedUitteam}-550x200.jpg`
           };
         case 'voetbal':
-          return `${baseUrl}${clubrelatiecode}`; // Voetbal specific logic
+          return `${baseUrl}${clubrelatiecode}`;
         default:
-          return `${baseUrl}${clubrelatiecode}`; // Other sports (use the default pattern)
+          return `${baseUrl}${clubrelatiecode}`;
       }
     },
     formatCompType(compType) {
@@ -161,7 +175,7 @@ export default {
           this.scrollCycleCount += 1;
 
           if(this.scrollCycleCount >= 2){
-            if(ENABLE_SCREEN_SWITCH == true){
+            if(this.enableScreenSwitch == true){
               clearInterval(this.scrollInterval);
               this.scrollInterval = null;
 
