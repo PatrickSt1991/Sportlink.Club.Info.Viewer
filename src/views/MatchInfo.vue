@@ -158,6 +158,11 @@ export default {
     },
   },
   mounted() {
+    if (!this.clientId) {
+      this.$router.push('/settings');
+      return;
+    }
+
     this.calculateScrollingContainerHeight();
     window.addEventListener('resize', this.calculateScrollingContainerHeight);
 
