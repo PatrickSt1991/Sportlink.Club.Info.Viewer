@@ -6,7 +6,7 @@ export const LOGO_URLS = {
   softbal: '',
   volleybal: '',
   zwemmen: '',
-  hockey_belgium: '',
+  "Hockey (België)": '',
 };
 
 export const HOME_SCREENS = {
@@ -15,9 +15,7 @@ export const HOME_SCREENS = {
   'Wedstrijd Uitslagen': '/match-results'
 }
 
-export const AVAILABLE_GAME_TYPES = Object.keys(LOGO_URLS).filter(
-  (key) => LOGO_URLS[key]
-);
+export const AVAILABLE_GAME_TYPES = Object.keys(LOGO_URLS);
 
 export const AVAILABLE_HOME_SCREENS = Object.keys(HOME_SCREENS).filter(
   (key) => HOME_SCREENS[key]

@@ -1,4 +1,4 @@
-import { createRouter, createWebHistory } from 'vue-router';
+import { createRouter, createWebHashHistory } from 'vue-router';
 import PreMatchInfo from '@/views/PreMatchInfo.vue';
 import MatchInfo from '@/views/MatchInfo.vue';
 import MatchResults from '@/views/MatchResults.vue';
@@ -33,7 +33,7 @@ const routes = [
 ];
 
 const router = createRouter({
-  history: createWebHistory(BASE_URL),
+  history: createWebHashHistory(BASE_URL),
   routes,
 });
 
