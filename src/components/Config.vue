@@ -1,15 +1,20 @@
 <template>
-  <div class="wrapper">  
+  <div class="wrapper" v-if="!isLoading">  
     <div class="config-container" id="configTop">
       <h2>Instellingen</h2>
       <div class="form-group">
         <label>Sportlink Client ID:</label>
-        <input type="text" v-model.text="config.clientId" @change="saveConfig">
+        <input type="text" v-model="config.clientId">
+      </div>
+
+      <div class="form-group">
+        <label>Sport accommodatie:</label>
+        <input type="text" v-model="config.sportLocatie">
       </div>
 
       <div class="form-group">
         <label>Sport:</label>
-        <select v-model="config.gameType" @change="saveConfig">
+        <select v-model="config.gameType">
           <option v-for="type in availableGameTypes" :key="type" :value="type">
             {{ type.charAt(0).toUpperCase() + type.slice(1) }}
           </option>
@@ -18,38 +23,37 @@
 
       <div class="form-group">
         <label>Programma dagen in de toekomst:</label>
-        <input style="width: 50px"  type="number" v-model.number="config.programmaDagen" @change="saveConfig" />
+        <input style="width: 50px" type="number" v-model.number="config.programmaDagen">
       </div>
 
       <div class="form-group">
         <label>Uitslag dagen in het verleden:</label>
-        <input style="width: 50px" type="number" v-model.number="config.uitslagDagen" @change="saveConfig" />
+        <input style="width: 50px" type="number" v-model.number="config.uitslagDagen">
       </div>
 
       <div class="form-group">
         <label>Wedstrijd Informatie verversen na x seconden:</label>
-        <input type="number" style="width: 50px" v-model.number="config.prematchRefresh" @change="saveConfig" />
+        <input type="number" style="width: 50px" v-model.number="config.prematchRefresh">
       </div>
 
       <div class="form-group">
         <label>Scherm automatisch laten schakelen:</label>
-        <input type="checkbox" v-model="config.enableScreenSwitch" @change="saveConfig" />
+        <input type="checkbox" v-model="config.enableScreenSwitch">
       </div>
 
       <div class="form-group">
         <label>Sponsor balk weergeven:</label>
-        <input type="checkbox" v-model="config.activeSponsors" @change="saveConfig" />
+        <input type="checkbox" v-model="config.activeSponsors">
       </div>
 
       <div class="form-group">
         <label>Start scherm:</label>
-        <select v-model="config.homeScreen" @change="saveConfig">
+        <select v-model="config.homeScreen">
           <option v-for="(path, label) in HOME_SCREENS" :key="label" :value="label">
             {{ label }}
           </option>
         </select>
       </div>
-
     </div>
     <div class="styling-container" id="configTop">
       <div class="matchEntry">
@@ -60,73 +64,168 @@
         <div :style="{ background: config.rightBoxColor, color: config.rightBoxText }" id="wedstrijdveld_fixed">Rechts</div>
       </div>
       <hr/>
-      <label>Links-midden:</label>
+      <label>Links:</label>
       <div class="form-group">
         <label>Kolom:</label>
-        <input type="text" style="width: 50px" v-model.number="config.leftBoxColor" @change="saveConfig" />
+        <div class="color-input-wrapper">
+          <input type="color" :value="config.leftBoxColor" @input="updateColor('leftBoxColor', $event.target.value)">
+          <input type="text" v-model="config.leftBoxColor" placeholder="#RRGGBB" @blur="validateColor('leftBoxColor')">
+        </div>
         <label>Tekst:</label>
-        <input type="text" style="width: 50px" v-model.number="config.leftBoxText" @change="saveConfig" />
+        <div class="color-input-wrapper">
+          <input type="color" :value="config.leftBoxText" @input="updateColor('leftBoxText', $event.target.value)">
+          <input type="text" v-model="config.leftBoxText" placeholder="#RRGGBB" @blur="validateColor('leftBoxText')">
+        </div>
       </div>
       <hr/>
       <label>Links-midden:</label>
       <div class="form-group">
         <label>Kolom:</label>
-        <input type="text" style="width: 50px" v-model.number="config.leftMidBoxColor" @change="saveConfig" />
+        <div class="color-input-wrapper">
+          <input type="color" :value="config.leftMidBoxColor" @input="updateColor('leftMidBoxColor', $event.target.value)">
+          <input type="text" v-model="config.leftMidBoxColor" placeholder="#RRGGBB" @blur="validateColor('leftMidBoxColor')">
+        </div>
         <label>Tekst:</label>
-        <input type="text" style="width: 50px" v-model.number="config.leftMidBoxText" @change="saveConfig" />
+        <div class="color-input-wrapper">
+          <input type="color" :value="config.leftMidBoxText" @input="updateColor('leftMidBoxText', $event.target.value)">
+          <input type="text" v-model="config.leftMidBoxText" placeholder="#RRGGBB" @blur="validateColor('leftMidBoxText')">
+        </div>
       </div>
       <hr/>
       <label>Midden:</label>
       <div class="form-group">
         <label>Kolom:</label>
-        <input type="text" style="width: 50px" v-model.number="config.midBoxColor" @change="saveConfig" />
+        <div class="color-input-wrapper">
+          <input type="color" :value="config.midBoxColor" @input="updateColor('midBoxColor', $event.target.value)">
+          <input type="text" v-model="config.midBoxColor" placeholder="#RRGGBB" @blur="validateColor('midBoxColor')">
+        </div>
         <label>Tekst:</label>
-        <input type="text" style="width: 50px" v-model.number="config.midBoxText" @change="saveConfig" />
+        <div class="color-input-wrapper">
+          <input type="color" :value="config.midBoxText" @input="updateColor('midBoxText', $event.target.value)">
+          <input type="text" v-model="config.midBoxText" placeholder="#RRGGBB" @blur="validateColor('midBoxText')">
+        </div>
       </div>
       <hr/>
       <label>Rechts-midden:</label>
       <div class="form-group">
         <label>Kolom:</label>
-        <input type="text" style="width: 50px" v-model.number="config.rightMidBoxColor" @change="saveConfig" />
+        <div class="color-input-wrapper">
+          <input type="color" :value="config.rightMidBoxColor" @input="updateColor('rightMidBoxColor', $event.target.value)">
+          <input type="text" v-model="config.rightMidBoxColor" placeholder="#RRGGBB" @blur="validateColor('rightMidBoxColor')">
+        </div>
         <label>Tekst:</label>
-        <input type="text" style="width: 50px" v-model.number="config.rightMidBoxText" @change="saveConfig" />
+        <div class="color-input-wrapper">
+          <input type="color" :value="config.rightMidBoxText" @input="updateColor('rightMidBoxText', $event.target.value)">
+          <input type="text" v-model="config.rightMidBoxText" placeholder="#RRGGBB" @blur="validateColor('rightMidBoxText')">
+        </div>
       </div>
       <hr/>
       <label>Rechts:</label>
       <div class="form-group">
         <label>Kolom:</label>
-        <input type="text" style="width: 50px" v-model.number="config.rightBoxColor" @change="saveConfig" />
+        <div class="color-input-wrapper">
+          <input type="color" :value="config.rightBoxColor" @input="updateColor('rightBoxColor', $event.target.value)">
+          <input type="text" v-model="config.rightBoxColor" placeholder="#RRGGBB" @blur="validateColor('rightBoxColor')">
+        </div>
         <label>Tekst:</label>
-        <input type="text" style="width: 50px" v-model.number="config.rightBoxText" @change="saveConfig" />
-      </div>
-
-      <div class="form-group">
-
+        <div class="color-input-wrapper">
+          <input type="color" :value="config.rightBoxText" @input="updateColor('rightBoxText', $event.target.value)">
+          <input type="text" v-model="config.rightBoxText" placeholder="#RRGGBB" @blur="validateColor('rightBoxText')">
+        </div>
       </div>
     </div>
+  </div>
+  <div v-else class="loading">
+    Configuratie laden...
   </div>
 </template>
 
 <script setup>
-import { ref, watch } from 'vue';
+import { ref, watch, onMounted } from 'vue';
 import { USER_CONFIG, updateUserConfig, HOME_SCREENS, AVAILABLE_GAME_TYPES } from '@/config';
 
-const config = ref({ ...USER_CONFIG });
+const config = ref({});
 const availableGameTypes = ref(AVAILABLE_GAME_TYPES);
+const isLoading = ref(true);
 
-function saveConfig() {
-  updateUserConfig(config.value);
+watch(() => config.value.clientId, async (newClientId) => {
+  if (newClientId && newClientId.length > 0) {
+    try {
+      const response = await fetch(`https://data.sportlink.com/clubgegevens?client_id=${newClientId}`);
+      if (!response.ok) throw new Error('Failed to fetch club data');
+      
+      const data = await response.json();
+      if (data?.bezoekadres?.naam) {
+        config.value.sportLocatie = data.bezoekadres.naam;
+      }
+    } catch (error) {
+      console.error('Error fetching club data:', error);
+    }
+  }
+});
+
+function updateColor(field, value) {
+  config[field] = value.toUpperCase();
 }
 
-watch(config, saveConfig, { deep: true });
+function validateColor(field) {
+  if (!/^#[0-9A-F]{6}$/i.test(config[field])) {
+    config[field] = defaultColors[field];
+    alert('Please enter a valid hex color (e.g., #FF0000)');
+  }
+}
+
+const defaultColors = {
+  leftBoxColor: "#b40808",
+  leftBoxText: "#ffffff",
+  leftMidBoxColor: "#000000",
+  leftMidBoxText: "#ffffff",
+  midBoxColor: "#de0b0b",
+  midBoxText: "#ffffff",
+  rightMidBoxColor: "#000000",
+  rightMidBoxText: "#ffffff",
+  rightBoxColor: "#b40808",
+  rightBoxText: "#ffffff"
+};
+onMounted(async () => {
+  config.value = JSON.parse(JSON.stringify(USER_CONFIG.value));
+  isLoading.value = false;
+});
+
+let saveTimeout;
+watch(config, (newConfig) => {
+  clearTimeout(saveTimeout);
+  saveTimeout = setTimeout(() => {
+    updateUserConfig(newConfig);
+  }, 300);
+}, { deep: true });
 </script>
 
 <style scoped>
+.color-input-wrapper {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.color-input-wrapper input[type="color"] {
+  width: 40px;
+  height: 40px;
+  padding: 2px;
+  border: 1px solid #ccc;
+  cursor: pointer;
+}
+
+.color-input-wrapper input[type="text"] {
+  width: 80px;
+  padding: 8px;
+  text-transform: uppercase;
+}
 .wrapper {
   display: flex;
-  justify-content: center; /* Horizontally center the wrapper */
-  gap: 20px; /* Adds space between the divs */
-  margin: 0 auto; /* Centers the wrapper horizontally */
+  justify-content: center;
+  gap: 20px;
+  margin: 0 auto;
 }
 
 .config-container, .styling-container {
@@ -140,7 +239,6 @@ watch(config, saveConfig, { deep: true });
   box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
 }
 
-/* Align label and input side by side */
 .form-group {
   display: flex;
   align-items: center;
@@ -151,28 +249,42 @@ watch(config, saveConfig, { deep: true });
 
 label {
   font-weight: bold;
-  flex: 1; /* Makes label take up remaining space */
+  flex: 1;
 }
 
-/* Adjust input and select fields */
 input, select {
-  flex: 1.5; /* Makes input/select take up more space */
+  flex: 1.5;
   padding: 8px;
   border: 1px solid #ccc;
   border-radius: 4px;
 }
 
-/* Make number inputs more consistent */
 input[type="number"] {
-  width: 70px; /* Keeps number fields from stretching too much */
+  width: 70px;
   text-align: center;
 }
 
-/* Improve checkbox alignment */
 input[type="checkbox"] {
   width: 20px;
   height: 20px;
-  accent-color: #007bff; /* Blue color checkbox */
+  accent-color: #007bff;
 }
 
+.matchEntry {
+  display: flex;
+  margin-bottom: 20px;
+}
+
+.matchEntry div {
+  flex: 1;
+  padding: 10px;
+  text-align: center;
+  font-weight: bold;
+}
+
+.loading {
+  padding: 20px;
+  text-align: center;
+  font-size: 1.2em;
+}
 </style>

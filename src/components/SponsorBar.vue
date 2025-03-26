@@ -7,7 +7,7 @@
           :key="index" 
           :src="getImage(image)" 
           class="sponsor-image" 
-          :style="activeSponsors ? {} : { visibility: 'hidden' }" 
+          :style="sponsorStyle" 
         />
         <img 
           v-if="imageSrc" 
@@ -21,54 +21,63 @@
     </p>
   </div>
 </template>
+
 <script>
+import { ref, watch, computed } from 'vue';
 import { USER_CONFIG } from '@/config';
-console.log(USER_CONFIG);
+
 export default {
   name: 'SponsorBar',
-  data() {
-    return {
-      year: new Date().getFullYear(),
-      imageSrc: null,
-      activeSponsors: USER_CONFIG.activeSponsors,
-      images: [
-        'caravan.jpg',
-        'detreffer.png',
-        'hartman.png',
-        'hofman.png',
-        'hyzon.png',
-        'jumbojan.png',
-        'rse_bev.svg',
-        'rse_tel.png',
-        'schrantee.png',
-        'soko.png',
-        'stukaschuur.jpg',
-        'top1toys.png',
-      ],
-    };
-  },
-  methods: {
-    getImage(imageName) {
+  setup() {
+    const year = ref(new Date().getFullYear());
+    const imageSrc = ref(null);
+
+    const sponsorStyle = computed(() => {
+      return USER_CONFIG.value.activeSponsors ? {} : { visibility: 'hidden' };
+    });
+
+    const images = [
+      'caravan.jpg',
+      'detreffer.png',
+      'hartman.png',
+      'hofman.png',
+      'hyzon.png',
+      'jumbojan.png',
+      'rse_bev.svg',
+      'rse_tel.png',
+      'schrantee.png',
+      'soko.png',
+      'stukaschuur.jpg',
+      'top1toys.png',
+    ];
+
+    const getImage = (imageName) => {
       return new URL(`../assets/sponsors/${imageName}`, import.meta.url).href;
-    },
-    loadBinaryImage() {
+    };
+
+    const loadBinaryImage = () => {
       fetch(new URL('../assets/main.bin', import.meta.url).href)
         .then((response) => response.arrayBuffer())
         .then((arrayBuffer) => {
           const blob = new Blob([arrayBuffer], { type: 'image/jpg' });
-          this.imageSrc = URL.createObjectURL(blob);
+          imageSrc.value = URL.createObjectURL(blob);
         })
         .catch((error) => {
           console.error('Error loading binary image:', error);
         });
-    },
+    };
+
+    return {
+      year,
+      imageSrc,
+      sponsorStyle,
+      images,
+      getImage,
+      loadBinaryImage
+    };
   },
   mounted() {
     this.loadBinaryImage();
   },
 };
 </script>
-
-<style scoped>
-
-</style>

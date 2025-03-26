@@ -3,7 +3,7 @@ import vue from '@vitejs/plugin-vue';
 import legacy from '@vitejs/plugin-legacy';
 import { fileURLToPath, URL } from 'url';
 import { BASE_URL } from './src/config';
-console.log(BASE_URL);
+
 export default defineConfig({
   base: BASE_URL,
   plugins: [
@@ -18,4 +18,13 @@ export default defineConfig({
       '@': fileURLToPath(new URL('./src', import.meta.url)),
     },
   },
+  server: {
+    proxy: {
+      '/api': {
+        target: 'http://192.168.2.125',
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/api/, '')
+      }
+    }
+  }  
 });

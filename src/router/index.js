@@ -10,6 +10,8 @@ const routes = [
     path: '/settings',
     name: 'Settings',
     component: Config,
+    // Add this to prevent Suspense warning
+    meta: { suspensible: false }
   },
   {
     path: '/prematch-info',
@@ -28,7 +30,7 @@ const routes = [
   },
   {
     path: '/:pathMatch(.*)*',
-    redirect: HOME_SCREENS[USER_CONFIG.homeScreen] || '/match-info',
+    redirect: () => HOME_SCREENS[USER_CONFIG.homeScreen] || '/match-info',
   },
 ];
 
