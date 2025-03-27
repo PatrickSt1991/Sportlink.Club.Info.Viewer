@@ -5,15 +5,31 @@
 
   color-scheme: light dark;
   color: rgba(255, 255, 255, 0.87);
-  background-image: url('@/assets/background.jpg'); /* Adjust the path accordingly */
-	height: 100%;
-	background-position: center;
-	background-repeat: no-repeat;
-	background-size: cover;
+  
+  /* Safe background implementation */
+  background: 
+    linear-gradient(rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.3)),
+    url('@/assets/background.jpg') no-repeat center center;
+  background-size: cover;
+  background-color: #121212;
+  
+  min-height: 100vh;
+  width: 100%;
+  overflow-x: hidden; /* Prevents horizontal scrollbar */
+  
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+/* Optional: Add these rules to ensure no horizontal overflow */
+html, body {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  max-width: 100%;
+  overflow-x: hidden;
 }
 
 a {

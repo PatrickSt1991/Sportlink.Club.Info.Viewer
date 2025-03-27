@@ -24,7 +24,7 @@ export const AVAILABLE_HOME_SCREENS = Object.keys(HOME_SCREENS).filter(
 );
 
 const defaultConfig = {
-  clientId: 'iLqhgc5Npa', //iLqhgc5Npa = Voetbal, J1jkP9ASKu = //Korfbal, UkMSNIG9Qy = //Soft en honkbal, BSRt2sOcG2 = //Basketbal
+  clientId: '', //iLqhgc5Npa = Voetbal, J1jkP9ASKu = //Korfbal, UkMSNIG9Qy = //Soft en honkbal, BSRt2sOcG2 = //Basketbal
   sportLocatie: null,
   programmaDagen: 7,
   uitslagDagen: 7,
@@ -33,17 +33,17 @@ const defaultConfig = {
   homeScreen: AVAILABLE_HOME_SCREENS[0] || '/match-info',
   gameType: AVAILABLE_GAME_TYPES[0] || 'voetbal',
   onPrem: false,
-  activeSponsors: true,
-  leftBoxColor: null,
-  leftBoxText: null,
-  leftMidBoxColor: null,
-  leftMidBoxText: null,
-  midBoxColor: null,
-  midBoxText: null,
-  rightMidBoxColor: null,
-  rightMidBoxText: null,
-  rightBoxColor: null,
-  rightBoxText: null
+  activeSponsors: false,
+  leftBoxColor: "#b40808",
+  leftBoxText: "#ffffff",
+  leftMidBoxColor: "#000000",
+  leftMidBoxText: "#ffffff",
+  midBoxColor: "#de0b0b",
+  midBoxText: "#ffffff",
+  rightMidBoxColor: "#000000",
+  rightMidBoxText: "#ffffff",
+  rightBoxColor: "#b40808",
+  rightBoxText: "#ffffff"
 };
 
 export const BASE_URL = defaultConfig.onPrem ? './' : '/Sportlink.Club.Info.Viewer/';
