@@ -1,137 +1,156 @@
 <template>
-  <div class="wrapper" v-if="!isLoading">  
-    <div class="config-container" id="configTop">
-      <h2>Instellingen</h2>
-      <div class="form-group">
-        <label>Sportlink Client ID:</label>
-        <input type="text" v-model="config.clientId">
-      </div>
+  <div class="wrapper" v-if="!isLoading">
+    <div class="containers-row">
+      <div class="config-container" id="configTop">
+        <h2>Instellingen</h2>
+        <div class="form-group">
+          <label>Sportlink Client ID:</label>
+          <input type="text" v-model="config.clientId">
+        </div>
 
-      <div class="form-group">
-        <label>Sport accommodatie:</label>
-        <input type="text" v-model="config.sportLocatie">
-      </div>
+        <div class="form-group">
+          <label>Sport accommodatie:</label>
+          <input type="text" v-model="config.sportLocatie">
+        </div>
 
-      <div class="form-group">
-        <label>Sport:</label>
-        <select v-model="config.gameType">
-          <option v-for="type in availableGameTypes" :key="type" :value="type">
-            {{ type.charAt(0).toUpperCase() + type.slice(1) }}
-          </option>
-        </select>
-      </div>
+        <div class="form-group">
+          <label>Sport:</label>
+          <select v-model="config.gameType">
+            <option v-for="type in availableGameTypes" :key="type" :value="type">
+              {{ type.charAt(0).toUpperCase() + type.slice(1) }}
+            </option>
+          </select>
+        </div>
 
-      <div class="form-group">
-        <label>Programma dagen in de toekomst:</label>
-        <input style="width: 50px" type="number" v-model.number="config.programmaDagen">
-      </div>
+        <div class="form-group">
+          <label>Programma dagen in de toekomst:</label>
+          <input style="width: 50px" type="number" v-model.number="config.programmaDagen">
+        </div>
 
-      <div class="form-group">
-        <label>Uitslag dagen in het verleden:</label>
-        <input style="width: 50px" type="number" v-model.number="config.uitslagDagen">
-      </div>
+        <div class="form-group">
+          <label>Uitslag dagen in het verleden:</label>
+          <input style="width: 50px" type="number" v-model.number="config.uitslagDagen">
+        </div>
 
-      <div class="form-group">
-        <label>Wedstrijd Informatie verversen na x seconden:</label>
-        <input type="number" style="width: 50px" v-model.number="config.prematchRefresh">
-      </div>
+        <div class="form-group">
+          <label>Wedstrijd Informatie verversen na x seconden:</label>
+          <input type="number" style="width: 50px" v-model.number="config.prematchRefresh">
+        </div>
 
-      <div class="form-group">
-        <label>Scherm automatisch laten schakelen:</label>
-        <input type="checkbox" v-model="config.enableScreenSwitch">
-      </div>
+        <div class="form-group">
+          <label>Scherm automatisch laten schakelen:</label>
+          <input type="checkbox" v-model="config.enableScreenSwitch">
+        </div>
 
-      <div class="form-group">
-        <label>Sponsor balk weergeven:</label>
-        <input type="checkbox" v-model="config.activeSponsors">
-      </div>
+        <div class="form-group">
+          <label>Sponsor balk weergeven:</label>
+          <input type="checkbox" v-model="config.activeSponsors">
+        </div>
 
-      <div class="form-group">
-        <label>Start scherm:</label>
-        <select v-model="config.homeScreen">
-          <option v-for="(path, label) in HOME_SCREENS" :key="label" :value="label">
-            {{ label }}
-          </option>
-        </select>
+        <div class="form-group">
+          <label>Start scherm:</label>
+          <select v-model="config.homeScreen">
+            <option v-for="(path, label) in HOME_SCREENS" :key="label" :value="label">
+              {{ label }}
+            </option>
+          </select>
+        </div>
+      </div>
+      
+      <div class="styling-container" id="configTop">
+        <div class="matchEntry">
+          <div :style="{ background: config.leftBoxColor, color: config.leftBoxText }" id="datumUitslag_fixed">Links</div>
+          <div :style="{ background: config.leftMidBoxColor, color: config.leftMidBoxText }" id="thuisteam_fixed">Links-Midden</div>
+          <div :style="{ background: config.midBoxColor, color: config.midBoxText }" id="kleedkamer_fixed">Midden</div>
+          <div :style="{ background: config.rightMidBoxColor, color: config.rightMidBoxText }" id="uitteam_fixed">Midden-Rechts</div>
+          <div :style="{ background: config.rightBoxColor, color: config.rightBoxText }" id="wedstrijdveld_fixed">Rechts</div>
+        </div>
+        <hr/>
+        <label>Links:</label>
+        <div class="form-group">
+          <label>Kolom:</label>
+          <div class="color-input-wrapper">
+            <input type="color" :value="config.leftBoxColor" @input="updateColor('leftBoxColor', $event.target.value)">
+            <input type="text" v-model="config.leftBoxColor" placeholder="#RRGGBB" @blur="validateColor('leftBoxColor')">
+          </div>
+          <label>Tekst:</label>
+          <div class="color-input-wrapper">
+            <input type="color" :value="config.leftBoxText" @input="updateColor('leftBoxText', $event.target.value)">
+            <input type="text" v-model="config.leftBoxText" placeholder="#RRGGBB" @blur="validateColor('leftBoxText')">
+          </div>
+        </div>
+        <hr/>
+        <label>Links-midden:</label>
+        <div class="form-group">
+          <label>Kolom:</label>
+          <div class="color-input-wrapper">
+            <input type="color" :value="config.leftMidBoxColor" @input="updateColor('leftMidBoxColor', $event.target.value)">
+            <input type="text" v-model="config.leftMidBoxColor" placeholder="#RRGGBB" @blur="validateColor('leftMidBoxColor')">
+          </div>
+          <label>Tekst:</label>
+          <div class="color-input-wrapper">
+            <input type="color" :value="config.leftMidBoxText" @input="updateColor('leftMidBoxText', $event.target.value)">
+            <input type="text" v-model="config.leftMidBoxText" placeholder="#RRGGBB" @blur="validateColor('leftMidBoxText')">
+          </div>
+        </div>
+        <hr/>
+        <label>Midden:</label>
+        <div class="form-group">
+          <label>Kolom:</label>
+          <div class="color-input-wrapper">
+            <input type="color" :value="config.midBoxColor" @input="updateColor('midBoxColor', $event.target.value)">
+            <input type="text" v-model="config.midBoxColor" placeholder="#RRGGBB" @blur="validateColor('midBoxColor')">
+          </div>
+          <label>Tekst:</label>
+          <div class="color-input-wrapper">
+            <input type="color" :value="config.midBoxText" @input="updateColor('midBoxText', $event.target.value)">
+            <input type="text" v-model="config.midBoxText" placeholder="#RRGGBB" @blur="validateColor('midBoxText')">
+          </div>
+        </div>
+        <hr/>
+        <label>Rechts-midden:</label>
+        <div class="form-group">
+          <label>Kolom:</label>
+          <div class="color-input-wrapper">
+            <input type="color" :value="config.rightMidBoxColor" @input="updateColor('rightMidBoxColor', $event.target.value)">
+            <input type="text" v-model="config.rightMidBoxColor" placeholder="#RRGGBB" @blur="validateColor('rightMidBoxColor')">
+          </div>
+          <label>Tekst:</label>
+          <div class="color-input-wrapper">
+            <input type="color" :value="config.rightMidBoxText" @input="updateColor('rightMidBoxText', $event.target.value)">
+            <input type="text" v-model="config.rightMidBoxText" placeholder="#RRGGBB" @blur="validateColor('rightMidBoxText')">
+          </div>
+        </div>
+        <hr/>
+        <label>Rechts:</label>
+        <div class="form-group">
+          <label>Kolom:</label>
+          <div class="color-input-wrapper">
+            <input type="color" :value="config.rightBoxColor" @input="updateColor('rightBoxColor', $event.target.value)">
+            <input type="text" v-model="config.rightBoxColor" placeholder="#RRGGBB" @blur="validateColor('rightBoxColor')">
+          </div>
+          <label>Tekst:</label>
+          <div class="color-input-wrapper">
+            <input type="color" :value="config.rightBoxText" @input="updateColor('rightBoxText', $event.target.value)">
+            <input type="text" v-model="config.rightBoxText" placeholder="#RRGGBB" @blur="validateColor('rightBoxText')">
+          </div>
+        </div>
       </div>
     </div>
-    <div class="styling-container" id="configTop">
-      <div class="matchEntry">
-        <div :style="{ background: config.leftBoxColor, color: config.leftBoxText }" id="datumUitslag_fixed">Links</div>
-        <div :style="{ background: config.leftMidBoxColor, color: config.leftMidBoxText }" id="thuisteam_fixed">Links-Midden</div>
-        <div :style="{ background: config.midBoxColor, color: config.midBoxText }" id="kleedkamer_fixed">Midden</div>
-        <div :style="{ background: config.rightMidBoxColor, color: config.rightMidBoxText }" id="uitteam_fixed">Midden-Rechts</div>
-        <div :style="{ background: config.rightBoxColor, color: config.rightBoxText }" id="wedstrijdveld_fixed">Rechts</div>
-      </div>
-      <hr/>
-      <label>Links:</label>
-      <div class="form-group">
-        <label>Kolom:</label>
-        <div class="color-input-wrapper">
-          <input type="color" :value="config.leftBoxColor" @input="updateColor('leftBoxColor', $event.target.value)">
-          <input type="text" v-model="config.leftBoxColor" placeholder="#RRGGBB" @blur="validateColor('leftBoxColor')">
-        </div>
-        <label>Tekst:</label>
-        <div class="color-input-wrapper">
-          <input type="color" :value="config.leftBoxText" @input="updateColor('leftBoxText', $event.target.value)">
-          <input type="text" v-model="config.leftBoxText" placeholder="#RRGGBB" @blur="validateColor('leftBoxText')">
-        </div>
-      </div>
-      <hr/>
-      <label>Links-midden:</label>
-      <div class="form-group">
-        <label>Kolom:</label>
-        <div class="color-input-wrapper">
-          <input type="color" :value="config.leftMidBoxColor" @input="updateColor('leftMidBoxColor', $event.target.value)">
-          <input type="text" v-model="config.leftMidBoxColor" placeholder="#RRGGBB" @blur="validateColor('leftMidBoxColor')">
-        </div>
-        <label>Tekst:</label>
-        <div class="color-input-wrapper">
-          <input type="color" :value="config.leftMidBoxText" @input="updateColor('leftMidBoxText', $event.target.value)">
-          <input type="text" v-model="config.leftMidBoxText" placeholder="#RRGGBB" @blur="validateColor('leftMidBoxText')">
-        </div>
-      </div>
-      <hr/>
-      <label>Midden:</label>
-      <div class="form-group">
-        <label>Kolom:</label>
-        <div class="color-input-wrapper">
-          <input type="color" :value="config.midBoxColor" @input="updateColor('midBoxColor', $event.target.value)">
-          <input type="text" v-model="config.midBoxColor" placeholder="#RRGGBB" @blur="validateColor('midBoxColor')">
-        </div>
-        <label>Tekst:</label>
-        <div class="color-input-wrapper">
-          <input type="color" :value="config.midBoxText" @input="updateColor('midBoxText', $event.target.value)">
-          <input type="text" v-model="config.midBoxText" placeholder="#RRGGBB" @blur="validateColor('midBoxText')">
-        </div>
-      </div>
-      <hr/>
-      <label>Rechts-midden:</label>
-      <div class="form-group">
-        <label>Kolom:</label>
-        <div class="color-input-wrapper">
-          <input type="color" :value="config.rightMidBoxColor" @input="updateColor('rightMidBoxColor', $event.target.value)">
-          <input type="text" v-model="config.rightMidBoxColor" placeholder="#RRGGBB" @blur="validateColor('rightMidBoxColor')">
-        </div>
-        <label>Tekst:</label>
-        <div class="color-input-wrapper">
-          <input type="color" :value="config.rightMidBoxText" @input="updateColor('rightMidBoxText', $event.target.value)">
-          <input type="text" v-model="config.rightMidBoxText" placeholder="#RRGGBB" @blur="validateColor('rightMidBoxText')">
-        </div>
-      </div>
-      <hr/>
-      <label>Rechts:</label>
-      <div class="form-group">
-        <label>Kolom:</label>
-        <div class="color-input-wrapper">
-          <input type="color" :value="config.rightBoxColor" @input="updateColor('rightBoxColor', $event.target.value)">
-          <input type="text" v-model="config.rightBoxColor" placeholder="#RRGGBB" @blur="validateColor('rightBoxColor')">
-        </div>
-        <label>Tekst:</label>
-        <div class="color-input-wrapper">
-          <input type="color" :value="config.rightBoxText" @input="updateColor('rightBoxText', $event.target.value)">
-          <input type="text" v-model="config.rightBoxText" placeholder="#RRGGBB" @blur="validateColor('rightBoxText')">
-        </div>
+
+    <div class="button-group">
+      <div class="button-group">
+        <router-link to="/prematch-info" custom v-slot="{ navigate }">
+          <button @click="navigate">Snel naar Wedstrijd Informatie</button>
+        </router-link>
+        
+        <router-link to="/match-results" custom v-slot="{ navigate }">
+          <button @click="navigate">Snel naar Wedstrijd Uitslagen</button>
+        </router-link>
+        
+        <router-link to="/match-info" custom v-slot="{ navigate }">
+          <button @click="navigate">Ga naar Wedstrijd Programma</button>
+        </router-link>
       </div>
     </div>
     <div class="sponsor-container" id="configTop" style="max-width: 700px;">
@@ -156,6 +175,8 @@
     Configuratie laden...
   </div>
 </template>
+
+
 
 <script setup>
 import { ref, watch, onMounted, computed } from 'vue';
@@ -281,17 +302,29 @@ watch(config, (newConfig) => {
   padding: 8px;
   text-transform: uppercase;
 }
+
 .wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+  margin: 0 auto;
+  padding: 20px;
+  width: 100%;
+  max-width: 940px;
+}
+
+.containers-row {
   display: flex;
   justify-content: center;
   gap: 20px;
-  margin: 0 auto;
+  width: 100%;
 }
 
 .config-container, .styling-container, .sponsor-container {
   padding: 20px;
-  max-width: 450px;
   width: 100%;
+  max-width: 450px;
   background-color: white;
   opacity: 80%;
   color: black;
@@ -378,5 +411,76 @@ input[type="checkbox"] {
   padding: 20px;
   text-align: center;
   font-size: 1.2em;
+}
+
+/* Button styles */
+.button-group {
+  display: flex;
+  gap: 12px;
+  margin-top: 20px;
+  width: 100%;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.button-group button {
+  padding: 12px 24px;
+  border: none;
+  border-radius: 6px;
+  font-size: 16px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  min-width: 200px;
+}
+
+.button-group button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+.button-group button:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.primary-button {
+  background-color: #4CAF50;
+  color: white;
+}
+
+.secondary-button {
+  background-color: #f44336;
+  color: white;
+}
+
+.action-button {
+  background-color: #2196F3;
+  color: white;
+}
+
+/* Responsive adjustments */
+@media (max-width: 940px) {
+  .containers-row {
+    flex-direction: column;
+    align-items: center;
+  }
+  
+  .config-container, .styling-container {
+    width: 100%;
+  }
+}
+
+@media (max-width: 600px) {
+  .button-group {
+    flex-direction: column;
+    align-items: center;
+  }
+  
+  .button-group button {
+    width: 100%;
+    max-width: 300px;
+  }
 }
 </style>
