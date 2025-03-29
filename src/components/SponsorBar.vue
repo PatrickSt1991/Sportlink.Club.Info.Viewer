@@ -3,9 +3,9 @@
     <div class="sponsor-bar">
       <div class="sponsor-images">
         <img 
-          v-for="(image, index) in images" 
+        v-for="(image, index) in sponsorImages" 
           :key="index" 
-          :src="getImage(image)" 
+          :src="image" 
           class="sponsor-image" 
           :style="sponsorStyle" 
         />
@@ -23,8 +23,9 @@
 </template>
 
 <script>
-import { ref, watch, computed } from 'vue';
+import { ref, computed, onMounted } from 'vue';
 import { USER_CONFIG } from '@/config';
+import { sponsorImages, loadSponsorImages } from '@/stores/sponsorStore';
 
 export default {
   name: 'SponsorBar',
@@ -35,25 +36,6 @@ export default {
     const sponsorStyle = computed(() => {
       return USER_CONFIG.value.activeSponsors ? {} : { visibility: 'hidden' };
     });
-
-    const images = [
-      'caravan.jpg',
-      'detreffer.png',
-      'hartman.png',
-      'hofman.png',
-      'hyzon.png',
-      'jumbojan.png',
-      'rse_bev.svg',
-      'rse_tel.png',
-      'schrantee.png',
-      'soko.png',
-      'stukaschuur.jpg',
-      'top1toys.png',
-    ];
-
-    const getImage = (imageName) => {
-      return new URL(`../assets/sponsors/${imageName}`, import.meta.url).href;
-    };
 
     const loadBinaryImage = () => {
       fetch(new URL('../assets/main.bin', import.meta.url).href)
@@ -67,17 +49,23 @@ export default {
         });
     };
 
+    window.addEventListener('storage', (event) => {
+      if (event.key === 'sponsorImages') {
+        loadSponsorImages();
+      }
+    });
+
+    onMounted(() => {
+      loadBinaryImage();
+      loadSponsorImages();
+    });
+
     return {
       year,
       imageSrc,
       sponsorStyle,
-      images,
-      getImage,
-      loadBinaryImage
+      sponsorImages,
     };
-  },
-  mounted() {
-    this.loadBinaryImage();
-  },
+  }
 };
 </script>

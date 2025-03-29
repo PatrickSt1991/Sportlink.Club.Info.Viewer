@@ -134,6 +134,23 @@
         </div>
       </div>
     </div>
+    <div class="sponsor-container" id="configTop" style="max-width: 700px;">
+      <h2>Sponsoren</h2>
+      <p>{{ sponsorHint }}</p>
+      <div class="input-container">
+          <input v-model="newImageUrl" placeholder="Enter image URL" />
+          <button @click="addImage">Sponsor Toevoegen</button>
+      </div>
+      <div class="form-group">
+        <div v-if="userSponsorImages.length > 0" class="image-grid">
+          <div v-for="(image, index) in userSponsorImages" :key="index" class="image-item">
+            <img :src="image" class="preview" />
+            <button @click="removeImage(index)" class="remove-button">X</button>
+          </div>
+        </div>
+        <p v-else>Er zijn nog geen sponsoren toegevoegd.</p>
+      </div>
+    </div>
   </div>
   <div v-else class="loading">
     Configuratie laden...
@@ -141,12 +158,15 @@
 </template>
 
 <script setup>
-import { ref, watch, onMounted } from 'vue';
+import { ref, watch, onMounted, computed } from 'vue';
 import { USER_CONFIG, updateUserConfig, HOME_SCREENS, AVAILABLE_GAME_TYPES } from '@/config';
+import { userSponsorImages, loadSponsorImages, saveSponsorImages } from '@/stores/sponsorStore';
+
 
 const config = ref({});
 const availableGameTypes = ref(AVAILABLE_GAME_TYPES);
 const isLoading = ref(true);
+const newImageUrl = ref("");
 
 watch(() => config.value.clientId, async (newClientId) => {
   if (newClientId && newClientId.length > 0) {
@@ -163,6 +183,33 @@ watch(() => config.value.clientId, async (newClientId) => {
     }
   }
 });
+
+function addImage() {
+  if (!newImageUrl.value.trim()) return;
+  
+  if (userSponsorImages.value.length >= 12) {
+    alert("Maximaal 12 sponsoren mogelijk.");
+    return;
+  }
+
+  if (!isValidImageUrl(newImageUrl.value)) {
+    alert("Geef een geldige image URL op (jpg, png, gif, webp)");
+    return;
+  }
+
+  userSponsorImages.value.push(newImageUrl.value.trim());
+  saveSponsorImages();
+  newImageUrl.value = "";
+}
+
+function isValidImageUrl(url) {
+  return /\.(jpe?g|png|gif|webp)$/i.test(url);
+}
+
+function removeImage(index) {
+  userSponsorImages.value.splice(index, 1);
+  saveSponsorImages(); // Use the shared save function
+}
 
 function updateColor(field, value) {
   config[field] = value.toUpperCase();
@@ -187,8 +234,17 @@ const defaultColors = {
   rightBoxColor: "#b40808",
   rightBoxText: "#ffffff"
 };
+
+const sponsorHint = computed(() => {
+  const current = userSponsorImages.value.length;
+  const max = 12;
+  const available = max - current;
+  return `Nog ${available} van de ${max} sponsoren mogelijk`;
+});
+
 onMounted(async () => {
   config.value = JSON.parse(JSON.stringify(USER_CONFIG.value));
+  loadSponsorImages();
   isLoading.value = false;
 });
 
@@ -202,6 +258,10 @@ watch(config, (newConfig) => {
 </script>
 
 <style scoped>
+.input-container {
+  padding: 5px;
+  margin-bottom: 10px;
+}
 .color-input-wrapper {
   display: flex;
   gap: 8px;
@@ -228,7 +288,7 @@ watch(config, (newConfig) => {
   margin: 0 auto;
 }
 
-.config-container, .styling-container {
+.config-container, .styling-container, .sponsor-container {
   padding: 20px;
   max-width: 450px;
   width: 100%;
@@ -237,6 +297,38 @@ watch(config, (newConfig) => {
   color: black;
   border-radius: 8px;
   box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+.image-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: center;
+}
+
+.image-item {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.preview {
+  width: 376px;
+  height: 55px;
+  object-fit: cover;
+  border-radius: 8px;
+}
+
+.remove-button {
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  background: red;
+  color: white;
+  border: none;
+  padding: 5px;
+  cursor: pointer;
 }
 
 .form-group {
