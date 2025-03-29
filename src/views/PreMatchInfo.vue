@@ -22,11 +22,19 @@
         <h1>{{ error }}</h1>
       </div>
 
-      <div v-else-if="matches.length === 0" id="noMatchMessage">
-        <img src="../assets/no_data.jpg" alt="No Matches" />
-        <h1>Er zijn geen aankomende wedstrijden bekend de aankomende drie uur.</h1>
+      <div v-else-if="matches.length === 0" class="no-matches-container" id="noMatchMessage">
+        <div class="calendar-icon">
+          <div class="calendar-page">
+            <div class="empty-grid">
+              <div v-for="n in 9" :key="n" class="grid-cell"></div>
+            </div>
+          </div>
+          <div class="calendar-spine"></div>
+        </div>
+        <h2 class="calh2">Geen wedstrijden gepland</h2>
+        <p class="calp">{{ dateRangeText }}</p>
       </div>
-
+      
       <div v-else id="scrollingContainer" ref="scrollingContainer" :style="{ height: scrollingContainerHeight }">
         <transition-group name="fade" tag="div">
           <div v-for="match in matches" :key="match.id" class="matchEntry">
@@ -44,7 +52,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, onUnmounted, watch, nextTick } from 'vue';
+import { ref, onMounted, onUnmounted, watch, nextTick, computed } from 'vue';
 import { USER_CONFIG } from '@/config';
 import { useRouter } from 'vue-router';
 
@@ -59,6 +67,19 @@ const scrollingContainerHeight = ref('300px');
 const scrollPosition = ref(0);
 const scrollingContainer = ref(null);
 const config = ref({});
+const now = ref('');
+const threeHoursLater = ref('');
+
+const formatDisplayDate = (date) => {
+  return date.toLocaleString('nl-NL', {
+    hour: '2-digit',
+    minute: '2-digit'
+  });
+};
+
+const dateRangeText = computed(() => {
+  return `Er zijn geen wedstrijden gepland tussen ${now.value} en ${threeHoursLater.value}`;
+});
 
 const fetchPreMatchInfo = async () => {
   if (!config.value?.clientId) return;
@@ -67,19 +88,21 @@ const fetchPreMatchInfo = async () => {
   error.value = null;
 
   try {
-    //const response = await fetch('/api/wvv_v2/test_feed_wedstrijdinfo.json');
     const response = await fetch(`https://data.sportlink.com/programma?gebruiklokaleteamgegevens=NEE&eigenwedstrijden=JA&thuis=JA&uit=NEE&client_id=${config.value.clientId}`);
     if (!response.ok) throw new Error(`HTTP Error! status: ${response.status}`);
 
     const data = await response.json();
-    const now = new Date();
-    now.setHours(now.getHours() - 3);
-    const threeHoursLater = new Date(now.getTime() + 6 * 60 * 60 * 1000);
+    const currentDate = new Date();
+    currentDate.setHours(currentDate.getHours() - 3);
+    const laterDate = new Date(currentDate.getTime() + 6 * 60 * 60 * 1000);
+
+    now.value = formatDisplayDate(currentDate);
+    threeHoursLater.value = formatDisplayDate(laterDate);
 
     matches.value = data.filter(match => {
       const matchDateTime = new Date(match.wedstrijddatum.replace(/(\+|\-)(\d{2})(\d{2})$/, '$1$2:$3'));
-      const isSameDay = matchDateTime.toDateString() === now.toDateString();
-      const isInWindow = matchDateTime >= now && matchDateTime <= threeHoursLater;
+      const isSameDay = matchDateTime.toDateString() === currentDate.toDateString();
+      const isInWindow = matchDateTime >= currentDate && matchDateTime <= laterDate;
       const isCorrectLocation = match.accommodatie === config.value?.sportLocatie;
       return isCorrectLocation && isSameDay && isInWindow;
     });
@@ -125,7 +148,8 @@ const startScrolling = async (attempt = 0) => {
       return;
     }
     
-    if (!scrollingContainer.value) {
+
+    if (!scrollingContainer.value && matches.length != 0) {
       console.error('Scrolling container not found after', maxAttempts, 'attempts');
       return;
     }
@@ -135,7 +159,6 @@ const startScrolling = async (attempt = 0) => {
   clearInterval(scrollInterval.value);
 
   await nextTick();
-
 
   scrollingContainer.value.scrollTop = 0;
 

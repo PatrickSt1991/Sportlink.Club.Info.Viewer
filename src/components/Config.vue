@@ -55,8 +55,7 @@
             </option>
           </select>
         </div>
-      </div>
-      
+      </div>  
       <div class="styling-container" id="configTop">
         <div class="matchEntry">
           <div :style="{ background: config.leftBoxColor, color: config.leftBoxText }" id="datumUitslag_fixed">Links</div>
@@ -136,6 +135,23 @@
           </div>
         </div>
       </div>
+      <div class="sponsor-container" id="configTop" style="max-width: 700px;">
+      <h2>Sponsoren</h2>
+      <p>{{ sponsorHint }}</p>
+      <div class="input-container">
+          <input v-model="newImageUrl" placeholder="Voer de URL van de afbeelding in" style="height: 25px; width: 200px;" />
+          <button @click="addImage">Toevoegen</button>
+      </div>
+      <div class="form-group">
+        <div v-if="userSponsorImages.length > 0" class="image-grid">
+          <div v-for="(image, index) in userSponsorImages" :key="index" class="image-item">
+            <img :src="image" class="preview" />
+            <button @click="removeImage(index)" class="remove-button">X</button>
+          </div>
+        </div>
+        <p v-else>Er zijn nog geen sponsoren toegevoegd.</p>
+      </div>
+    </div>
     </div>
 
     <div class="button-group">
@@ -151,23 +167,6 @@
         <router-link to="/match-info" custom v-slot="{ navigate }">
           <button @click="navigate">Ga naar Wedstrijd Programma</button>
         </router-link>
-      </div>
-    </div>
-    <div class="sponsor-container" id="configTop" style="max-width: 700px;">
-      <h2>Sponsoren</h2>
-      <p>{{ sponsorHint }}</p>
-      <div class="input-container">
-          <input v-model="newImageUrl" placeholder="Enter image URL" />
-          <button @click="addImage">Sponsor Toevoegen</button>
-      </div>
-      <div class="form-group">
-        <div v-if="userSponsorImages.length > 0" class="image-grid">
-          <div v-for="(image, index) in userSponsorImages" :key="index" class="image-item">
-            <img :src="image" class="preview" />
-            <button @click="removeImage(index)" class="remove-button">X</button>
-          </div>
-        </div>
-        <p v-else>Er zijn nog geen sponsoren toegevoegd.</p>
       </div>
     </div>
   </div>
@@ -208,8 +207,8 @@ watch(() => config.value.clientId, async (newClientId) => {
 function addImage() {
   if (!newImageUrl.value.trim()) return;
   
-  if (userSponsorImages.value.length >= 12) {
-    alert("Maximaal 12 sponsoren mogelijk.");
+  if (userSponsorImages.value.length >= 13) {
+    alert("Maximaal 13 sponsoren mogelijk.");
     return;
   }
 
@@ -258,7 +257,7 @@ const defaultColors = {
 
 const sponsorHint = computed(() => {
   const current = userSponsorImages.value.length;
-  const max = 12;
+  const max = 13;
   const available = max - current;
   return `Nog ${available} van de ${max} sponsoren mogelijk`;
 });
@@ -311,7 +310,6 @@ watch(config, (newConfig) => {
   margin: 0 auto;
   padding: 20px;
   width: 100%;
-  max-width: 940px;
 }
 
 .containers-row {
@@ -417,7 +415,6 @@ input[type="checkbox"] {
 .button-group {
   display: flex;
   gap: 12px;
-  margin-top: 20px;
   width: 100%;
   justify-content: center;
   flex-wrap: wrap;

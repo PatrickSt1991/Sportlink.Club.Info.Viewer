@@ -169,17 +169,76 @@ button:focus-visible {
   border-radius: 25px;
   color: #000000;
   padding-top: 10px;
+  min-width: 97%;
+  margin-bottom: 10px;
 }
 
-#noMatchMessage img {
-  width: auto; /* Adjust size as needed */
-  height: auto; /* Maintain aspect ratio */
+.no-matches-container {
+  text-align: center;
+  padding: 3rem 1rem;
+  max-width: 400px;
+  margin: 0 auto;
+  color: #666;
 }
 
-#noMatchMessage h1 {
-  font-size: 24px; /* Adjust the font size */
-  margin-top: 10px; /* Space between image and text */
-  padding-bottom: 10px;
+.calendar-icon {
+  width: 120px;
+  height: 120px;
+  position: relative;
+  margin: 0 auto 2rem;
+  perspective: 1000px;
+  margin-top: 10px;
+}
+
+.calendar-page {
+  width: 100%;
+  height: 100%;
+  background: white;
+  border-radius: 5px;
+  box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+  padding: 15px;
+  position: relative;
+  transform-style: preserve-3d;
+}
+
+.empty-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  height: 100%;
+}
+
+.grid-cell {
+  background: #f5f5f5;
+  border-radius: 2px;
+}
+
+.calendar-spine {
+  position: absolute;
+  left: -8px;
+  top: 5px;
+  bottom: 5px;
+  width: 8px;
+  background: #e0e0e0;
+  border-radius: 3px 0 0 3px;
+}
+
+.calh2 {
+  margin: 0 0 0.5rem;
+  font-weight: 500;
+}
+
+.calp {
+  margin: 0;
+  color: #999;
+}
+.calendar-icon {
+  animation: gentleFloat 3s ease-in-out infinite;
+}
+
+@keyframes gentleFloat {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-8px); }
 }
 
 #scrollingContainer {

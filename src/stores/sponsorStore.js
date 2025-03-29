@@ -3,7 +3,7 @@ import { ref } from 'vue';
 export const sponsorImages = ref([]);
 export const userSponsorImages = ref([]); // Separate ref for user-added images only
 
-const MAX_IMAGES = 12;
+const MAX_IMAGES = 13;
 
 const defaultImage = new URL('../assets/empty_sponsor.jpg', import.meta.url).href;
 

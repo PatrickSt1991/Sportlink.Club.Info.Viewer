@@ -11,9 +11,17 @@
         <h1>{{ error }}</h1>
       </div>
 
-      <div v-else-if="matches.length === 0" id="noMatchMessage">
-        <img src="../assets/no_data.jpg" alt="No Matches"/>
-        <h1>Er zijn momenteel geen wedstrijd resultaten beschikbaar...</h1>
+      <div v-else-if="matches.length === 0" class="no-matches-container" id="noMatchMessage">
+        <div class="calendar-icon">
+          <div class="calendar-page">
+            <div class="empty-grid">
+              <div v-for="n in 9" :key="n" class="grid-cell"></div>
+            </div>
+          </div>
+          <div class="calendar-spine"></div>
+        </div>
+        <h2 class="calh2">Geen wedstrijd resultaten</h2>
+        <p class="calp">Geen wedstrijd resultaten van de afgelopen {{ config.uitslagDagen }} dagen</p>
       </div>
 
       <div v-else id="scrollingContainer" :style="{ height: scrollingContainerHeight }">

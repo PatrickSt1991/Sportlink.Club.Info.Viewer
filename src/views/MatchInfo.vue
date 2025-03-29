@@ -5,16 +5,24 @@
     </div>
     <div id="rcorners_matchinfo_fixed">
       <div v-if="loading" id="noMatchMessage">
-        <h1>Wedstrijd uitslagen worden geladen...</h1>
+        <h1>Wedstrijd programma worden geladen...</h1>
       </div>
 
       <div v-else-if="error" id="noMatchMessage">
         <h1>{{ error }}</h1>
       </div>
 
-      <div v-else-if="matches.length === 0" id="noMatchMessage">
-        <img src="../assets/no_data.jpg" alt="No Matches"/>
-        <h1>Er is momenteel geen wedstrijd data beschikbaar...</h1>
+      <div v-else-if="matches.length === 0" class="no-matches-container" id="noMatchMessage">
+        <div class="calendar-icon">
+          <div class="calendar-page">
+            <div class="empty-grid">
+              <div v-for="n in 9" :key="n" class="grid-cell"></div>
+            </div>
+          </div>
+          <div class="calendar-spine"></div>
+        </div>
+        <h2 class="calh2">Geen wedstrijd programma</h2>
+        <p class="calp">Geen wedstrijden de aankomende {{ config.programmaDagen }} dagen</p>
       </div>
 
       <div v-else id="scrollingContainer" :style="{ height: scrollingContainerHeight }">
