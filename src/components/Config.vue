@@ -23,47 +23,12 @@
       <div class="config-container" id="configTop">
         <h2>Instellingen</h2>
         <div class="form-group">
-          <label>Sportlink Client ID:</label>
-          <input type="text" v-model="config.clientId">
-        </div>
-
-        <div class="form-group">
-          <label>Sport accommodatie:</label>
-          <input type="text" v-model="config.sportLocatie">
-        </div>
-
-        <div class="form-group">
           <label>Sport:</label>
           <select v-model="config.gameType">
             <option v-for="type in availableGameTypes" :key="type" :value="type">
               {{ type.charAt(0).toUpperCase() + type.slice(1) }}
             </option>
           </select>
-        </div>
-
-        <div class="form-group">
-          <label>Programma dagen in de toekomst:</label>
-          <input style="width: 50px" type="number" v-model.number="config.programmaDagen">
-        </div>
-
-        <div class="form-group">
-          <label>Uitslag dagen in het verleden:</label>
-          <input style="width: 50px" type="number" v-model.number="config.uitslagDagen">
-        </div>
-
-        <div class="form-group">
-          <label>Wedstrijd Informatie verversen na x seconden:</label>
-          <input type="number" style="width: 50px" v-model.number="config.prematchRefresh">
-        </div>
-
-        <div class="form-group">
-          <label>Scherm automatisch laten schakelen:</label>
-          <input type="checkbox" v-model="config.enableScreenSwitch">
-        </div>
-
-        <div class="form-group">
-          <label>Sponsor balk weergeven:</label>
-          <input type="checkbox" v-model="config.activeSponsors">
         </div>
 
         <div class="form-group">
@@ -74,6 +39,52 @@
             </option>
           </select>
         </div>
+
+        <div class="form-group" v-if="config.gameType.toLowerCase() != 'handbal'">
+          <label>Client ID:</label>
+          <input type="text" v-model="config.clientId">
+        </div>
+
+        <div class="form-group" v-if="config.gameType.toLowerCase() === 'handbal'">
+          <label for="email">E-mail:</label>
+          <input type="text" id="email" v-model="config.username">
+        </div>
+
+        <div class="form-group" v-if="config.gameType.toLowerCase() === 'handbal'">
+          <label>Wachtwoord:</label>
+          <input type="password" v-model="config.password">
+        </div>
+
+        <div class="form-group">
+          <label>Accommodatie:</label>
+          <input type="text" v-model="config.sportLocatie">
+        </div>
+
+        <div class="form-group">
+          <label>Programma dagen:</label>
+          <input style="width: 50px" type="number" v-model.number="config.programmaDagen">
+        </div>
+
+        <div class="form-group">
+          <label>Uitslagen dagen:</label>
+          <input style="width: 50px" type="number" v-model.number="config.uitslagDagen">
+        </div>
+
+        <div class="form-group">
+          <label>Wedstrijd Informatie verversen na x seconden:</label>
+          <input type="number" style="width: 50px" v-model.number="config.prematchRefresh">
+        </div>
+
+        <div class="form-group">
+          <label>Weergave automatisch laten schakelen:</label>
+          <input type="checkbox" v-model="config.enableScreenSwitch">
+        </div>
+
+        <div class="form-group">
+          <label>Sponsoren weergeven:</label>
+          <input type="checkbox" v-model="config.activeSponsors">
+        </div>
+
       </div>  
       <div class="styling-container" id="configTop">
         <div class="matchEntry">
@@ -207,6 +218,7 @@ const availableGameTypes = ref(AVAILABLE_GAME_TYPES);
 const isLoading = ref(true);
 const newImageUrl = ref("");
 
+/*original
 watch(() => config.value.clientId, async (newClientId) => {
   if (newClientId && newClientId.length > 0) {
     try {
@@ -222,6 +234,83 @@ watch(() => config.value.clientId, async (newClientId) => {
     }
   }
 });
+*/
+
+// Watch for club data changes
+watch(
+  () => [config.value.gameType, config.value.clientId?.trim()],
+  async ([gameType, clientId]) => {
+    if (gameType !== 'handbal' && clientId) {
+      try {
+        const response = await fetch(`https://data.sportlink.com/clubgegevens?client_id=${clientId}`);
+        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+        
+        const data = await response.json();
+        if (data?.bezoekadres?.naam) {
+          config.value.sportLocatie = data.bezoekadres.naam;
+        }
+      } catch (error) {
+        console.error('Error fetching club data:', error);
+      }
+    }
+  },
+  { immediate: true }
+);
+
+// Watch for handbal credentials
+watch(
+  () => [config.value.gameType, config.value.username?.trim(), config.value.password?.trim()],
+  async ([gameType, username, password]) => {
+    if (gameType === 'handbal' && username && password) {
+      try {
+        const token = await sportlinkBearerToken(username, password);
+        config.value.bearerToken = token.accessToken,
+        config.value.refreshToken = token.refreshToken,
+        config.value.tokenExpiry = Date.now() + (token.expiresIn * 1000);
+      } catch (error) {
+        console.error('Authentication failed:', error);
+      }
+    }
+  },
+  { deep: true }
+);
+
+async function sportlinkBearerToken (username, password) {
+  const formData = new URLSearchParams({
+    grant_type: 'password',
+    username: username,
+    password: password,
+    client_id: 'JUian2haoKqIripvaios',
+    secret: '9BdMs5h9jvr9Agte'
+  });
+  try {
+    const response = await fetch('/oauth/token', 
+    {
+      method: 'POST',
+      headers: {
+        'User-Agent': 'okhttp/4.12.0', // Fake Android client
+        'Accept-Encoding': 'gzip',     // Optional but matches Insomnia
+      },      
+      body: formData
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const tokenData = await response.json();
+    console.log('Successfully fetched token:', tokenData);
+
+    return {
+      accessToken: tokenData.access_token,
+      refreshToken: tokenData.refresh_token,
+      expiresIn: tokenData.expires_in
+    };
+  } catch (error) {
+    console.log('Error fetching bearer token:', error);
+    throw error;
+  }
+}
 
 function addImage() {
   if (!newImageUrl.value.trim()) return;
@@ -251,12 +340,12 @@ function removeImage(index) {
 }
 
 function updateColor(field, value) {
-  config[field] = value.toUpperCase();
+  config.value[field] = value.toUpperCase();
 }
 
 function validateColor(field) {
-  if (!/^#[0-9A-F]{6}$/i.test(config[field])) {
-    config[field] = defaultColors[field];
+  if (!/^#[0-9A-F]{6}$/i.test(config.value[field])) {
+    config.value[field] = defaultColors[field];
     alert('Please enter a valid hex color (e.g., #FF0000)');
   }
 }
@@ -285,7 +374,6 @@ onMounted(async () => {
   config.value = JSON.parse(JSON.stringify(USER_CONFIG.value));
   loadSponsorImages();
   isLoading.value = false;
-
   // Show modal if no client ID is present
   if (!config.value.clientId || config.value.clientId.trim() === '') {
     showClientIdModal.value = true;

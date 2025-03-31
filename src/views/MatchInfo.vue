@@ -164,15 +164,22 @@ const startScrolling = () => {
 
 // Watch for config changes
 watch(() => USER_CONFIG.value, (newConfig) => {
-  if (newConfig) {
-    config.value = { ...newConfig };
-    if (!config.value.clientId) {
-      router.push('/settings');
-    } else {
-      fetchMatchInfo();
-    }
+  if (!newConfig) return;
+  
+  config.value = { ...newConfig };
+  
+  const missingClientId = !newConfig.clientId;
+  const missingHandbalCredentials = (
+    newConfig.gameType === 'handbal' && 
+    (!newConfig.username || !newConfig.password)
+  );
+  
+  if (missingClientId || missingHandbalCredentials) {
+    router.push('/settings');
+  } else {
+    fetchMatchInfo();
   }
-}, { immediate: true });
+}, { immediate: true, deep: true });
 
 // Lifecycle hooks
 onMounted(() => {

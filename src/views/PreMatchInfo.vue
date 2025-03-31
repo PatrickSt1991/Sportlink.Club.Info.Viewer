@@ -199,15 +199,23 @@ const stopPeriodicRefresh = () => {
 };
 
 watch(() => USER_CONFIG.value, (newConfig) => {
-  if (newConfig) {
-    config.value = { ...newConfig };
-    if (!config.value.clientId) {
-      router.push('/settings');
-    } else {
-      fetchPreMatchInfo();
-    }
+  if (!newConfig) return;
+  
+  config.value = { ...newConfig };
+  
+  const missingClientId = !newConfig.clientId;
+  const missingHandbalCredentials = (
+    newConfig.gameType === 'handbal' && 
+    (!newConfig.username || !newConfig.password)
+  );
+  
+  if (missingClientId || missingHandbalCredentials) {
+    router.push('/settings');
+  } else {
+    fetchPreMatchInfo();
   }
-}, { immediate: true });
+}, { immediate: true, deep: true });
+
 
 onMounted(() => {
   calculateScrollingContainerHeight();

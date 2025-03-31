@@ -198,17 +198,23 @@ const formatTeamName = (teamName) => {
   return teamName?.toLowerCase().replace(/\s+/g, '-') || '';
 };
 
-// Then set up watchers and lifecycle hooks
 watch(() => USER_CONFIG.value, (newConfig) => {
-  if (newConfig) {
-    config.value = { ...newConfig };
-    if (!config.value.clientId) {
-      router.push('/settings');
-    } else {
-      fetchMatchResults();
-    }
+  if (!newConfig) return;
+  
+  config.value = { ...newConfig };
+  
+  const missingClientId = !newConfig.clientId;
+  const missingHandbalCredentials = (
+    newConfig.gameType === 'handbal' && 
+    (!newConfig.username || !newConfig.password)
+  );
+  
+  if (missingClientId || missingHandbalCredentials) {
+    router.push('/settings');
+  } else {
+    fetchMatchResults();
   }
-}, { immediate: true });
+}, { immediate: true, deep: true });
 
 onMounted(() => {
   calculateScrollingContainerHeight();

@@ -20,11 +20,11 @@ export default defineConfig({
   },
   server: {
     proxy: {
-      '/api': {
-        target: 'http://192.168.2.125',
+      '/oauth': {
+        target: 'https://app-sportlinked-production.sportlink.com',
         changeOrigin: true,
-        rewrite: (path) => path.replace(/^\/api/, '')
-      }
-    }
-  }  
+        secure: true,
+      },
+    },
+  },
 });
