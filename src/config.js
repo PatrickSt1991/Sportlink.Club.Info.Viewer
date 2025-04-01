@@ -9,7 +9,7 @@ export const LOGO_URLS = {
   volleybal: '',
   zwemmen: '',
   "Hockey (België)": '',
-  handbal: 'https://binaries.sportlink.com/NHV-production-REPL/{{ clubHash }}?img.op=resize&img.width=200&img.height=200',
+  handbal: '',
 };
 
 export const HOME_SCREENS = {
@@ -28,9 +28,6 @@ const defaultConfig = {
   clientId: '', //iLqhgc5Npa = Voetbal, J1jkP9ASKu = //Korfbal, UkMSNIG9Qy = //Soft en honkbal, BSRt2sOcG2 = //Basketbal
   username: '',
   password: '',
-  bearerToken: null,
-  refreshToken: null,
-  tokenExpiry: null,
   sportLocatie: null,
   programmaDagen: 7,
   uitslagDagen: 7,

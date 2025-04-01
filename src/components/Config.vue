@@ -263,54 +263,15 @@ watch(
   async ([gameType, username, password]) => {
     if (gameType === 'handbal' && username && password) {
       try {
-        const token = await sportlinkBearerToken(username, password);
-        config.value.bearerToken = token.accessToken,
-        config.value.refreshToken = token.refreshToken,
-        config.value.tokenExpiry = Date.now() + (token.expiresIn * 1000);
+        console.log('Maybe Sportlink will do something for here aswell? already told them about the finding')
       } catch (error) {
-        console.error('Authentication failed:', error);
+        console.error('Well thats a error:', error);
       }
     }
   },
   { deep: true }
 );
 
-async function sportlinkBearerToken (username, password) {
-  const formData = new URLSearchParams({
-    grant_type: 'password',
-    username: username,
-    password: password,
-    client_id: 'JUian2haoKqIripvaios',
-    secret: '9BdMs5h9jvr9Agte'
-  });
-  try {
-    const response = await fetch('/oauth/token', 
-    {
-      method: 'POST',
-      headers: {
-        'User-Agent': 'okhttp/4.12.0', // Fake Android client
-        'Accept-Encoding': 'gzip',     // Optional but matches Insomnia
-      },      
-      body: formData
-    });
-
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
-
-    const tokenData = await response.json();
-    console.log('Successfully fetched token:', tokenData);
-
-    return {
-      accessToken: tokenData.access_token,
-      refreshToken: tokenData.refresh_token,
-      expiresIn: tokenData.expires_in
-    };
-  } catch (error) {
-    console.log('Error fetching bearer token:', error);
-    throw error;
-  }
-}
 
 function addImage() {
   if (!newImageUrl.value.trim()) return;

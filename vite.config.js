@@ -18,13 +18,4 @@ export default defineConfig({
       '@': fileURLToPath(new URL('./src', import.meta.url)),
     },
   },
-  server: {
-    proxy: {
-      '/oauth': {
-        target: 'https://app-sportlinked-production.sportlink.com',
-        changeOrigin: true,
-        secure: true,
-      },
-    },
-  },
 });
