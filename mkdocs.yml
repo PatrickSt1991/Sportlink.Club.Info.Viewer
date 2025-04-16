@@ -1,0 +1,14 @@
+site_name: Sportlink Club Info Viewer
+theme:
+  name: material
+
+nav:
+  - Home: index.md
+
+markdown_extensions:
+  - toc:
+      permalink: true
+  - admonition
+  - codehilite
+  - footnotes
+  - tables
