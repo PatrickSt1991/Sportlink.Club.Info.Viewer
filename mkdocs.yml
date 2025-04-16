@@ -1,6 +1,6 @@
 site_name: Sportlink Club Info Viewer
 theme:
-  name: material
+  name: mkdocs
 
 nav:
   - Home: index.md
