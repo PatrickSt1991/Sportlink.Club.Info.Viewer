@@ -28,14 +28,12 @@
         <transition-group name="fade" tag="div">
           <div v-for="match in matches" :key="match.id" class="matchEntry">
             <div :style="{ background: config.leftBoxColor, color: config.leftBoxText }" id="datumUitslag_fixed">{{ match.datumopgemaakt }}</div>
-            <img :style="{ background: config.leftMidBoxColor, color: config.leftMidBoxText }" id="clublogo" v-if="config.gameType !== 'basketbal'" :src="formatClubIcon(match.thuisteamclubrelatiecode)">
-            <img :style="{ background: config.leftMidBoxColor, color: config.leftMidBoxText }" id="clublogo" v-if="config.gameType === 'basketbal'" :src="formatClubIcon(match.thuisteamclubrelatiecode, match.thuisteam, match.uitteam).thuisteamLogo">
+            <img :style="{ background: config.leftMidBoxColor, color: config.leftMidBoxText }" id="clublogo" :src="match.thuisteamlogo">
             <div :style="{ background: config.leftMidBoxColor, color: config.leftMidBoxText }" id="thuisteam_fixed">{{ match.thuisteam }}</div>
             <div :style="{ background: config.midBoxColor, color: config.midBoxText }" id="kleedkamer_fixed">{{ match.uitslag }}</div>
             <div :style="{ background: config.rightMidBoxColor, color: config.rightMidBoxText }" id="uitteam_fixed">{{ match.uitteam }}</div>
-            <img :style="{ background: config.rightMidBoxColor, color: config.rightMidBoxText }" id="clublogo" v-if="config.gameType !== 'basketbal'" :src="formatClubIcon(match.uitteamclubrelatiecode)">
-            <img :style="{ background: config.rightMidBoxColor, color: config.rightMidBoxText }" id="clublogo" v-if="config.gameType === 'basketbal'" :src="formatClubIcon(match.uitteamclubrelatiecode, match.thuisteam, match.uitteam).uitteamLogo">
-            <div :style="{ background: config.rightBoxColor, color: config.rightBoxText }" id="wedstrijdveld_fixed">{{ formatCompType(match.competitiesoort) }}</div>
+            <img :style="{ background: config.rightMidBoxColor, color: config.rightMidBoxText }" id="clublogo" :src="match.uitteamlogo">
+            <div :style="{ background: config.rightBoxColor, color: config.rightBoxText }" id="wedstrijdveld_fixed">{{ match.competitiesoort }}</div>
           </div>
         </transition-group>
       </div>
@@ -45,8 +43,10 @@
 
 <script setup>
 import { ref, onMounted, watch, nextTick, onUnmounted } from 'vue';
-import { USER_CONFIG, LOGO_URLS } from '@/config';
+import { USER_CONFIG } from '@/config';
 import { useRouter } from 'vue-router';
+import { formatCompType } from '@/utils/formatCompType.js';
+import { formatNevoboDate } from '@/utils/formatDateType.js';
 
 const router = useRouter();
 
@@ -59,7 +59,6 @@ const scrollingContainerHeight = ref('300px');
 const scrollPosition = ref(0);
 const scrollCycleCount = ref(0);
 const config = ref({});
-const fallbackLogo = ref('');
 const containerReady = ref(false);
 
 // First define the scrolling functions
@@ -127,7 +126,7 @@ const stopScrolling = () => {
 
 // Then define the data fetching functions
 const fetchMatchResults = async () => {
-  if (!config.value?.uitslagDagen || !config.value?.clientId) {
+  if (!config.value?.uitslagDagen || (!config.value?.clientId && !config.value?.clubIdentifer)) {
     console.error("Config not loaded yet!");
     return;
   }
@@ -136,9 +135,17 @@ const fetchMatchResults = async () => {
   error.value = null;
 
   try {
-    const response = await fetch(
-      `https://data.sportlink.com/uitslagen?gebruiklokaleteamgegevens=NEE&thuis=JA&uit=JA&client_id=${config.value.clientId}`
-    );
+    let response;
+    let url;
+
+    if(config.value.clientId){
+        url = `https://data.sportlink.com/uitslagen?gebruiklokaleteamgegevens=NEE&thuis=JA&uit=JA&client_id=${config.value.clientId}`;
+    }else if(config.value.clubIdentifer){
+      url = `https://api.nevobo.nl/v1/competitie/wedstrijden/resultaat?vereniging=${config.value.clubIdentifer}`;
+      url =`https://cors-proxy.clubinfoproxy.workers.dev/proxy?url=${encodeURIComponent(url)}`;
+    }
+
+    response = await fetch(url);
 
     if (!response.ok) throw new Error(`HTTP Error! Status: ${response.status}`);
 
@@ -147,10 +154,44 @@ const fetchMatchResults = async () => {
     const dateThreshold = new Date(now);
     dateThreshold.setDate(now.getDate() - config.value.uitslagDagen);
 
-    matches.value = data.filter(match => {
-      const matchDate = new Date(match.wedstrijddatum);
-      return matchDate >= dateThreshold && matchDate <= now;
-    });
+    if (Array.isArray(data)) {
+        matches.value = data.filter(match => {
+            const matchDate = new Date(match.wedstrijddatum);
+            return matchDate >= dateThreshold && matchDate <= now;
+        })
+        .map(
+          match => {
+            match.competitiesoort = formatCompType(match.competitiesoort);
+
+            return match;
+          });
+    } 
+    else if (data._embedded && data._embedded.items) {
+        matches.value = data._embedded.items
+          .filter(match => {
+              const matchDate = new Date(match.datum);
+              return matchDate >= dateThreshold && matchDate <= now;
+          })
+          .map(match => {
+            const thuisteamparts = match._embedded.pouleindeling_thuis._embedded.team.naam.split(/\s*\/+\s*/);
+            const uitteamparts = match._embedded.pouleindeling_uit._embedded.team.naam.split(/\s*\/+\s*/);
+
+            match.datumopgemaakt = formatNevoboDate(match.datum);
+            match.uitslag = match.uitslag.code;
+
+            match.thuisteam = thuisteamparts[thuisteamparts.length - 1].trim();
+            match.thuisteamlogo = match._embedded?.pouleindeling_thuis?._embedded.team?._embedded?.vereniging?._links?.logo_url?.href || '';
+            
+            match.uitteam = uitteamparts[uitteamparts.length - 1].trim();
+            match.uitteamlogo = match._embedded?.pouleindeling_uit?._embedded?.team?._embedded?.vereniging?._links?.logo_url?.href || '';
+            
+            match.competitiesoort = formatCompType(match._embedded?.poule?._embedded?.regio?.omschrijving || '');
+
+            return match;
+          });
+    } else {
+        console.error("Unexpected data format");
+    }
 
     if (matches.value.length > 0) {
       await nextTick();
@@ -164,52 +205,16 @@ const fetchMatchResults = async () => {
   }
 };
 
-// Then define helper functions
-const formatCompType = (compType) => {
-  const typeMap = {
-    'regulier': 'Competitie',
-    'beker': 'Beker',
-    'friendly': 'Vriendschappelijk',
-  };
-  return typeMap[compType] ?? 'Onbekend';
-};
-
-const formatClubIcon = (clubrelatiecode, thuisteam, uitteam) => {
-  if (!clubrelatiecode || config.value.gameType === 'basketbal') {
-    return {
-      thuisteamLogo: fallbackLogo.value,
-      uitteamLogo: fallbackLogo.value
-    };
-  }
-
-  const baseUrl = LOGO_URLS[config.value.gameType?.toLowerCase()] || '';
-  if (!baseUrl) return fallbackLogo.value;
-
-  if (config.value.gameType?.toLowerCase() === 'basketbal') {
-    return {
-      thuisteamLogo: `${baseUrl}${formatTeamName(thuisteam)}-550x200.jpg`,
-      uitteamLogo: `${baseUrl}${formatTeamName(uitteam)}-550x200.jpg`
-    };
-  }
-  return `${baseUrl}${clubrelatiecode}`;
-};
-
-const formatTeamName = (teamName) => {
-  return teamName?.toLowerCase().replace(/\s+/g, '-') || '';
-};
-
 watch(() => USER_CONFIG.value, (newConfig) => {
   if (!newConfig) return;
   
   config.value = { ...newConfig };
   
   const missingClientId = !newConfig.clientId;
-  const missingHandbalCredentials = (
-    newConfig.gameType === 'handbal' && 
-    (!newConfig.username || !newConfig.password)
-  );
+  const missingClubIdentifier = !newConfig.clubIdentifer;
+  const missingUitslagDagen = !newConfig.uitslagDagen;
   
-  if (missingClientId || missingHandbalCredentials) {
+  if (missingUitslagDagen || (missingClientId && missingClubIdentifier)) {
     router.push('/settings');
   } else {
     fetchMatchResults();

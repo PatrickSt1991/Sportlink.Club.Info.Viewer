@@ -38,7 +38,7 @@
       <div v-else id="scrollingContainer" ref="scrollingContainer" :style="{ height: scrollingContainerHeight }">
         <transition-group name="fade" tag="div">
           <div v-for="match in matches" :key="match.id" class="matchEntry">
-            <div :style="{ background: config.leftBoxColor, color: config.leftBoxText }" id="datumUitslag_fixed">{{ formatDate(match.wedstrijddatum) }}</div>
+            <div :style="{ background: config.leftBoxColor, color: config.leftBoxText }" id="datumUitslag_fixed">{{ match.wedstrijddatum }}</div>
             <div :style="{ background: config.leftMidBoxColor, color: config.leftMidBoxText }" id="thuisteam_fixed">{{ match.thuisteam }}</div>
             <div :style="{ background: config.midBoxColor, color: config.midBoxText }" id="kleedkamer_fixed">{{ formatKleedkamer(match.kleedkamerthuisteam) }}</div>
             <div :style="{ background: config.rightMidBoxColor, color: config.rightMidBoxText }" id="uitteam_fixed">{{ match.uitteam }}</div>
@@ -55,6 +55,9 @@
 import { ref, onMounted, onUnmounted, watch, nextTick, computed } from 'vue';
 import { USER_CONFIG } from '@/config';
 import { useRouter } from 'vue-router';
+import { formatKleedkamer, formatVeld } from '@/utils/formatUtils.js';
+import { formatCompType } from '@/utils/formatCompType.js';
+import { formatTime  } from '@/utils/formatDateType.js';
 
 const router = useRouter();
 
@@ -70,42 +73,82 @@ const config = ref({});
 const now = ref('');
 const threeHoursLater = ref('');
 
-const formatDisplayDate = (date) => {
-  return date.toLocaleString('nl-NL', {
-    hour: '2-digit',
-    minute: '2-digit'
-  });
-};
-
 const dateRangeText = computed(() => {
   return `Er zijn geen wedstrijden gepland tussen ${now.value} en ${threeHoursLater.value}`;
 });
 
 const fetchPreMatchInfo = async () => {
-  if (!config.value?.clientId) return;
+  if(!config.value.clientId && !config.value.clubIdentifer){
+    console.error("Config is not loaded yet");
+    return;
+  }
 
   loading.value = true;
   error.value = null;
 
   try {
-    const response = await fetch(`https://data.sportlink.com/programma?gebruiklokaleteamgegevens=NEE&eigenwedstrijden=JA&thuis=JA&uit=NEE&client_id=${config.value.clientId}`);
+    let response;
+    let url;
+
+    if(config.value.clientId){
+      url = `https://data.sportlink.com/programma?gebruiklokaleteamgegevens=NEE&eigenwedstrijden=JA&thuis=JA&uit=NEE&client_id=${config.value.clientId}`;
+    }else if(config.value.clubIdentifer){
+      url = `https://api.nevobo.nl/v1/competitie/wedstrijden/programma?vereniging=${config.value.clubIdentifer}`;
+      url =`https://cors-proxy.clubinfoproxy.workers.dev/proxy?url=${encodeURIComponent(url)}`;
+    }
+
+    response = await fetch(url);
     if (!response.ok) throw new Error(`HTTP Error! status: ${response.status}`);
 
     const data = await response.json();
     const currentDate = new Date();
     currentDate.setHours(currentDate.getHours() - 3);
     const laterDate = new Date(currentDate.getTime() + 6 * 60 * 60 * 1000);
+    now.value = formatTime(currentDate);
+    threeHoursLater.value = formatTime(laterDate);
 
-    now.value = formatDisplayDate(currentDate);
-    threeHoursLater.value = formatDisplayDate(laterDate);
 
-    matches.value = data.filter(match => {
-      const matchDateTime = new Date(match.wedstrijddatum.replace(/(\+|\-)(\d{2})(\d{2})$/, '$1$2:$3'));
-      const isSameDay = matchDateTime.toDateString() === currentDate.toDateString();
-      const isInWindow = matchDateTime >= currentDate && matchDateTime <= laterDate;
-      const isCorrectLocation = match.accommodatie === config.value?.sportLocatie;
-      return isCorrectLocation && isSameDay && isInWindow;
-    });
+    if(Array.isArray(data)){
+      matches.value = data.filter(match => {
+        const matchDateTime = new Date(match.wedstrijddatum.replace(/(\+|\-)(\d{2})(\d{2})$/, '$1$2:$3'));
+        const isSameDay = matchDateTime.toDateString() === currentDate.toDateString();
+        const isInWindow = matchDateTime >= currentDate && matchDateTime <= laterDate;
+        const isCorrectLocation = match.accommodatie === config.value?.sportLocatie;
+        return isCorrectLocation && isSameDay && isInWindow;
+      })
+      .map(match =>{
+        match.wedstrijddatum = formatDate(match.wedstrijddatum) 
+        return match;
+      });
+    }else if(data._embedded && data._embedded.items){
+      matches.value = data._embedded.items
+      .filter(match => {
+          const matchDateTime = new Date(match.tijd);
+          const isSameDay = matchDateTime.toDateString() === currentDate.toDateString();
+          const isInWindow = matchDateTime >= currentDate && matchDateTime <= laterDate;
+          const isCorrectLocation = match._embedded.pouleindeling_thuis._embedded.team._embedded.vereniging.vestigingsplaats === config.value?.sportLocatie;
+          return isCorrectLocation && isSameDay && isInWindow;
+        })
+      .map(match => {
+        const thuisteamparts = match._embedded.pouleindeling_thuis._embedded.team.naam.split(/\s*\/+\s*/);
+        const uitteamparts = match._embedded.pouleindeling_uit._embedded.team.naam.split(/\s*\/+\s*/);
+        match.wedstrijddatum = formatTime(match.tijd);
+        match.thuisteam = thuisteamparts[thuisteamparts.length - 1].trim();
+        match.thuisteamlogo = match._embedded?.pouleindeling_thuis?._embedded.team?._embedded?.vereniging?._links?.logo_url?.href || '';
+
+        match.uitteam = uitteamparts[uitteamparts.length - 1].trim();
+        match.uitteamlogo = match._embedded?.pouleindeling_uit?._embedded?.team?._embedded?.vereniging?._links?.logo_url?.href || '';
+        match.competitiesoort = formatCompType(match._embedded?.poule?._embedded?.regio?.omschrijving || '');
+
+        match.veld = match._embedded.speelveld.aanduiding || "Onbekend";
+
+        
+        return match;
+      });
+    }else{
+      console.error("Unexpected data format:");
+    }
+
 
     if (matches.value.length > 0) {
       await nextTick();
@@ -117,20 +160,6 @@ const fetchPreMatchInfo = async () => {
   } finally {
     loading.value = false;
   }
-};
-
-const formatKleedkamer = (kleedkamer) => {
-  return kleedkamer ? kleedkamer : '---';
-};
-
-const formatVeld = (veld) => {
-  if (!veld) return '-';
-  return veld.charAt(0).toUpperCase() + veld.slice(1);
-};
-
-const formatDate = (dateString) => {
-  const options = { hour: '2-digit', minute: '2-digit' };
-  return new Date(dateString).toLocaleString('nl-NL', options).replace(',', '');
 };
 
 const calculateScrollingContainerHeight = () => {
@@ -204,12 +233,9 @@ watch(() => USER_CONFIG.value, (newConfig) => {
   config.value = { ...newConfig };
   
   const missingClientId = !newConfig.clientId;
-  const missingHandbalCredentials = (
-    newConfig.gameType === 'handbal' && 
-    (!newConfig.username || !newConfig.password)
-  );
+  const missingClubIdentifier = !newConfig.clubIdentifer;
   
-  if (missingClientId || missingHandbalCredentials) {
+  if (missingClientId && missingClubIdentifier) {
     router.push('/settings');
   } else {
     fetchPreMatchInfo();

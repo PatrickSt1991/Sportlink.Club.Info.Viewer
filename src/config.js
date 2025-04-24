@@ -1,15 +1,14 @@
 import { ref } from 'vue';
 
-export const LOGO_URLS = {
-  voetbal: 'https://logoapi.voetbal.nl/logo.php?clubcode=',
-  basketbal: 'https://d26urwx8o7j8vg.cloudfront.net/',
-  korfbal: '',
-  basebal: '',
-  softbal: '',
-  volleybal: '',
-  zwemmen: '',
-  "Hockey (België)": '',
-  handbal: '',
+export const GAME_TYPES = {
+  'KNVB (Voetbal)': true,
+  'NBB (Basketbal)': true,
+  'KNKV (Korfbal)': true,
+  'KNBSB (Soft- en Honkbal)': true,
+  'Nevobo (Volleybal)': true,
+  'KNZB (Zwemmen)': false,
+  "KBHB (Hockey België)": false,
+  'NHV (Handbal)': false
 };
 
 export const HOME_SCREENS = {
@@ -18,7 +17,9 @@ export const HOME_SCREENS = {
   'Wedstrijd Uitslagen': '/match-results'
 };
 
-export const AVAILABLE_GAME_TYPES = Object.keys(LOGO_URLS);
+export const AVAILABLE_GAME_TYPES = Object.keys(GAME_TYPES).filter(
+  (key) => GAME_TYPES[key]
+);
 
 export const AVAILABLE_HOME_SCREENS = Object.keys(HOME_SCREENS).filter(
   (key) => HOME_SCREENS[key]
@@ -26,8 +27,7 @@ export const AVAILABLE_HOME_SCREENS = Object.keys(HOME_SCREENS).filter(
 
 const defaultConfig = {
   clientId: '', //iLqhgc5Npa = Voetbal, J1jkP9ASKu = //Korfbal, UkMSNIG9Qy = //Soft en honkbal, BSRt2sOcG2 = //Basketbal
-  username: '',
-  password: '',
+  clubIdentifer: '',
   sportLocatie: null,
   programmaDagen: 7,
   uitslagDagen: 7,

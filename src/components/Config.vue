@@ -40,19 +40,14 @@
           </select>
         </div>
 
-        <div class="form-group" v-if="config.gameType.toLowerCase() != 'handbal'">
+        <div class="form-group" v-if="!config.gameType.toLowerCase().includes('nevobo')">
           <label>Client ID:</label>
           <input type="text" v-model="config.clientId">
         </div>
 
-        <div class="form-group" v-if="config.gameType.toLowerCase() === 'handbal'">
-          <label for="email">E-mail:</label>
-          <input type="text" id="email" v-model="config.username">
-        </div>
-
-        <div class="form-group" v-if="config.gameType.toLowerCase() === 'handbal'">
-          <label>Wachtwoord:</label>
-          <input type="password" v-model="config.password">
+        <div class="form-group" v-if="config.gameType.toLowerCase().includes('nevobo')">
+          <label>Identifier:</label>
+          <input type="text" v-model="config.clubIdentifer">
         </div>
 
         <div class="form-group">
@@ -83,6 +78,20 @@
         <div class="form-group">
           <label>Sponsoren weergeven:</label>
           <input type="checkbox" v-model="config.activeSponsors">
+        </div>
+
+        <div class="form-group">
+          
+          <div>
+            <label>Proxy Status:</label><br/>
+            <small>Cloudflare proxy voor Nevobo<br/>(gratis)</small>
+          </div>
+          
+          <div v-if="corsStatus" class="cors-status space-y-1">
+            <span>{{ corsStatus.requestsToday }} / {{ corsStatus.limit }}</span><br/>
+            <progress :value="corsStatus.requestsToday" :max="corsStatus.limit" :class="progressBarClass"></progress><br/>
+            <div>Status: {{ corsStatus.status }}</div>
+          </div>
         </div>
 
       </div>  
@@ -205,42 +214,23 @@
   </div>
 </template>
 
-
-
 <script setup>
 import { ref, watch, onMounted, computed } from 'vue';
 import { USER_CONFIG, updateUserConfig, HOME_SCREENS, AVAILABLE_GAME_TYPES } from '@/config';
 import { userSponsorImages, loadSponsorImages, saveSponsorImages } from '@/stores/sponsorStore';
 
+const corsStatus = ref(null);
 const showClientIdModal = ref(false);
 const config = ref({});
 const availableGameTypes = ref(AVAILABLE_GAME_TYPES);
 const isLoading = ref(true);
 const newImageUrl = ref("");
 
-/*original
-watch(() => config.value.clientId, async (newClientId) => {
-  if (newClientId && newClientId.length > 0) {
-    try {
-      const response = await fetch(`https://data.sportlink.com/clubgegevens?client_id=${newClientId}`);
-      if (!response.ok) throw new Error('Failed to fetch club data');
-      
-      const data = await response.json();
-      if (data?.bezoekadres?.naam) {
-        config.value.sportLocatie = data.bezoekadres.naam;
-      }
-    } catch (error) {
-      console.error('Error fetching club data:', error);
-    }
-  }
-});
-*/
-
 // Watch for club data changes
 watch(
-  () => [config.value.gameType, config.value.clientId?.trim()],
-  async ([gameType, clientId]) => {
-    if (gameType !== 'handbal' && clientId) {
+  () => [config.value.gameType, config.value.clientId?.trim(), config.value.clubIdentifer?.trim()],
+  async ([gameType, clientId, clubIdentifer]) => {
+    if (clientId && gameType != 'Nevobo (Volleybal)') {
       try {
         const response = await fetch(`https://data.sportlink.com/clubgegevens?client_id=${clientId}`);
         if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
@@ -251,26 +241,60 @@ watch(
         }
       } catch (error) {
         console.error('Error fetching club data:', error);
+      }finally{
+        config.value.clubIdentifer = null;
       }
     }
+    if (clubIdentifer && gameType === 'Nevobo (Volleybal)') {
+        try {
+          const url = `https://api.nevobo.nl/relatiebeheer/verenigingen/${clubIdentifer}`;
+          const proxiedUrl = `https://cors-proxy.clubinfoproxy.workers.dev/proxy?url=${encodeURIComponent(url)}`;
+
+          const response = await fetch(proxiedUrl);
+          if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+
+          const data = await response.json();
+
+          if (data?.naam) {
+            config.value.sportLocatie = data.vestigingsplaats;
+          }
+        } catch (error) {
+          console.error('Error fetching vereniging data from Nevobo API:', error);
+        }finally{
+          config.value.clientId = null;
+        }
+      }
   },
   { immediate: true }
 );
 
-// Watch for handbal credentials
-watch(
-  () => [config.value.gameType, config.value.username?.trim(), config.value.password?.trim()],
-  async ([gameType, username, password]) => {
-    if (gameType === 'handbal' && username && password) {
-      try {
-        console.log('Maybe Sportlink will do something for here aswell? already told them about the finding')
-      } catch (error) {
-        console.error('Well thats a error:', error);
-      }
+const progressBarClass = computed(() => {
+  const percentage = (corsStatus.value?.requestsToday ?? 0) / (corsStatus.value?.limit ?? 1);
+  if (percentage >= 0.9) return 'danger';
+  if (percentage >= 0.75) return 'warning';
+  return 'success';
+});
+
+const statusTextClass = computed(() => {
+  const status = corsStatus.value?.status;
+  if (status === 'ok') return 'text-success';
+  if (status === 'warning') return 'text-warning';
+  return 'text-danger';
+});
+
+const fetchCorsStatus = async () => {
+  try {
+    const res = await fetch("https://cors-proxy.clubinfoproxy.workers.dev/status");
+    if (res.ok) {
+      corsStatus.value = await res.json();
+    } else {
+      throw new Error("CORS proxy status fetch failed");
     }
-  },
-  { deep: true }
-);
+  } catch (e) {
+    corsStatus.value = { requestsToday: 0, limit: 1000, status: 'error' };
+    console.error("Failed to fetch CORS proxy status", e);
+  }
+};
 
 
 function addImage() {
@@ -335,14 +359,18 @@ onMounted(async () => {
   config.value = JSON.parse(JSON.stringify(USER_CONFIG.value));
   loadSponsorImages();
   isLoading.value = false;
-  // Show modal if no client ID is present
-  if (!config.value.clientId || config.value.clientId.trim() === '') {
+
+  if (!config.value.clientId || config.value.clientId.trim() === ''){
+    fetchCorsStatus();
+  }
+
+  if ((!config.value.clubIdentifer || config.value.clubIdentifer.trim() === '') && (!config.value.clientId || config.value.clientId.trim() === '')) {
     showClientIdModal.value = true;
   }
 });
 
-watch(() => config.value.clientId, (newVal) => {
-  if (!newVal || newVal.trim() === '') {
+watch(() => config.value.clientId, config.value.clubIdentifer, (newClientVal, newIdentifierVal) => {
+  if ((!newIdentifierVal || newIdentifierVal.trim() === '') && (!newClientVal || newClientVal.trim() === '')) {
     showClientIdModal.value = true;
   }
 });
@@ -433,6 +461,10 @@ watch(config, (newConfig) => {
   width: 80px;
   padding: 8px;
   text-transform: uppercase;
+}
+
+progress {
+  inline-size: 16em;
 }
 
 .wrapper {

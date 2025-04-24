@@ -28,13 +28,13 @@
       <div v-else id="scrollingContainer" :style="{ height: scrollingContainerHeight }">
         <transition-group name="fade" tag="div">
           <div v-for="match in matches" :key="match.id" class="matchEntry">
-            <div :style="{ background: config.leftBoxColor, color: config.leftBoxText }" id="datumProgramma_fixed">{{ formatDate(match.wedstrijddatum) }}</div>
+            <div :style="{ background: config.leftBoxColor, color: config.leftBoxText }" id="datumProgramma_fixed">{{ match.wedstrijddatum }}</div>
             <img :style="{ background: config.leftMidBoxColor, color: config.leftMidBoxText }" id="clublogo" :src="match.thuisteamlogo">
             <div :style="{ background: config.leftMidBoxColor, color: config.leftMidBoxText }" id="thuisteam_fixed">{{ match.thuisteam }}</div>
             <div :style="{ background: config.midBoxColor, color: config.midBoxText }" id="kleedkamer_fixed">-</div>
             <div :style="{ background: config.rightMidBoxColor, color: config.rightMidBoxText }" id="uitteam_fixed">{{ match.uitteam }}</div>
             <img :style="{ background: config.rightMidBoxColor, color: config.rightMidBoxText }" id="clublogo" :src="match.uitteamlogo">
-            <div :style="{ background: config.rightBoxColor, color: config.rightBoxText }" id="wedstrijdveld_fixed">{{ formatCompType(match.competitiesoort) }}</div>
+            <div :style="{ background: config.rightBoxColor, color: config.rightBoxText }" id="wedstrijdveld_fixed">{{ match.competitiesoort }}</div>
           </div>
         </transition-group>
       </div>
@@ -46,6 +46,9 @@
 import { ref, onMounted, watch, onUnmounted, nextTick } from 'vue';
 import { USER_CONFIG } from '@/config';
 import { useRouter } from 'vue-router';
+import { formatCompType } from '@/utils/formatCompType.js';
+import { formatDateTime } from '@/utils/formatDateType.js';
+import { formatNevoboDate } from '../utils/formatDateType';
 
 const router = useRouter();
 
@@ -60,47 +63,70 @@ const scrollCycleCount = ref(0);
 const config = ref({});
 const containerReady = ref(false);
 
-// Corrected function name (added missing 'l' in "Scrolling")
 const calculateScrollingContainerHeight = () => {
   const windowHeight = window.innerHeight;
   scrollingContainerHeight.value = `${windowHeight - 265}px`;
 };
 
-// Helper functions
-const formatDate = (dateString) => {
-  const options = {
-    day: '2-digit',
-    month: 'short',
-    hour: '2-digit',
-    minute: '2-digit',
-  };
-  return new Date(dateString)
-    .toLocaleString('nl-NL', options)
-    .replace(',', '');
-};
-
-const formatCompType = (compType) => {
-  switch (compType) {
-    case 'regulier': return 'Competitie';
-    case 'beker': return 'Beker';
-    case 'oefen': return 'Oefen';
-    default: return 'Onbekend';
-  }
-};
-
 // Fetch function
 const fetchMatchInfo = async () => {
-  if (!config.value?.programmaDagen || !config.value?.clientId) return;
+  if (!config.value?.programmaDagen || (!config.value?.clientId && !config.value?.clubIdentifer)) {
+    console.error('Config not loaded yet!');
+    return;
+  }
 
-  error.value = null;
   loading.value = true;
-
+  error.value = null;
+  
   try {
-    const response = await fetch(
-      `https://data.sportlink.com/programma?gebruiklokaleteamgegevens=NEE&aantaldagen=${config.value.programmaDagen}&eigenwedstrijden=JA&thuis=JA&uit=JA&client_id=${config.value.clientId}`
-    );
+    let response;
+    let url;
+
+    if(config.value.clientId){
+      url = `https://data.sportlink.com/programma?gebruiklokaleteamgegevens=NEE&aantaldagen=${config.value.programmaDagen}&eigenwedstrijden=JA&thuis=JA&uit=JA&client_id=${config.value.clientId}`
+    }else if(config.value.clubIdentifer){
+      url = `https://api.nevobo.nl/v1/competitie/wedstrijden/programma?vereniging=${config.value.clubIdentifer}`;
+      url =`https://cors-proxy.clubinfoproxy.workers.dev/proxy?url=${encodeURIComponent(url)}`;
+    }
+
+    response = await fetch(url);
+
     if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-    matches.value = await response.json();
+    
+    const data = await response.json();
+    const now = new Date();
+    const dateThreshold = new Date(now);
+    dateThreshold.setDate(now.getDate() + config.value.programmaDagen);
+    
+    if(Array.isArray(data)){
+      matches.value = data.map(match => {
+        match.competitiesoort = formatCompType(match.competitiesoort);
+        match.wedstrijddatum = formatDateTime(match.wedstrijddatum)
+        return match;
+      });
+    }else if(data._embedded && data._embedded.items){
+      matches.value = data._embedded.items
+        .filter(match => {
+          const matchDate = new Date(match.datum);
+          return matchDate >= now && matchDate <= dateThreshold;
+        })
+      .map(match => {
+        const thuisteamparts = match._embedded.pouleindeling_thuis._embedded.team.naam.split(/\s*\/+\s*/);
+        const uitteamparts = match._embedded.pouleindeling_uit._embedded.team.naam.split(/\s*\/+\s*/);
+
+        match.wedstrijddatum = formatDateTime(match.tijd);
+        match.thuisteam = thuisteamparts[thuisteamparts.length - 1].trim();
+        match.thuisteamlogo = match._embedded?.pouleindeling_thuis?._embedded.team?._embedded?.vereniging?._links?.logo_url?.href || '';
+
+        match.uitteam = uitteamparts[uitteamparts.length - 1].trim();
+        match.uitteamlogo = match._embedded?.pouleindeling_uit?._embedded?.team?._embedded?.vereniging?._links?.logo_url?.href || '';
+        match.competitiesoort = formatCompType(match._embedded?.poule?._embedded?.regio?.omschrijving || '');
+        
+        return match;
+      });
+    }else{
+      console.error("Unexpected data format:");
+    }
 
     if (matches.value.length > 0) {
       await nextTick();
@@ -169,12 +195,10 @@ watch(() => USER_CONFIG.value, (newConfig) => {
   config.value = { ...newConfig };
   
   const missingClientId = !newConfig.clientId;
-  const missingHandbalCredentials = (
-    newConfig.gameType === 'handbal' && 
-    (!newConfig.username || !newConfig.password)
-  );
+  const missingClubIdentifier = !newConfig.clubIdentifer;
+  const missingUitslagDagen = !newConfig.uitslagDagen;
   
-  if (missingClientId || missingHandbalCredentials) {
+  if (missingUitslagDagen || (missingClientId && missingClubIdentifier)) {
     router.push('/settings');
   } else {
     fetchMatchInfo();
