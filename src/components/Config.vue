@@ -32,6 +32,24 @@
         </div>
 
         <div class="form-group">
+        <label>Achtegrond:</label>
+        <select v-model="config.selectedBackground" @change="updateBackground">
+          <option disabled value="">Kies Achtergrond</option>
+          <option v-for="option in backgroundOptions" :key="option.value" :value="option.value">
+            {{ option.label }}
+          </option>
+          <option value="custom">Andere URL</option>
+        </select>
+
+        <input
+          v-if="config.selectedBackground === 'custom'"
+          v-model="config.customBackgroundUrl"
+          @input="updateBackground"
+          placeholder="Enter image URL"
+        />
+      </div>
+
+        <div class="form-group">
           <label>Start scherm:</label>
           <select v-model="config.homeScreen">
             <option v-for="(path, label) in HOME_SCREENS" :key="label" :value="label">
@@ -175,22 +193,22 @@
         </div>
       </div>
       <div class="sponsor-container" id="configTop" style="max-width: 700px;">
-      <h2>Sponsoren</h2>
-      <p>{{ sponsorHint }}</p>
-      <div class="input-container">
-          <input v-model="newImageUrl" placeholder="Voer de URL van de afbeelding in" style="height: 25px; width: 200px;" />
-          <button @click="addImage">Toevoegen</button>
-      </div>
-      <div class="form-group">
-        <div v-if="userSponsorImages.length > 0" class="image-grid">
-          <div v-for="(image, index) in userSponsorImages" :key="index" class="image-item">
-            <img :src="image" class="preview" />
-            <button @click="removeImage(index)" class="remove-button">X</button>
-          </div>
+        <h2>Sponsoren</h2>
+        <p>{{ sponsorHint }}</p>
+        <div class="input-container">
+            <input v-model="newImageUrl" placeholder="Voer de URL van de afbeelding in" style="height: 25px; width: 200px;" />
+            <button @click="addImage">Toevoegen</button>
         </div>
-        <p v-else>Er zijn nog geen sponsoren toegevoegd.</p>
+        <div class="form-group">
+          <div v-if="userSponsorImages.length > 0" class="image-grid">
+            <div v-for="(image, index) in userSponsorImages" :key="index" class="image-item">
+              <img :src="image" class="preview" />
+              <button @click="removeImage(index)" class="remove-button">X</button>
+            </div>
+          </div>
+          <p v-else>Er zijn nog geen sponsoren toegevoegd.</p>
+        </div>
       </div>
-    </div>
     </div>
 
     <div class="button-group">
@@ -215,9 +233,10 @@
 </template>
 
 <script setup>
-import { ref, watch, onMounted, computed } from 'vue';
-import { USER_CONFIG, updateUserConfig, HOME_SCREENS, AVAILABLE_GAME_TYPES } from '@/config';
+import { ref, watch, onMounted, computed, watchEffect } from 'vue';
+import { USER_CONFIG, updateUserConfig, HOME_SCREENS, AVAILABLE_GAME_TYPES, backgroundOptions } from '@/config';
 import { userSponsorImages, loadSponsorImages, saveSponsorImages } from '@/stores/sponsorStore';
+import defaultImg from '@/assets/voetbal.jpg'
 
 const corsStatus = ref(null);
 const showClientIdModal = ref(false);
@@ -226,7 +245,7 @@ const availableGameTypes = ref(AVAILABLE_GAME_TYPES);
 const isLoading = ref(true);
 const newImageUrl = ref("");
 
-// Watch for club data changes
+
 watch(
   () => [config.value.gameType, config.value.clientId?.trim(), config.value.clubIdentifer?.trim()],
   async ([gameType, clientId, clubIdentifer]) => {
@@ -275,12 +294,7 @@ const progressBarClass = computed(() => {
   return 'success';
 });
 
-const statusTextClass = computed(() => {
-  const status = corsStatus.value?.status;
-  if (status === 'ok') return 'text-success';
-  if (status === 'warning') return 'text-warning';
-  return 'text-danger';
-});
+
 
 const fetchCorsStatus = async () => {
   try {
@@ -291,11 +305,32 @@ const fetchCorsStatus = async () => {
       throw new Error("CORS proxy status fetch failed");
     }
   } catch (e) {
-    corsStatus.value = { requestsToday: 0, limit: 1000, status: 'error' };
+    corsStatus.value = { requestsToday: 0, limit: 100000, status: 'error' };
     console.error("Failed to fetch CORS proxy status", e);
   }
 };
 
+const backgroundUrl = computed(() => {
+  if(config.value.selectedBackground === 'custom') {
+    return config.value.customBackgroundUrl || '';
+  }
+  return config.value.selectedBackground || '';
+});
+
+function updateBackground() {
+  const root = document.documentElement;
+  if (backgroundUrl.value) {
+    root.style.background = `linear-gradient(rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.3)), url(${backgroundUrl.value}) no-repeat center center`;
+  } else {
+    root.style.background = `linear-gradient(rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.3)), url(${defaultImg}) no-repeat center center`;
+  }
+  root.style.backgroundSize = 'cover';
+  root.style.minHeight = '100vh';
+}
+
+watchEffect(() => {
+  updateBackground();
+});
 
 function addImage() {
   if (!newImageUrl.value.trim()) return;
@@ -357,8 +392,18 @@ const sponsorHint = computed(() => {
 
 onMounted(async () => {
   config.value = JSON.parse(JSON.stringify(USER_CONFIG.value));
+
+  if(!config.value.selectedBackground){
+    config.value.selectedBackground = '';
+  }
+
+  if(!config.value.customBackgroundUrl){
+    config.value.customBackgroundUrl = '';
+  }
+
   loadSponsorImages();
   isLoading.value = false;
+  updateBackground();
 
   if (!config.value.clientId || config.value.clientId.trim() === ''){
     fetchCorsStatus();
@@ -374,6 +419,9 @@ watch(() => config.value.clientId, config.value.clubIdentifer, (newClientVal, ne
     showClientIdModal.value = true;
   }
 });
+
+console.log(config.value.selectedBackground)
+console.log(config.selectedBackground)
 
 let saveTimeout;
 watch(config, (newConfig) => {

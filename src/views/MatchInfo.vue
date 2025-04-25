@@ -49,6 +49,7 @@ import { useRouter } from 'vue-router';
 import { formatCompType } from '@/utils/formatCompType.js';
 import { formatDateTime } from '@/utils/formatDateType.js';
 import { formatNevoboDate } from '../utils/formatDateType';
+import noImage from '@/assets/no_image.png';
 
 const router = useRouter();
 
@@ -116,10 +117,10 @@ const fetchMatchInfo = async () => {
 
         match.wedstrijddatum = formatDateTime(match.tijd);
         match.thuisteam = thuisteamparts[thuisteamparts.length - 1].trim();
-        match.thuisteamlogo = match._embedded?.pouleindeling_thuis?._embedded.team?._embedded?.vereniging?._links?.logo_url?.href || '';
+        match.thuisteamlogo = match._embedded?.pouleindeling_thuis?._embedded.team?._embedded?.vereniging?._links?.logo_url?.href || noImage;
 
         match.uitteam = uitteamparts[uitteamparts.length - 1].trim();
-        match.uitteamlogo = match._embedded?.pouleindeling_uit?._embedded?.team?._embedded?.vereniging?._links?.logo_url?.href || '';
+        match.uitteamlogo = match._embedded?.pouleindeling_uit?._embedded?.team?._embedded?.vereniging?._links?.logo_url?.href || noImage;
         match.competitiesoort = formatCompType(match._embedded?.poule?._embedded?.regio?.omschrijving || '');
         
         return match;

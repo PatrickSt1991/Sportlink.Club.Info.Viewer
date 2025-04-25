@@ -11,6 +11,17 @@ export const GAME_TYPES = {
   'NHV (Handbal)': false
 };
 
+export const backgroundOptions = [
+  { label: 'Voetbal', value: new URL('@/assets/voetbal.jpg', import.meta.url).href },
+  { label: 'Basketbal', value: new URL('@/assets/basketbal.jpg', import.meta.url).href },
+  { label: 'Korfbal', value: new URL('@/assets/korfbal.jpg', import.meta.url).href },
+  { label: 'Soft- en Honkbal', value: new URL('@/assets/basebal.jpg', import.meta.url).href },
+  { label: 'Volleybal', value: new URL('@/assets/volleyball.jpg', import.meta.url).href },
+  { label: 'Zwemmen', value: new URL('@/assets/waterpolo.jpg', import.meta.url).href },
+  { label: 'Hockey Belgie', value: new URL('@/assets/hockey.jpg', import.meta.url).href },
+  { label: 'Handbal', value: new URL('@/assets/handbal.jpg', import.meta.url).href },
+];
+
 export const HOME_SCREENS = {
   'Wedstrijd Informatie': '/match-info',
   'Wedstrijd Programma': '/prematch-info',
@@ -46,7 +57,8 @@ const defaultConfig = {
   rightMidBoxColor: "#000000",
   rightMidBoxText: "#ffffff",
   rightBoxColor: "#b40808",
-  rightBoxText: "#ffffff"
+  rightBoxText: "#ffffff",
+  selectedBackground: 'voetbal.jpg',
 };
 
 export const BASE_URL = defaultConfig.onPrem ? './' : '/Sportlink.Club.Info.Viewer/';

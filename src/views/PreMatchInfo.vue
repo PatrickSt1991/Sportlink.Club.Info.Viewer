@@ -58,6 +58,7 @@ import { useRouter } from 'vue-router';
 import { formatKleedkamer, formatVeld } from '@/utils/formatUtils.js';
 import { formatCompType } from '@/utils/formatCompType.js';
 import { formatTime  } from '@/utils/formatDateType.js';
+import noImage from '@/assets/no_image.png';
 
 const router = useRouter();
 
@@ -134,10 +135,10 @@ const fetchPreMatchInfo = async () => {
         const uitteamparts = match._embedded.pouleindeling_uit._embedded.team.naam.split(/\s*\/+\s*/);
         match.wedstrijddatum = formatTime(match.tijd);
         match.thuisteam = thuisteamparts[thuisteamparts.length - 1].trim();
-        match.thuisteamlogo = match._embedded?.pouleindeling_thuis?._embedded.team?._embedded?.vereniging?._links?.logo_url?.href || '';
+        match.thuisteamlogo = match._embedded?.pouleindeling_thuis?._embedded.team?._embedded?.vereniging?._links?.logo_url?.href || noImage;
 
         match.uitteam = uitteamparts[uitteamparts.length - 1].trim();
-        match.uitteamlogo = match._embedded?.pouleindeling_uit?._embedded?.team?._embedded?.vereniging?._links?.logo_url?.href || '';
+        match.uitteamlogo = match._embedded?.pouleindeling_uit?._embedded?.team?._embedded?.vereniging?._links?.logo_url?.href || noImage;
         match.competitiesoort = formatCompType(match._embedded?.poule?._embedded?.regio?.omschrijving || '');
 
         match.veld = match._embedded.speelveld.aanduiding || "Onbekend";
