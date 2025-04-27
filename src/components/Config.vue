@@ -23,16 +23,20 @@
       <div class="config-container" id="configTop">
         <h2>Instellingen</h2>
         <div class="form-group">
-          <label>Sport:</label>
+          <label class="leftLabel">Sport:</label>
           <select v-model="config.gameType">
-            <option v-for="type in availableGameTypes" :key="type" :value="type">
-              {{ type.charAt(0).toUpperCase() + type.slice(1) }}
+            <option
+              v-for="game in availableGameTypes"
+              :key="game.label"
+              :value="game"
+            >
+              {{ game.label }} - [{{ game.type }}]
             </option>
           </select>
         </div>
 
         <div class="form-group">
-        <label>Achtegrond:</label>
+        <label class="leftLabel">Achtegrond:</label>
         <select v-model="config.selectedBackground" @change="updateBackground">
           <option disabled value="">Kies Achtergrond</option>
           <option v-for="option in backgroundOptions" :key="option.value" :value="option.value">
@@ -50,7 +54,7 @@
       </div>
 
         <div class="form-group">
-          <label>Start scherm:</label>
+          <label class="leftLabel">Start scherm:</label>
           <select v-model="config.homeScreen">
             <option v-for="(path, label) in HOME_SCREENS" :key="label" :value="label">
               {{ label }}
@@ -58,54 +62,68 @@
           </select>
         </div>
 
-        <div class="form-group" v-if="!config.gameType.toLowerCase().includes('nevobo')">
-          <label>Client ID:</label>
+        <div class="form-group" v-if="config.gameType.type === 'Sportlink API'">
+          <label class="leftLabel">Client ID:</label>
           <input type="text" v-model="config.clientId">
         </div>
 
-        <div class="form-group" v-if="config.gameType.toLowerCase().includes('nevobo')">
-          <label>Identifier:</label>
+        <div class="form-group" v-if="config.gameType.type === 'Nevobo Proxy'">
+          <label class="leftLabel">Identifier:</label>
           <input type="text" v-model="config.clubIdentifer">
         </div>
 
+        <div class="form-group" v-if="config.gameType.type === 'Sportlink APP'">
+          <label class="leftLabel">Gebruikersaam:</label>
+          <input type="text" :readonly="config.fakeCredentials" v-model="config.username" :value="config.fakeCredentials ? FAKE_CREDENTIALS.username : config.username">
+        </div>
+
+        <div class="form-group" v-if="config.gameType.type === 'Sportlink APP'">
+          <label class="leftLabel">Wachtwoord:</label>
+          <input type="text" :readonly="config.fakeCredentials" v-model="config.password" :value="config.fakeCredentials ? FAKE_CREDENTIALS.password : config.password">
+        </div>
+
+        <div class="form-group"  v-if="config.gameType.type === 'Sportlink APP'">
+          <label class="leftLabel">Fake credentials:</label>
+          <input type="checkbox" v-model="config.fakeCredentials">
+        </div>
+
         <div class="form-group">
-          <label>Accommodatie:</label>
+          <label class="leftLabel">Accommodatie:</label>
           <input type="text" v-model="config.sportLocatie">
         </div>
 
         <div class="form-group">
-          <label>Programma dagen:</label>
+          <label class="leftLabel">Programma dagen:</label>
           <input style="width: 50px" type="number" v-model.number="config.programmaDagen">
         </div>
 
         <div class="form-group">
-          <label>Uitslagen dagen:</label>
+          <label class="leftLabel">Uitslagen dagen:</label>
           <input style="width: 50px" type="number" v-model.number="config.uitslagDagen">
         </div>
 
         <div class="form-group">
-          <label>Wedstrijd Informatie verversen na x seconden:</label>
+          <label class="leftLabel">Informatie verversen na x seconden:</label>
           <input type="number" style="width: 50px" v-model.number="config.prematchRefresh">
         </div>
 
         <div class="form-group">
-          <label>Weergave automatisch laten schakelen:</label>
+          <label class="leftLabel">Weergave automatisch laten schakelen:</label>
           <input type="checkbox" v-model="config.enableScreenSwitch">
         </div>
 
         <div class="form-group">
-          <label>Sponsoren weergeven:</label>
+          <label class="leftLabel">Sponsoren weergeven:</label>
           <input type="checkbox" v-model="config.activeSponsors">
         </div>
 
-        <div class="form-group">
-          
+        <div class="form-group" v-if="corsStatus">
           <div>
-            <label>Proxy Status:</label><br/>
-            <small>Cloudflare proxy voor Nevobo<br/>(gratis)</small>
+            <label class="leftLabel">Proxy Status:</label><br/>
+            <small>Cloudflare</small>
           </div>
           
-          <div v-if="corsStatus" class="cors-status space-y-1">
+          <div class="cors-status space-y-1">
             <span>{{ corsStatus.requestsToday }} / {{ corsStatus.limit }}</span><br/>
             <progress :value="corsStatus.requestsToday" :max="corsStatus.limit" :class="progressBarClass"></progress><br/>
             <div>Status: {{ corsStatus.status }}</div>
@@ -234,7 +252,7 @@
 
 <script setup>
 import { ref, watch, onMounted, computed, watchEffect } from 'vue';
-import { USER_CONFIG, updateUserConfig, HOME_SCREENS, AVAILABLE_GAME_TYPES, backgroundOptions } from '@/config';
+import { USER_CONFIG, updateUserConfig, HOME_SCREENS, AVAILABLE_GAME_TYPES, backgroundOptions, FAKE_CREDENTIALS } from '@/config';
 import { userSponsorImages, loadSponsorImages, saveSponsorImages } from '@/stores/sponsorStore';
 import defaultImg from '@/assets/voetbal.jpg'
 
@@ -247,9 +265,9 @@ const newImageUrl = ref("");
 
 
 watch(
-  () => [config.value.gameType, config.value.clientId?.trim(), config.value.clubIdentifer?.trim()],
-  async ([gameType, clientId, clubIdentifer]) => {
-    if (clientId && gameType != 'Nevobo (Volleybal)') {
+  () => [config.value.gameType, config.value.clientId?.trim(), config.value.clubIdentifer?.trim(), config.value.username?.trim(), config.value.password?.trim()],
+  async ([gameType, clientId, clubIdentifer, username, password]) => {
+    if (clientId && gameType.type === 'Sportlink API') {
       try {
         const response = await fetch(`https://data.sportlink.com/clubgegevens?client_id=${clientId}`);
         if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
@@ -264,9 +282,10 @@ watch(
         config.value.clubIdentifer = null;
       }
     }
-    if (clubIdentifer && gameType === 'Nevobo (Volleybal)') {
+    if (clubIdentifer && gameType.type === 'Nevobo Proxy') {
         try {
           const url = `https://api.nevobo.nl/relatiebeheer/verenigingen/${clubIdentifer}`;
+          console.log('Fetching data from:', url);
           const proxiedUrl = `https://cors-proxy.clubinfoproxy.workers.dev/proxy?url=${encodeURIComponent(url)}`;
 
           const response = await fetch(proxiedUrl);
@@ -283,6 +302,9 @@ watch(
           config.value.clientId = null;
         }
       }
+    if (username && password && gameType.type === 'Sportlink APP') {
+      console.log('Sportlink APP selected, no action needed for clientId or clubIdentifer.');
+    }
   },
   { immediate: true }
 );
@@ -405,7 +427,7 @@ onMounted(async () => {
   isLoading.value = false;
   updateBackground();
 
-  if (!config.value.clientId || config.value.clientId.trim() === ''){
+  if(gameType.type === 'Nevobo Proxy'){
     fetchCorsStatus();
   }
 
@@ -420,9 +442,6 @@ watch(() => config.value.clientId, config.value.clubIdentifer, (newClientVal, ne
   }
 });
 
-console.log(config.value.selectedBackground)
-console.log(config.selectedBackground)
-
 let saveTimeout;
 watch(config, (newConfig) => {
   clearTimeout(saveTimeout);
@@ -430,6 +449,7 @@ watch(config, (newConfig) => {
     updateUserConfig(newConfig);
   }, 300);
 }, { deep: true });
+
 </script>
 
 <style scoped>

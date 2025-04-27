@@ -182,6 +182,7 @@ const startScrolling = () => {
         
         if (scrollCycleCount.value >= 2 && config.value.enableScreenSwitch) {
           clearInterval(scrollInterval.value);
+          console.log('Switching to match results page...');
           router.push('/match-results');
         }
       }
