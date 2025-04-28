@@ -1,9 +1,16 @@
 import { ref } from 'vue';
 
-export const FAKE_CREDENTIALS = {
-  username: 'testuser',
-  password: 'testpassword',
-}
+export const FAKE_CREDENTIALS = [
+  { username: 'rxxnrextolzwlqsspy@hthlm.com', password: 'test1234', sport: 'waterpolo'},
+  { username: 'testuser_handbal', password: 'testpassword', sport: 'handbal'},
+  { username: 'testuser_hockeyB', password: 'testpassword', sport: 'hockey belgië'},
+  { username: 'testuser_volleybal', password: 'testpassword', sport: 'volleybal'},
+  { username: 'testuser_softbal', password: 'testpassword', sport: 'softbal'},
+  { username: 'testuser_voetbal', password: 'testpassword', sport: 'voetbal'},
+  { username: 'testuser_basketbal', password: 'testpassword', sport: 'basketbal'},
+  { username: 'testuser_korfbal', password: 'testpassword', sport: 'korfbal'},
+  { username: 'testuser_honkbal', password: 'testpassword', sport: 'honkbal'}
+]
 
 export const GAME_TYPES = [
   { label: 'Voetal', type: 'Sportlink API', active: true },
@@ -12,8 +19,8 @@ export const GAME_TYPES = [
   { label: 'Soft- en Honkbal', type: 'Sportlink API', active: true },
   { label: 'Volleybal', type: 'Nevobo Proxy', active: true },
   { label: 'Volleybal', type: 'Sportlink API', active: true },
-  { label: 'Zwemmen', type: 'Sportlink APP', active: true },
-  { label: 'Hockey België', type: 'Sportlink APP', active: false },
+  { label: 'Waterpolo', type: 'Sportlink Proxy', active: true },
+  { label: 'Hockey België', type: 'Sportlink Proxy', active: false },
   { label: 'Handbal', type: 'Sportlink API', active: true }
 ];
 
@@ -23,8 +30,8 @@ export const backgroundOptions = [
   { label: 'Korfbal', value: new URL('@/assets/korfbal.jpg', import.meta.url).href },
   { label: 'Soft- en Honkbal', value: new URL('@/assets/basebal.jpg', import.meta.url).href },
   { label: 'Volleybal', value: new URL('@/assets/volleyball.jpg', import.meta.url).href },
-  { label: 'Zwemmen', value: new URL('@/assets/waterpolo.jpg', import.meta.url).href },
-  { label: 'Hockey Belgie', value: new URL('@/assets/hockey.jpg', import.meta.url).href },
+  { label: 'Waterpolo', value: new URL('@/assets/waterpolo.jpg', import.meta.url).href },
+  { label: 'Hockey België', value: new URL('@/assets/hockey.jpg', import.meta.url).href },
   { label: 'Handbal', value: new URL('@/assets/handbal.jpg', import.meta.url).href },
 ];
 
