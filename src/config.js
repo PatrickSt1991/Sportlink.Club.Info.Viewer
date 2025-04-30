@@ -19,8 +19,8 @@ export const GAME_TYPES = [
   { label: 'Soft- en Honkbal', type: 'Sportlink API', active: true },
   { label: 'Volleybal', type: 'Nevobo Proxy', active: true },
   { label: 'Volleybal', type: 'Sportlink API', active: true },
-  { label: 'Waterpolo', type: 'Sportlink Proxy', active: true },
-  { label: 'Hockey België', type: 'Sportlink Proxy', active: false },
+  { label: 'Waterpolo', type: 'Sportlink Proxy', instance: 'KNZB', active: true },
+  { label: 'Hockey België', type: 'Sportlink Proxy', instance: 'KBHB', active: false },
   { label: 'Handbal', type: 'Sportlink API', active: true }
 ];
 
@@ -48,10 +48,14 @@ export const AVAILABLE_HOME_SCREENS = Object.keys(HOME_SCREENS).filter(
 );
 
 const defaultConfig = {
+  showTerms: true,
   clientId: '',
   clubIdentifer: '',
+  clubId: '',
   username: '',
   password: '',
+  validUsername: false,
+  validPassword: false,
   fakeCredentials: false,
   sportLocatie: null,
   programmaDagen: 7,

@@ -6,6 +6,13 @@
   
     <div class="wrapper" v-if="!isLoading">
       <div class="containers-row">
+        <ClubSelectPopup
+          :visible="showClubSelectPopup"
+          :clubs="clubs"
+          @close="showClubSelectPopup = false"
+          @save="handleClubSelected"
+        />
+
         <ConfigSettings 
           :config="config" 
           :available-game-types="availableGameTypes" 
@@ -16,7 +23,7 @@
           @update:config="updateConfig" 
           @update-background="updateBackground" 
         />
-        
+
         <StyleCustomization 
           :styles="styleConfig" 
           @update:styles="updateStyles" 
@@ -38,7 +45,6 @@
   
   <script setup>
   import { ref, watch, onMounted, onUnmounted, computed } from 'vue';
-  import axios from 'axios';
   import { USER_CONFIG, updateUserConfig, HOME_SCREENS, AVAILABLE_GAME_TYPES, backgroundOptions, FAKE_CREDENTIALS } from '@/config';
   import { userSponsorImages, loadSponsorImages, saveSponsorImages } from '@/stores/sponsorStore';
   import defaultImg from '@/assets/voetbal.jpg';
@@ -49,12 +55,16 @@
   import StyleCustomization from './StyleCustomization.vue';
   import SponsorManager from './SponsorManager.vue';
   import NavigationButtons from './NavigationButtons.vue';
+  import ClubSelectPopup from './ClubSelectPopup.vue'
   
   const corsStatus = ref(null);
   const showClientIdModal = ref(false);
   const config = ref({});
   const availableGameTypes = ref(AVAILABLE_GAME_TYPES);
   const isLoading = ref(true);
+  const showClubSelectPopup = ref(false);
+  const clubs = ref([]);
+  
   let refreshInterval;
 
   const sportlinkTokenInfo = ref({
@@ -64,32 +74,42 @@
   });
   
   async function sportlinkLogin(username, password) {
-    return;
     try {
-    const url = 'https://app-sportlinked-production.sportlink.com/oauth/token';
-    const proxiedUrl = `https://cors-proxy.clubinfoproxy.workers.dev/proxy?url=${encodeURIComponent(url)}`;
-    
-    const params = new URLSearchParams();
-    params.append('grant_type', 'password');
-    params.append('username', username);
-    params.append('password', password);
-    params.append('client_id', 'JUian2haoKqIripvaios');
-    params.append('secret', '9BdMs5h9jvr9Agte');
+      const url = 'https://app-sportlinked-production.sportlink.com/oauth/token';
+      const proxiedUrl = `https://cors-proxy.clubinfoproxy.workers.dev/proxy?url=${encodeURIComponent(url)}`;
 
-    const response = await axios.post(proxiedUrl, params, {
-      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-    });
+      const params = new URLSearchParams();
+      params.append('grant_type', 'password');
+      params.append('username', username);
+      params.append('password', password);
+      params.append('client_id', '4BtKnhojt4MSnRScVak5');
+      params.append('secret', 'vLD8uPHOgIHJjAj9');
 
-    const { access_token, refresh_token, expires_in } = response.data;
-    sportlinkTokenInfo.value.access_token = access_token;
-    sportlinkTokenInfo.value.refresh_token = refresh_token;
-    sportlinkTokenInfo.value.expires_at = Date.now() + expires_in * 1000;
+      const response = await fetch(proxiedUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+          'User-Agent': 'okhttp/4.12.0'
+        },
+        body: params,
+      });
 
-    console.log('Login successful', sportlinkTokenInfo.value);
-  } catch (error) {
-    console.error('Login failed', error);
+      if (!response.ok) {
+        throw new Error(`HTTP error with sportlinkLogin! ${response.status}`);
+      }
+      
+      const data = await response.json()
+      const { access_token, refresh_token, expires_in } = data;
+      
+      sportlinkTokenInfo.value.access_token = access_token;
+      sportlinkTokenInfo.value.refresh_token = refresh_token;
+      sportlinkTokenInfo.value.expires_at = Date.now() + expires_in * 1000;
+      localStorage.setItem('sportlinkTokenInfo', JSON.stringify(sportlinkTokenInfo.value));
+      console.log('Sportlink login succesfull, token are stored')
+    } catch (error) {
+      console.error('Login failed', error);
+    }
   }
-}
 
   async function sportlinkRefreshToken() {
     try {
@@ -99,27 +119,71 @@
       const params = new URLSearchParams();
       params.append('grant_type', 'refresh_token');
       params.append('refresh_token', sportlinkTokenInfo.value.refresh_token);
-      params.append('client_id', 'JUian2haoKqIripvaios');
-      params.append('secret', '9BdMs5h9jvr9Agte');
+      params.append('client_id', '4BtKnhojt4MSnRScVak5');
+      params.append('secret', 'vLD8uPHOgIHJjAj9');
 
-      const response = await axios.post(proxiedUrl, params, {
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      const response = await fetch(proxiedUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+          'User-Agent': 'okhttp/4.12.0'
+        },
+        body: params,
       });
 
-      const { access_token, refresh_token, expires_in } = response.data;
+      if (!response.ok) {
+        throw new Error(`Token refresh failed: ${response.status} ${response.statusText}`);
+      }
+
+      const { access_token, refresh_token, expires_in } = await response.json();
+
       sportlinkTokenInfo.value.access_token = access_token;
       sportlinkTokenInfo.value.refresh_token = refresh_token;
       sportlinkTokenInfo.value.expires_at = Date.now() + expires_in * 1000;
 
+
+      localStorage.setItem('sportlinkTokenInfo', JSON.stringify(sportlinkTokenInfo.value));
       console.log('Token refreshed', sportlinkTokenInfo.value);
     } catch (error) {
       console.error('Refresh failed, trying full login...', error);
       if (config.value.username && config.value.password && config.value.gameType?.type === 'Sportlink Proxy') {
-        await sportlinkLogin(config.value.username, config.value.password);
+        if(config.value.validUsername === true && config.value.validPassword === true){
+          await sportlinkLogin(username, password);
+        }
       }
     }
   }
 
+  async function fetchSportlinkClubs(appInstance) {
+    const url = 'https://app-sportlinked-production.sportlink.com/entity/common/memberportal/app/club/Clubs?v=1';
+    const proxiedUrl = `https://cors-proxy.clubinfoproxy.workers.dev/proxy?url=${encodeURIComponent(url)}`;
+    
+    try{
+      const response = await fetch(proxiedUrl, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${sportlinkTokenInfo.value.access_token}`,
+          'X-Real-User-Agent': `sportlink-app-${appInstance.toLowerCase()}/6.26.0-2025017636 android SM-N976N/samsung/25 (6.26.0)`,
+          'X-Navajo-Instance': `${appInstance}`,
+          'X-Navajo-Locale': 'nl',
+          'X-Navajo-Version': '1',
+          'Accept': '*/*'
+        },
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('Proxy error details:', errorText);
+        throw new Error(`Failed to fetch clubs: ${response.status} ${response.statusText}`);
+      }
+
+      const { Club } = await response.json();
+      clubs.value = Club || [];
+    } catch (error) {
+      console.error('Full fetch error:', error);
+      throw error;
+    }
+  }
 
   const styleConfig = computed(() => {
     const styles = {};
@@ -138,7 +202,6 @@
     return styles;
   });
   
-  // Background URL computation
   const backgroundUrl = computed(() => {
     if(config.value.selectedBackground === 'custom') {
       return config.value.customBackgroundUrl || '';
@@ -146,13 +209,11 @@
     return config.value.selectedBackground || '';
   });
   
-  // Functions for child component communication
   function updateConfig(newConfig) {
     config.value = { ...newConfig };
   }
   
   function updateStyles(newStyles) {
-    // Update the style properties in the main config
     Object.keys(newStyles).forEach(key => {
       config.value[key] = newStyles[key];
     });
@@ -169,7 +230,6 @@
     root.style.minHeight = '100vh';
   }
   
-  // Sponsor management functions
   function addSponsor(imageUrl) {
     userSponsorImages.value.push(imageUrl);
     saveSponsorImages();
@@ -180,6 +240,14 @@
     saveSponsorImages();
   }
   
+  function handleClubSelected(club) {
+    config.value.clubId = club.ClubId;
+    config.value.clubName = club.ClubName;
+    config.value.sportLocatie = club.City;
+
+    showClubSelectPopup.value = false;
+  }
+
   const fetchCorsStatus = async () => {
     try {
       const res = await fetch("https://cors-proxy.clubinfoproxy.workers.dev/status");
@@ -195,9 +263,18 @@
   };
   
   watch(
-    () => [config.value.gameType, config.value.clientId?.trim(), config.value.clubIdentifer?.trim(), 
-           config.value.username?.trim(), config.value.password?.trim()],
-    async ([gameType, clientId, clubIdentifer, username, password]) => {
+    () => ({
+      gameType: config.value.gameType,
+      username: config.value.username?.trim(),
+      password: config.value.password?.trim(),
+      validUsername: config.value.validUsername,
+      validPassword: config.value.validPassword,
+      fakeCredentials: config.value.fakeCredentials,
+      clientId: config.value.clientId,
+      clubIdentifer: config.value.clubIdentifer
+    }),
+    async ({ gameType, username, password, validUsername, validPassword, clientId, clubIdentifer }) => {
+      console.log(clientId)
       if (gameType?.type === 'Sportlink API' && clientId) {
         try {
           const response = await fetch(`https://data.sportlink.com/clubgegevens?client_id=${clientId}`);
@@ -235,9 +312,15 @@
       }
       
       if (gameType?.type === 'Sportlink Proxy' && username && password) {
-        console.log(`Sportlink Proxy selected, starting login...`);
+        console.log('eerst hier')
+        const tokenExpired = !sportlinkTokenInfo.value.access_token || Date.now() >= sportlinkTokenInfo.value.expires_at;
 
-        await sportlinkLogin(username, password);
+        if(validUsername && validPassword && (tokenExpired || !config.value.clubId))
+        {
+          await sportlinkLogin(username, password);
+          await fetchSportlinkClubs(config.value.gameType.instance);
+          showClubSelectPopup.value = true;
+        }
 
         if(refreshInterval) {
           clearInterval(refreshInterval);
@@ -254,7 +337,7 @@
         }, 60 * 1000);
       }
     },
-    { immediate: true}
+    { deep: true, immediate: true }
   );
   
   // Save configuration changes
@@ -282,14 +365,21 @@
     isLoading.value = false;
     updateBackground();
   
+    const saved = localStorage.getItem('sportlinkTokenInfo');
+    if (saved) {
+      const parsed = JSON.parse(saved);
+      if (parsed.expires_at > Date.now()) {
+        sportlinkTokenInfo.value = parsed;
+      } else {
+        localStorage.removeItem('sportlinkTokenInfo');
+      }
+    }
+
+
     if(config.value.gameType?.type === 'Nevobo Proxy'){
       fetchCorsStatus();
     }
-  
-    if ((!config.value.clubIdentifer || config.value.clubIdentifer.trim() === '') && 
-        (!config.value.clientId || config.value.clientId.trim() === '')) {
-      showClientIdModal.value = true;
-    }
+
   });
   
   onUnmounted(() => {
@@ -298,11 +388,13 @@
     }
   });
   // Show modal if both client id and club identifier are empty
-  watch(() => [config.value.clientId, config.value.clubIdentifer], 
-    ([newClientVal, newIdentifierVal]) => {
-      if ((!newIdentifierVal || newIdentifierVal.trim() === '') && 
-          (!newClientVal || newClientVal.trim() === '')) {
-        showClientIdModal.value = true;
+  watch(() => [config.value.clientId, config.value.clubIdentifer, config.value.clubId], 
+    ([newClientVal, newIdentifierVal, newClubVal]) => {
+      if ((!newIdentifierVal || newIdentifierVal.trim() === '') && (!newClientVal || newClientVal.trim() === '') && (!newClubVal || newClientVal.trim() === '')) {
+        if(config.value.showTerms){
+          showClientIdModal.value = true;
+          config.value.showTerms = false;
+        }
       }
     }
   );

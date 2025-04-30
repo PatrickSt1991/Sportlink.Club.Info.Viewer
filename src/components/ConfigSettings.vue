@@ -52,13 +52,20 @@
       </div>
   
       <div class="form-group" v-if="localConfig.gameType?.type === 'Sportlink Proxy'">
+        <label class="leftLabel">ClubId:</label>
+        <input type="text" v-model="localConfig.clubId">
+      </div>
+
+      <div class="form-group" v-if="localConfig.gameType?.type === 'Sportlink Proxy'">
         <label class="leftLabel">Gebruikersnaam:</label>
         <input type="text" :readonly="localConfig.fakeCredentials" v-model="localConfig.username">
+        <input type="checkbox" :disabled="localConfig.fakeCredentials" v-model="localConfig.validUsername">
       </div>
   
       <div class="form-group" v-if="localConfig.gameType?.type === 'Sportlink Proxy'">
         <label class="leftLabel">Wachtwoord:</label>
         <input type="text" :readonly="localConfig.fakeCredentials" v-model="localConfig.password">
+        <input type="checkbox" :disabled="localConfig.fakeCredentials" v-model="localConfig.validPassword">
       </div>
   
       <div class="form-group" v-if="localConfig.gameType?.type === 'Sportlink Proxy'">
@@ -73,17 +80,17 @@
   
       <div class="form-group">
         <label class="leftLabel">Programma dagen:</label>
-        <input style="width: 50px" type="number" v-model.number="localConfig.programmaDagen">
+        <input type="number" v-model.number="localConfig.programmaDagen">
       </div>
   
       <div class="form-group">
         <label class="leftLabel">Uitslagen dagen:</label>
-        <input style="width: 50px" type="number" v-model.number="localConfig.uitslagDagen">
+        <input type="number" v-model.number="localConfig.uitslagDagen">
       </div>
   
       <div class="form-group">
         <label class="leftLabel">Informatie verversen na x seconden:</label>
-        <input type="number" style="width: 50px" v-model.number="localConfig.prematchRefresh">
+        <input type="number" v-model.number="localConfig.prematchRefresh">
       </div>
   
       <div class="form-group">
@@ -112,7 +119,7 @@
   </template>
   
   <script setup>
-  import { ref, computed, watch, defineProps, defineEmits } from 'vue';
+  import { nextTick, ref, computed, watch, defineProps, defineEmits } from 'vue';
   
   const props = defineProps({
     config: {
@@ -143,44 +150,76 @@
   
   const emit = defineEmits(['update:config', 'updateBackground']);
   
-  // Create a local copy of the config to work with
   const localConfig = ref({ ...props.config });
   
-  // Watch for changes to local config and emit them up
   watch(localConfig.value, (newValue) => {
     emit('update:config', newValue);
   }, { deep: true });
   
-  // Watch for changes in the incoming config and update local copy
   watch(() => props.config, (newValue) => {
     localConfig.value = { ...newValue };
   }, { deep: true });
   
-  // Watch for fake credentials toggle
-  watch(
-    () => [localConfig.value.fakeCredentials, localConfig.value.gameType?.label],
-    ([fakeCredentialsEnabled, selectedGameLabel]) => {
-      if(selectedGameLabel) {
-        const selectedSport = selectedGameLabel.toLowerCase();
-        const fakeCredential = props.fakeCredentials.find(
-          (cred) => cred.sport.toLowerCase() === selectedSport
-        );
-  
-        if(fakeCredentialsEnabled && fakeCredential){
-          localConfig.value.username = fakeCredential.username;
-          localConfig.value.password = fakeCredential.password;
-        } else if(!fakeCredentialsEnabled 
-                && localConfig.value.username === fakeCredential?.username
-                && localConfig.value.password === fakeCredential?.password)
-        {
-          localConfig.value.username = '';
-          localConfig.value.password = '';  
-        }
-      }
+  watch(() => localConfig.value.gameType,
+    (newValue, oldValue) => {
+      localConfig.value.clientId = null;
+      localConfig.value.clubIdentifer = null;
+      localConfig.value.clubId = null;
+      localConfig.value.username = null;
+      localConfig.value.password = null;
+      localConfig.value.validUsername = false;
+      localConfig.value.validPassword = false;
+      localConfig.value.fakeCredentials = false;
+      localConfig.value.sportLocatie = null;
+      localConfig.value.someOtherConfig = null;
+      console.log(`Sport aangepast van ${oldValue.label} naar ${newValue.label}, resetting...`)
     }
   );
+
+// Watch for fake credentials changes
+watch(
+  () => [localConfig.value.fakeCredentials, localConfig.value.gameType?.label],
+  async ([fakeCredentialsEnabled, selectedGameLabel], [oldFakeCredentials, oldGameLabel]) => {
+    // Skip if values haven't actually changed
+    if (fakeCredentialsEnabled === oldFakeCredentials && selectedGameLabel === oldGameLabel) {
+      return;
+    }
+
+    if (selectedGameLabel) {
+      const selectedSport = selectedGameLabel.toLowerCase();
+      const fakeCredential = props.fakeCredentials.find(
+        (cred) => cred.sport.toLowerCase() === selectedSport
+      );
+
+      const changes = {};
+
+      if (fakeCredentialsEnabled && fakeCredential) {
+        changes.username = fakeCredential.username;
+        changes.password = fakeCredential.password;
+        changes.validUsername = true;
+        changes.validPassword = true;
+      } else if (
+        !fakeCredentialsEnabled &&
+        localConfig.value.username === fakeCredential?.username &&
+        localConfig.value.password === fakeCredential?.password
+      ) {
+        changes.username = '';
+        changes.password = '';
+        changes.validUsername = false;
+        changes.validPassword = false;
+      }
+
+      // Only update if there are actual changes
+      if (Object.keys(changes).length > 0) {
+        Object.assign(localConfig.value, changes);
+        await nextTick();
+        emit('update:config', { ...localConfig.value });
+      }
+    }
+  },
+  { deep: true, flush: 'post' }
+);
   
-  // Update background
   function updateBackground() {
     emit('updateBackground');
   }
@@ -208,34 +247,31 @@
   .form-group {
     display: flex;
     align-items: center;
-    justify-content: space-between;
-    margin-bottom: 12px;
     gap: 10px;
+    margin-bottom: 12px;
   }
-  
+
   .leftLabel {
     font-weight: bold;
-    flex: 1;
+    width: 150px;
+    flex-shrink: 0;
   }
-  
-  input, select {
-    flex: 1.5;
+
+  input[type="text"],
+  input[type="number"],
+  select {
+    flex: 1;
     padding: 8px;
     border: 1px solid #ccc;
     border-radius: 4px;
   }
-  
-  input[type="number"] {
-    width: 70px;
-    text-align: center;
-  }
-  
+
   input[type="checkbox"] {
     width: 20px;
     height: 20px;
     accent-color: #007bff;
   }
-  
+
   progress {
     inline-size: 16em;
   }
@@ -254,5 +290,5 @@
   
   .cors-status {
     flex: 1.5;
-  }
+  } 
   </style>

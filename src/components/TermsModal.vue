@@ -76,7 +76,7 @@
   
   .modal-button {
     padding: 10px 25px;
-    background-color: #b40808;
+    background-color: #2196F3;
     color: white;
     border: none;
     border-radius: 5px;
@@ -87,6 +87,6 @@
   }
   
   .modal-button:hover {
-    background-color: #d10a0a;
+    background-color: #2196F3;
   }
   </style>

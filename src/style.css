@@ -28,11 +28,6 @@ html, body {
   overflow-x: hidden;
 }
 
-.leftLabel {
-  text-align: left;
-  min-width: 130px;
-}
-
 a {
   color: #000000;
   text-decoration: inherit;

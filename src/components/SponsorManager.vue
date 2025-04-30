@@ -90,7 +90,7 @@
   
   .input-container button {
     padding: 8px 16px;
-    background-color: #4CAF50;
+    background-color: #2196F3;
     color: white;
     border: none;
     border-radius: 4px;
