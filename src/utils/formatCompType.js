@@ -10,6 +10,9 @@ export const formatCompType = (compType) => {
       'Regio Oost': 'Regio Oost',
       'Regio West': 'Regio West',
       'Regio Zuid': 'Regio Zuid',
+      'TROPHY_COMPETITION': 'Beker',
+      'DEFAULT_COMPETITION': 'Competitie',
+      'POST_COMPETITION': 'Nacompetitie'
     };
     return typeMap[compType] ?? 'Onbekend';
   };

@@ -28,7 +28,6 @@
   <script setup>
   import { computed, ref } from 'vue';
   
-  // ✅ Correctly assign to variables
   const props = defineProps({
     clubs: Array,
     visible: Boolean,

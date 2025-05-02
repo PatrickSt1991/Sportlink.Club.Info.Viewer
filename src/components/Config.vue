@@ -273,10 +273,19 @@
       clientId: config.value.clientId,
       clubIdentifer: config.value.clubIdentifer
     }),
-    async ({ gameType, username, password, validUsername, validPassword, clientId, clubIdentifer }) => {
-      console.log(clientId)
+    async (
+      { 
+        gameType, 
+        username, 
+        password, 
+        validUsername, 
+        validPassword, 
+        clientId, 
+        fakeCredentials,
+        clubIdentifer }) => {
       if (gameType?.type === 'Sportlink API' && clientId) {
         try {
+          console.log('sportlink api')
           const response = await fetch(`https://data.sportlink.com/clubgegevens?client_id=${clientId}`);
           if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
           
@@ -311,30 +320,43 @@
         }
       }
       
-      if (gameType?.type === 'Sportlink Proxy' && username && password) {
-        console.log('eerst hier')
+      if (gameType?.type === 'Sportlink Proxy' && (username && password || fakeCredentials)) {
+        console.log('Sportlink Proxy triggered')
         const tokenExpired = !sportlinkTokenInfo.value.access_token || Date.now() >= sportlinkTokenInfo.value.expires_at;
 
-        if(validUsername && validPassword && (tokenExpired || !config.value.clubId))
-        {
-          await sportlinkLogin(username, password);
-          await fetchSportlinkClubs(config.value.gameType.instance);
-          showClubSelectPopup.value = true;
-        }
-
-        if(refreshInterval) {
-          clearInterval(refreshInterval);
-        }
-
-        refreshInterval = setInterval(async () => {
-          if (sportlinkTokenInfo.value.expires_at) {
-            const timeLeft = sportlinkTokenInfo.value.expires_at - Date.now();
-            if(timeLeft < 5 * 60 * 1000){
-              console.log(`Refreshing Sportlink token...`)
-              await sportlinkRefreshToken();
+        if((validUsername && validPassword) || fakeCredentials) {
+          if (tokenExpired || !config.value.clubId) {
+            try {
+              if (fakeCredentials) {
+                const fakeCred = FAKE_CREDENTIALS.find(c => c.sport.toLowerCase() === gameType.label.toLowerCase());
+                if (fakeCred) {
+                  await sportlinkLogin(fakeCred.username, fakeCred.password);
+                }
+              } else {
+                await sportlinkLogin(username, password);
+              }
+              
+              await fetchSportlinkClubs(config.value.gameType.instance);
+              showClubSelectPopup.value = true;
+            } catch (error) {
+              console.error('Error during login or club fetch:', error);
             }
           }
-        }, 60 * 1000);
+
+          if(refreshInterval) {
+            clearInterval(refreshInterval);
+          }
+
+          refreshInterval = setInterval(async () => {
+            if (sportlinkTokenInfo.value.expires_at) {
+              const timeLeft = sportlinkTokenInfo.value.expires_at - Date.now();
+              if(timeLeft < 5 * 60 * 1000){
+                console.log(`Refreshing Sportlink token...`)
+                await sportlinkRefreshToken();
+              }
+            }
+          }, 60 * 1000);
+        }
       }
     },
     { deep: true, immediate: true }
@@ -387,10 +409,10 @@
       clearInterval(refreshInterval);
     }
   });
-  // Show modal if both client id and club identifier are empty
+  
   watch(() => [config.value.clientId, config.value.clubIdentifer, config.value.clubId], 
     ([newClientVal, newIdentifierVal, newClubVal]) => {
-      if ((!newIdentifierVal || newIdentifierVal.trim() === '') && (!newClientVal || newClientVal.trim() === '') && (!newClubVal || newClientVal.trim() === '')) {
+      if ((!newIdentifierVal || newIdentifierVal.trim() === '') && (!newClientVal || newClientVal.trim() === '') && (!newClubVal || newClubVal.trim() === '')) {
         if(config.value.showTerms){
           showClientIdModal.value = true;
           config.value.showTerms = false;

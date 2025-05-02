@@ -40,10 +40,10 @@
           <div v-for="match in matches" :key="match.id" class="matchEntry">
             <div :style="{ background: config.leftBoxColor, color: config.leftBoxText }" id="datumUitslag_fixed">{{ match.wedstrijddatum }}</div>
             <div :style="{ background: config.leftMidBoxColor, color: config.leftMidBoxText }" id="thuisteam_fixed">{{ match.thuisteam }}</div>
-            <div :style="{ background: config.midBoxColor, color: config.midBoxText }" id="kleedkamer_fixed">{{ formatKleedkamer(match.kleedkamerthuisteam) }}</div>
+            <div :style="{ background: config.midBoxColor, color: config.midBoxText }" id="kleedkamer_fixed">{{ match.kleedkamerthuisteam }}</div>
             <div :style="{ background: config.rightMidBoxColor, color: config.rightMidBoxText }" id="uitteam_fixed">{{ match.uitteam }}</div>
-            <div :style="{ background: config.rightBoxColor, color: config.rightBoxText }" id="kleedkamer_fixed">{{ formatKleedkamer(match.kleedkameruitteam) }}</div>
-            <div :style="{ background: config.leftBoxColor, color: config.leftBoxText }" id="wedstrijdveld_fixed">{{ formatVeld(match.veld) }}</div>
+            <div :style="{ background: config.rightBoxColor, color: config.rightBoxText }" id="kleedkamer_fixed">{{ match.kleedkameruitteam }}</div>
+            <div :style="{ background: config.leftBoxColor, color: config.leftBoxText }" id="wedstrijdveld_fixed">{{ match.veld }}</div>
           </div>
         </transition-group>
       </div>
@@ -59,6 +59,7 @@ import { formatKleedkamer, formatVeld } from '@/utils/formatUtils.js';
 import { formatCompType } from '@/utils/formatCompType.js';
 import { formatTime  } from '@/utils/formatDateType.js';
 import noImage from '@/assets/no_image.png';
+import { formatDateTime } from '../utils/formatDateType';
 
 const router = useRouter();
 
@@ -79,7 +80,7 @@ const dateRangeText = computed(() => {
 });
 
 const fetchPreMatchInfo = async () => {
-  if(!config.value.clientId && !config.value.clubIdentifer){
+  if(!config.value.clientId && !config.value.clubIdentifer && !config.value.clubId){
     console.error("Config is not loaded yet");
     return;
   }
@@ -91,14 +92,43 @@ const fetchPreMatchInfo = async () => {
     let response;
     let url;
 
-    if(config.value.clientId){
+    if(config.value.gameType?.type === 'Sportlink API'){
       url = `https://data.sportlink.com/programma?gebruiklokaleteamgegevens=NEE&eigenwedstrijden=JA&thuis=JA&uit=NEE&client_id=${config.value.clientId}`;
-    }else if(config.value.clubIdentifer){
+    }else if(config.value.gameType?.type === 'Nevobo Proxy'){
       url = `https://api.nevobo.nl/v1/competitie/wedstrijden/programma?vereniging=${config.value.clubIdentifer}`;
       url =`https://cors-proxy.clubinfoproxy.workers.dev/proxy?url=${encodeURIComponent(url)}`;
+    }else if(config.value.gameType?.type === 'Sportlink Proxy'){
+      url = `https://app-sportlinked-production.sportlink.com/entity/common/memberportal/app/club/ClubProgram?v=3&ClubId=${config.value.clubId}`;
+      url = `https://cors-proxy.clubinfoproxy.workers.dev/proxy?url=${encodeURIComponent(url)}`;
     }
 
-    response = await fetch(url);
+    if(config.value.gameType?.type !== 'Sportlink Proxy'){
+      try{
+        response = await fetch(url);
+      }catch(error){
+        console.error('Full fetch error:', error);
+      }
+    }else{
+      try{
+        const tokenInfo = JSON.parse(localStorage.getItem('sportlinkTokenInfo'));
+
+        response = await fetch(url, {
+          method: 'GET',
+          headers: {
+            'Authorization': `Bearer ${tokenInfo?.access_token}`,
+            'X-Real-User-Agent': `sportlink-app-${config.value.gameType?.instance.toLowerCase()}/6.26.0-2025017636 android SM-N976N/samsung/25 (6.26.0)`,
+            'X-Navajo-Instance': `${config.value.gameType?.instance}`,
+            'X-Navajo-Locale': 'nl',
+            'X-Navajo-Version': '2',
+            'Accept': '*/*'
+          },
+        });
+      } catch (error) {
+        console.error('Full fetch error:', error);
+        throw error;
+      }
+    }
+    
     if (!response.ok) throw new Error(`HTTP Error! status: ${response.status}`);
 
     const data = await response.json();
@@ -108,48 +138,124 @@ const fetchPreMatchInfo = async () => {
     now.value = formatTime(currentDate);
     threeHoursLater.value = formatTime(laterDate);
 
+    if(config.value.gameType?.type === 'Sportlink API'){
+      try{
+          matches.value = data
+          .filter(match => {
+            const matchDateTime = new Date(match.wedstrijddatum.replace(/(\+|\-)(\d{2})(\d{2})$/, '$1$2:$3'));
+            const isSameDay = matchDateTime.toDateString() === currentDate.toDateString();
+            const isInWindow = matchDateTime >= currentDate && matchDateTime <= laterDate;
+            const isCorrectLocation = match.accommodatie === config.value?.sportLocatie;
+            return isCorrectLocation && isSameDay && isInWindow;
+        })
+        .map(match =>{
+          match.wedstrijddatum = formatTime(match.wedstrijddatum) 
+          match.kleedkamerthuisteam = formatKleedkamer(match.kleedkamerthuisteam)
+          match.kleedkameruitteam = formatKleedkamer(match.kleedkameruitteam)
+          match.veld = formatVeld(match.veld)
 
-    if(Array.isArray(data)){
-      matches.value = data.filter(match => {
-        const matchDateTime = new Date(match.wedstrijddatum.replace(/(\+|\-)(\d{2})(\d{2})$/, '$1$2:$3'));
-        const isSameDay = matchDateTime.toDateString() === currentDate.toDateString();
-        const isInWindow = matchDateTime >= currentDate && matchDateTime <= laterDate;
-        const isCorrectLocation = match.accommodatie === config.value?.sportLocatie;
-        return isCorrectLocation && isSameDay && isInWindow;
-      })
-      .map(match =>{
-        match.wedstrijddatum = formatDate(match.wedstrijddatum) 
-        return match;
-      });
-    }else if(data._embedded && data._embedded.items){
-      matches.value = data._embedded.items
-      .filter(match => {
-          const matchDateTime = new Date(match.tijd);
+          return match;
+        });
+      }catch(error){
+        console.log("Unexpected data format on Sportlink API:", error);
+      }
+    }
+    
+    if(config.value.gameType?.type === 'Sportlink Proxy'){
+      const tokenInfo = JSON.parse(localStorage.getItem('sportlinkTokenInfo'));
+
+      try{
+        const matchesRaw = data.ProgramItemMatchClub
+
+        .filter(item => {
+          const matchDateTime = new Date(item.Match.matchDateTime);
           const isSameDay = matchDateTime.toDateString() === currentDate.toDateString();
           const isInWindow = matchDateTime >= currentDate && matchDateTime <= laterDate;
-          const isCorrectLocation = match._embedded.pouleindeling_thuis._embedded.team._embedded.vereniging.vestigingsplaats === config.value?.sportLocatie;
-          return isCorrectLocation && isSameDay && isInWindow;
+          const isCorrectLocation = item.Match.HomeTeam.Club.ClubId === config.value.clubId;
+
+          return isCorrectLocation && isSameDay && isInWindow
         })
-      .map(match => {
-        const thuisteamparts = match._embedded.pouleindeling_thuis._embedded.team.naam.split(/\s*\/+\s*/);
-        const uitteamparts = match._embedded.pouleindeling_uit._embedded.team.naam.split(/\s*\/+\s*/);
-        match.wedstrijddatum = formatTime(match.tijd);
-        match.thuisteam = thuisteamparts[thuisteamparts.length - 1].trim();
-        match.thuisteamlogo = match._embedded?.pouleindeling_thuis?._embedded.team?._embedded?.vereniging?._links?.logo_url?.href || noImage;
+        matches.value = await Promise.all(
+          matchesRaw.map(async match => {
+            const matchId = match.Match.PublicMatchId
 
-        match.uitteam = uitteamparts[uitteamparts.length - 1].trim();
-        match.uitteamlogo = match._embedded?.pouleindeling_uit?._embedded?.team?._embedded?.vereniging?._links?.logo_url?.href || noImage;
-        match.competitiesoort = formatCompType(match._embedded?.poule?._embedded?.regio?.omschrijving || '');
+            const fetchMatchDetails = async (matchid) => {
+              const url = `https://app-sportlinked-production.sportlink.com/entity/common/memberportal/app/match/MatchFacility?v=3&PublicMatchId=${matchid}`;
+              const proxyUrl = `https://cors-proxy.clubinfoproxy.workers.dev/proxy?url=${encodeURIComponent(url)}`;
+              const response = await fetch(proxyUrl, {
+                method: 'GET',
+                headers: {
+                  'Authorization': `Bearer ${tokenInfo?.access_token}`,
+                  'X-Real-User-Agent': `sportlink-app-${config.value.gameType?.instance.toLowerCase()}/6.26.0-2025017636 android SM-N976N/samsung/25 (6.26.0)`,
+                  'X-Navajo-Instance': `${config.value.gameType?.instance}`,
+                  'X-Navajo-Locale': 'nl',
+                  'X-Navajo-Version': '3',
+                }
+              });
+              const details = await response.json();
+              console.log(details)
+              const homeDressingRoom = details.HomeDressingRoom;
+              const awayDressingRoom = details.AwayDressingRoom;
+              const matchField = details.SubFacilityName;
 
-        match.veld = match._embedded.speelveld.aanduiding || "Onbekend";
+              return {
+                homeDressingRoom,
+                awayDressingRoom,
+                matchField
+              }
 
-        
-        return match;
-      });
-    }else{
-      console.error("Unexpected data format:");
+            };
+
+            const matchDetails = matchId ? await fetchMatchDetails(matchId) : null;
+
+            match.wedstrijddatum = formatTime(match.Match.MatchDateTime),
+            match.thuisteam = match.Match.HomeTeam.TeamName,
+            match.kleedkamerthuisteam = formatKleedkamer(matchDetails.homeDressingRoom)
+
+            match.uitteam = match.Match.AwayTeam.TeamName,
+            match.kleedkameruitteam = formatKleedkamer(matchDetails.awayDressingRoom)
+            match.veld = formatVeld(matchDetails.matchField)
+
+            return match;
+          })
+        )
+      }catch(error){
+        console.error("Unexpected data format on Sportlink Proxy:", error); 
+      }
     }
 
+    if(config.value.gameType?.type === 'Nevobo Proxy'){
+      try{
+        matches.value = data._embedded.items
+        /*
+        .filter(match => {
+            const matchDateTime = new Date(match.tijd);
+            const isSameDay = matchDateTime.toDateString() === currentDate.toDateString();
+            const isInWindow = matchDateTime >= currentDate && matchDateTime <= laterDate;
+            const isCorrectLocation = match._embedded.pouleindeling_thuis._embedded.team._embedded.vereniging.vestigingsplaats === config.value?.sportLocatie;
+            return isCorrectLocation && isSameDay && isInWindow;
+          })
+            */
+        .map(match => {
+          const thuisteamparts = match._embedded.pouleindeling_thuis._embedded.team.naam.split(/\s*\/+\s*/);
+          const uitteamparts = match._embedded.pouleindeling_uit._embedded.team.naam.split(/\s*\/+\s*/);
+          match.wedstrijddatum = formatTime(match.tijd);
+          match.thuisteam = match._embedded.pouleindeling_thuis._embedded.team.naam//thuisteamparts[thuisteamparts.length - 1].trim();
+          match.thuisteamlogo = match._embedded?.pouleindeling_thuis?._embedded.team?._embedded?.vereniging?._links?.logo_url?.href || noImage;
+
+          match.uitteam = match._embedded.pouleindeling_uit._embedded.team.naam //uitteamparts[uitteamparts.length - 1].trim();
+          match.uitteamlogo = match._embedded?.pouleindeling_uit?._embedded?.team?._embedded?.vereniging?._links?.logo_url?.href || noImage;
+          match.competitiesoort = formatCompType(match._embedded?.poule?._embedded?.regio?.omschrijving || '');
+
+          match.veld = match._embedded.speelveld.aanduiding || "Onbekend";
+          
+          return match;
+        });
+      }catch(error){
+        console.error("Unexpected data format on Nevobo Proxy:", error);
+      }
+
+    }
 
     if (matches.value.length > 0) {
       await nextTick();
@@ -235,8 +341,9 @@ watch(() => USER_CONFIG.value, (newConfig) => {
   
   const missingClientId = !newConfig.clientId;
   const missingClubIdentifier = !newConfig.clubIdentifer;
+  const missingClubId = !newConfig.clubId;
   
-  if (missingClientId && missingClubIdentifier) {
+  if (missingClientId && missingClubIdentifier && missingClubId) {
     router.push('/settings');
   } else {
     fetchPreMatchInfo();

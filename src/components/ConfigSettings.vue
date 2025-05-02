@@ -161,7 +161,7 @@
   }, { deep: true });
   
   watch(() => localConfig.value.gameType,
-    (newValue, oldValue) => {
+    (newValue) => {
       localConfig.value.clientId = null;
       localConfig.value.clubIdentifer = null;
       localConfig.value.clubId = null;
@@ -171,54 +171,128 @@
       localConfig.value.validPassword = false;
       localConfig.value.fakeCredentials = false;
       localConfig.value.sportLocatie = null;
-      localConfig.value.someOtherConfig = null;
-      console.log(`Sport aangepast van ${oldValue.label} naar ${newValue.label}, resetting...`)
+      console.log(`Sport aangepast naar ${newValue.label}, resetting...`)
     }
   );
 
-// Watch for fake credentials changes
-watch(
-  () => [localConfig.value.fakeCredentials, localConfig.value.gameType?.label],
-  async ([fakeCredentialsEnabled, selectedGameLabel], [oldFakeCredentials, oldGameLabel]) => {
-    // Skip if values haven't actually changed
-    if (fakeCredentialsEnabled === oldFakeCredentials && selectedGameLabel === oldGameLabel) {
-      return;
-    }
+  watch(
+    () => ({
+      selectedGameLabel: localConfig.value.gameType?.label || null,
+      nevoboIdentifier: localConfig.value.clubIdentifer || null
+    }),
+    async ({ selectedGameLabel, nevoboIdentifier }, prev = { selectedGameLabel: null, nevoboIdentifier: null }) => {
+      if(!selectedGameLabel || !nevoboIdentifier) return;
+      
+      if(localConfig.value.gameType?.type !== 'Nevobo Proxy') return;
+      console.log(selectedGameLabel)
+      console.log(prev.selectedGameLabel)
+      if(selectedGameLabel === prev.selectedGameLabel &&
+          nevoboIdentifier === prev.nevoboIdentifier){
+          return;
+        }
+      
+        try{
+          const changes = {};
+          changes.clubIdentifer = localConfig.value.clubIdentifer
 
-    if (selectedGameLabel) {
-      const selectedSport = selectedGameLabel.toLowerCase();
-      const fakeCredential = props.fakeCredentials.find(
-        (cred) => cred.sport.toLowerCase() === selectedSport
-      );
+          if (Object.keys(changes).length > 0) {
+            Object.assign(localConfig.value, changes);
+            await nextTick();
+            emit('update:config', { ...localConfig.value });
+          } 
+        }catch(error){
+          console.error('Error in fake credentials watch:', error)
+        }
+    },
+    { deep: true, immediate: true, flush: 'post'}
+  );
 
-      const changes = {};
+  watch(
+    () => ({
+      selectedGameLabel: localConfig.value.gameType?.label || null,
+      sportlinkClientId: localConfig.value.clientId || null
+    }),
+    async ({ selectedGameLabel, sportlinkClientId }, prev = { selectedGameLabel: null, sportlinkClientId: null }) => {
+      if(!selectedGameLabel || !sportlinkClientId) return;
 
-      if (fakeCredentialsEnabled && fakeCredential) {
-        changes.username = fakeCredential.username;
-        changes.password = fakeCredential.password;
-        changes.validUsername = true;
-        changes.validPassword = true;
-      } else if (
-        !fakeCredentialsEnabled &&
-        localConfig.value.username === fakeCredential?.username &&
-        localConfig.value.password === fakeCredential?.password
-      ) {
-        changes.username = '';
-        changes.password = '';
-        changes.validUsername = false;
-        changes.validPassword = false;
+      if(localConfig.value.gameType?.type !== 'Sportlink API') return;
+      
+      if(selectedGameLabel === prev.selectedGameLabel &&
+          sportlinkClientId === prev.sportlinkClientId){
+        return;
       }
 
-      // Only update if there are actual changes
-      if (Object.keys(changes).length > 0) {
-        Object.assign(localConfig.value, changes);
-        await nextTick();
-        emit('update:config', { ...localConfig.value });
+      try{
+        const changes = {};
+        changes.clientId = localConfig.value.clientId
+
+        if (Object.keys(changes).length > 0) {
+          Object.assign(localConfig.value, changes);
+          await nextTick();
+          emit('update:config', { ...localConfig.value });
+        }
+      } catch(error) {
+        console.error('Error in fake credentials watch:', error)
       }
-    }
-  },
-  { deep: true, flush: 'post' }
-);
+    },
+    { deep: true, immediate: true, flush: 'post' }
+  );
+
+  watch(
+    () => ({
+      fakeCredentialsEnabled: localConfig.value.fakeCredentials,
+      selectedGameLabel: localConfig.value.gameType?.label || null
+    }),
+    async ({ fakeCredentialsEnabled, selectedGameLabel }, prev = { fakeCredentialsEnabled: null, selectedGameLabel: null }) => {
+      if (!selectedGameLabel || !Array.isArray(props.fakeCredentials)) {
+        return;
+      }
+
+      if(localConfig.value.gameType?.type !== 'Sportlink Proxy') return;
+    
+      if (fakeCredentialsEnabled === prev.fakeCredentialsEnabled &&
+          selectedGameLabel === prev.selectedGameLabel) {
+        return;
+      }
+
+      try{
+        const selectedSport = selectedGameLabel.toLowerCase();
+        const fakeCredential = props.fakeCredentials.find(
+          (cred) => cred.sport.toLowerCase() === selectedSport
+        );
+
+        if(fakeCredentialsEnabled && !fakeCredential){
+          return;
+        }
+
+        const changes = {};
+
+        if (fakeCredentialsEnabled) {
+          changes.username = fakeCredential.username;
+          changes.password = fakeCredential.password;
+          changes.validUsername = true;
+          changes.validPassword = true;
+        } else if (
+          localConfig.value.username === fakeCredential?.username &&
+          localConfig.value.password === fakeCredential?.password
+        ) {
+          changes.username = '';
+          changes.password = '';
+          changes.validUsername = false;
+          changes.validPassword = false;
+        }
+
+        if (Object.keys(changes).length > 0) {
+          Object.assign(localConfig.value, changes);
+          await nextTick();
+          emit('update:config', { ...localConfig.value });
+        }
+      } catch(error) {
+        console.error('Error in fake credentials watch:', error)
+      }
+    },
+    { deep: true, immediate: true, flush: 'post' }
+  );
   
   function updateBackground() {
     emit('updateBackground');
