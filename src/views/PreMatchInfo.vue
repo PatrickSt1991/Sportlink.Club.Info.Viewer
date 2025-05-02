@@ -22,18 +22,10 @@
         <h1>{{ error }}</h1>
       </div>
 
-      <div v-else-if="matches.length === 0" class="no-matches-container" id="noMatchMessage">
-        <div class="calendar-icon">
-          <div class="calendar-page">
-            <div class="empty-grid">
-              <div v-for="n in 9" :key="n" class="grid-cell"></div>
-            </div>
-          </div>
-          <div class="calendar-spine"></div>
-        </div>
-        <h2 class="calh2">Geen wedstrijden gepland</h2>
-        <p class="calp">{{ dateRangeText }}</p>
-      </div>
+      <NoMatchesDisplay 
+        v-else-if="matches.length === 0"
+        title="Geen wedstrijd resultaten"
+        :message="dateRangeText" />
       
       <div v-else id="scrollingContainer" ref="scrollingContainer" :style="{ height: scrollingContainerHeight }">
         <transition-group name="fade" tag="div">
@@ -58,22 +50,26 @@ import { useRouter } from 'vue-router';
 import { formatKleedkamer, formatVeld } from '@/utils/formatUtils.js';
 import { formatCompType } from '@/utils/formatCompType.js';
 import { formatTime  } from '@/utils/formatDateType.js';
-import noImage from '@/assets/no_image.png';
-import { formatDateTime } from '../utils/formatDateType';
+import NoMatchesDisplay from '@/components/NoMatchesDisplay.vue';
+import { useScrollHelper } from '../utils/scrollHelper';
 
 const router = useRouter();
 
 const matches = ref([]);
 const error = ref(null);
 const loading = ref(false);
-const scrollInterval = ref(null);
-const refreshInterval = ref(null);
-const scrollingContainerHeight = ref('300px');
-const scrollPosition = ref(0);
-const scrollingContainer = ref(null);
 const config = ref({});
 const now = ref('');
 const threeHoursLater = ref('');
+
+const {
+    scrollingContainerHeight,
+    calculateScrollingContainerHeight,
+    startScrolling,
+    tryStartScrolling,
+    stopScrolling
+} = useScrollHelper(router, config);
+
 
 const dateRangeText = computed(() => {
   return `Er zijn geen wedstrijden gepland tussen ${now.value} en ${threeHoursLater.value}`;
@@ -227,7 +223,6 @@ const fetchPreMatchInfo = async () => {
     if(config.value.gameType?.type === 'Nevobo Proxy'){
       try{
         matches.value = data._embedded.items
-        /*
         .filter(match => {
             const matchDateTime = new Date(match.tijd);
             const isSameDay = matchDateTime.toDateString() === currentDate.toDateString();
@@ -235,16 +230,11 @@ const fetchPreMatchInfo = async () => {
             const isCorrectLocation = match._embedded.pouleindeling_thuis._embedded.team._embedded.vereniging.vestigingsplaats === config.value?.sportLocatie;
             return isCorrectLocation && isSameDay && isInWindow;
           })
-            */
         .map(match => {
-          const thuisteamparts = match._embedded.pouleindeling_thuis._embedded.team.naam.split(/\s*\/+\s*/);
-          const uitteamparts = match._embedded.pouleindeling_uit._embedded.team.naam.split(/\s*\/+\s*/);
           match.wedstrijddatum = formatTime(match.tijd);
-          match.thuisteam = match._embedded.pouleindeling_thuis._embedded.team.naam//thuisteamparts[thuisteamparts.length - 1].trim();
-          match.thuisteamlogo = match._embedded?.pouleindeling_thuis?._embedded.team?._embedded?.vereniging?._links?.logo_url?.href || noImage;
+          match.thuisteam = match._embedded.pouleindeling_thuis._embedded.team.naam
 
-          match.uitteam = match._embedded.pouleindeling_uit._embedded.team.naam //uitteamparts[uitteamparts.length - 1].trim();
-          match.uitteamlogo = match._embedded?.pouleindeling_uit?._embedded?.team?._embedded?.vereniging?._links?.logo_url?.href || noImage;
+          match.uitteam = match._embedded.pouleindeling_uit._embedded.team.naam
           match.competitiesoort = formatCompType(match._embedded?.poule?._embedded?.regio?.omschrijving || '');
 
           match.veld = match._embedded.speelveld.aanduiding || "Onbekend";
@@ -267,57 +257,6 @@ const fetchPreMatchInfo = async () => {
   } finally {
     loading.value = false;
   }
-};
-
-const calculateScrollingContainerHeight = () => {
-  scrollingContainerHeight.value = `${window.innerHeight - 265}px`;
-};
-
-const startScrolling = async (attempt = 0) => {
-  const maxAttempts = 5;
-  
-  if (!scrollingContainer.value) {
-    scrollingContainer.value = document.getElementById('scrollingContainer');
-    
-    if (!scrollingContainer.value && attempt < maxAttempts) {
-      setTimeout(() => startScrolling(attempt + 1), 100 * (attempt + 1));
-      return;
-    }
-    
-
-    if (!scrollingContainer.value && matches.length != 0) {
-      console.error('Scrolling container not found after', maxAttempts, 'attempts');
-      return;
-    }
-  }
-
-  scrollPosition.value = 0;
-  clearInterval(scrollInterval.value);
-
-  await nextTick();
-
-  scrollingContainer.value.scrollTop = 0;
-
-  const scrollHeight = scrollingContainer.value.scrollHeight - scrollingContainer.value.clientHeight;
-  if (scrollHeight <= 0) {
-    console.log('Not enough content to scroll');
-    return;
-  }
-
-  scrollInterval.value = setInterval(() => {
-    scrollPosition.value += 1;
-    scrollingContainer.value.scrollTop = scrollPosition.value;
-
-    if (scrollPosition.value >= scrollHeight) {
-      scrollPosition.value = 0;
-      scrollingContainer.value.scrollTop = 0;
-    }
-  }, 100);
-};
-
-const stopScrolling = () => {
-  clearInterval(scrollInterval.value);
-  scrollInterval.value = null;
 };
 
 const startPeriodicRefresh = () => {

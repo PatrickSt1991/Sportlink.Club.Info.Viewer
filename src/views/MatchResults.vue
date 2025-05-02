@@ -11,18 +11,10 @@
         <h1>{{ error }}</h1>
       </div>
 
-      <div v-else-if="matches.length === 0" class="no-matches-container" id="noMatchMessage">
-        <div class="calendar-icon">
-          <div class="calendar-page">
-            <div class="empty-grid">
-              <div v-for="n in 9" :key="n" class="grid-cell"></div>
-            </div>
-          </div>
-          <div class="calendar-spine"></div>
-        </div>
-        <h2 class="calh2">Geen wedstrijd resultaten</h2>
-        <p class="calp">Geen wedstrijd resultaten van de afgelopen {{ config.uitslagDagen }} dagen</p>
-      </div>
+      <NoMatchesDisplay 
+        v-else-if="matches.length === 0"
+        title="Geen wedstrijd resultaten"
+        :message="dateRangeText" />
 
       <div v-else id="scrollingContainer" :style="{ height: scrollingContainerHeight }">
         <transition-group name="fade" tag="div">
@@ -49,6 +41,8 @@ import { formatCompType } from '@/utils/formatCompType.js';
 import { formatNevoboDate } from '@/utils/formatDateType.js';
 import noImage from '@/assets/no_image.png';
 import { formatDateTime } from '../utils/formatDateType';
+import NoMatchesDisplay from '@/components/NoMatchesDisplay.vue';
+import { useScrollHelper } from '../utils/scrollHelper';
 
 const router = useRouter();
 
@@ -56,77 +50,16 @@ const router = useRouter();
 const matches = ref([]);
 const error = ref(null);
 const loading = ref(false);
-const scrollInterval = ref(null);
-const scrollingContainerHeight = ref('300px');
-const scrollPosition = ref(0);
-const scrollCycleCount = ref(0);
 const config = ref({});
-const containerReady = ref(false);
 
-// First define the scrolling functions
-const calculateScrollingContainerHeight = () => {
-  scrollingContainerHeight.value = `${window.innerHeight - 265}px`;
-};
+const {
+  scrollingContainerHeight,
+  calculateScrollingContainerHeight,
+  startScrolling,
+  tryStartScrolling,
+  stopScrolling
+} = useScrollHelper(router, config);
 
-const startScrolling = () => {
-  const container = document.getElementById('scrollingContainer');
-  
-  if (!container) {
-    console.error('Scrolling container not found! Trying again...');
-    setTimeout(tryStartScrolling, 100);
-    return;
-  }
-
-  containerReady.value = true;
-  scrollPosition.value = 0;
-  scrollCycleCount.value = 0;
-  clearInterval(scrollInterval.value);
-
-  container.scrollTop = 0;
-
-  const scrollHeight = container.scrollHeight - container.clientHeight;
-  if (scrollHeight <= 0) {
-    console.log('Not enough content to scroll');
-    return;
-  }
-
-  scrollInterval.value = setInterval(() => {
-    scrollPosition.value += 1;
-    container.scrollTop = scrollPosition.value;
-    
-    if (scrollPosition.value >= scrollHeight) {
-      scrollPosition.value = 0;
-      scrollCycleCount.value += 1;
-      container.scrollTop = 0;
-      
-      if (scrollCycleCount.value >= 2 && config.value.enableScreenSwitch) {
-        stopScrolling();
-        router.push('/match-info');
-      }
-    }
-  }, 100);
-};
-
-const tryStartScrolling = (attempt = 0) => {
-  const maxAttempts = 5;
-  const container = document.getElementById('scrollingContainer');
-  
-  if (container) {
-    containerReady.value = true;
-    startScrolling();
-  } else if (attempt < maxAttempts) {
-    setTimeout(() => tryStartScrolling(attempt + 1), 200 * (attempt + 1));
-  } else {
-    console.error('Failed to find scrolling container after', maxAttempts, 'attempts');
-  }
-};
-
-const stopScrolling = () => {
-  clearInterval(scrollInterval.value);
-  scrollInterval.value = null;
-};
-
-// Then define the data fetching functions
 const fetchMatchResults = async () => {
   if (!config.value?.uitslagDagen || (!config.value?.clientId && !config.value?.clubIdentifer)) {
     console.error("Config not loaded yet!");
@@ -260,6 +193,7 @@ const fetchMatchResults = async () => {
 
     if(config.value.gameType?.type === 'Nevobo Proxy') {
       try{
+        console.log(dateThreshold)
         matches.value = data._embedded.items
           .filter(match => {
               const matchDate = new Date(match.datum);
@@ -319,6 +253,10 @@ watch(() => USER_CONFIG.value, (newConfig) => {
 onMounted(() => {
   calculateScrollingContainerHeight();
   window.addEventListener('resize', calculateScrollingContainerHeight);
+  
+  if(matches.value.length > 0){
+    nextTick().then(startScrolling);
+  }
 });
 
 onUnmounted(() => {

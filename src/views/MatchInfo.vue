@@ -12,18 +12,10 @@
         <h1>{{ error }}</h1>
       </div>
 
-      <div v-else-if="matches.length === 0" class="no-matches-container" id="noMatchMessage">
-        <div class="calendar-icon">
-          <div class="calendar-page">
-            <div class="empty-grid">
-              <div v-for="n in 9" :key="n" class="grid-cell"></div>
-            </div>
-          </div>
-          <div class="calendar-spine"></div>
-        </div>
-        <h2 class="calh2">Geen wedstrijd programma</h2>
-        <p class="calp">Geen wedstrijden de aankomende {{ config.programmaDagen }} dagen</p>
-      </div>
+      <NoMatchesDisplay 
+        v-else-if="matches.length === 0"
+        title="Geen wedstrijd programma"
+        :message="dateRangeText" />
 
       <div v-else id="scrollingContainer" :style="{ height: scrollingContainerHeight }">
         <transition-group name="fade" tag="div">
@@ -48,28 +40,25 @@ import { USER_CONFIG } from '@/config';
 import { useRouter } from 'vue-router';
 import { formatCompType } from '@/utils/formatCompType.js';
 import { formatDateTime } from '@/utils/formatDateType.js';
-import { formatNevoboDate } from '../utils/formatDateType';
 import noImage from '@/assets/no_image.png';
+import NoMatchesDisplay from '@/components/NoMatchesDisplay.vue';
+import { useScrollHelper } from '../utils/scrollHelper';
 
 const router = useRouter();
-
-// Reactive state
 const matches = ref([]);
 const error = ref(null);
 const loading = ref(false);
-const scrollInterval = ref(null);
-const scrollingContainerHeight = ref('300px');
-const scrollPosition = ref(0);
-const scrollCycleCount = ref(0);
 const config = ref({});
-const containerReady = ref(false);
 
-const calculateScrollingContainerHeight = () => {
-  const windowHeight = window.innerHeight;
-  scrollingContainerHeight.value = `${windowHeight - 265}px`;
-};
+const {
+    scrollingContainerHeight,
+    calculateScrollingContainerHeight,
+    startScrolling,
+    tryStartScrolling,
+    stopScrolling
+} = useScrollHelper(router, config);
 
-// Fetch function
+
 const fetchMatchInfo = async () => {
   if (!config.value?.programmaDagen || (!config.value?.clientId && !config.value?.clubIdentifer && !config.value?.clubId)) {
     console.error('Config not loaded yet!');
@@ -125,7 +114,6 @@ const fetchMatchInfo = async () => {
     if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
     
     const data = await response.json();
-    console.log(data.ProgramItemMatchClub)
     const now = new Date();
     const dateThreshold = new Date(now);
     dateThreshold.setDate(now.getDate() + config.value.programmaDagen);
@@ -199,9 +187,9 @@ const fetchMatchInfo = async () => {
 
     if(config.value.gameType?.type === 'Nevobo Proxy'){
       try{
+
         matches.value = data._embedded.items
         .filter(match => {
-
           const matchDate = new Date(match.datum);
           return matchDate >= now && matchDate <= dateThreshold;
         })
@@ -236,56 +224,6 @@ const fetchMatchInfo = async () => {
   }
 };
 
-// Scrolling functions
-const tryStartScrolling = (attempt = 0) => {
-  const maxAttempts = 5;
-  const container = document.getElementById('scrollingContainer');
-  
-  if (container) {
-    containerReady.value = true;
-    startScrolling();
-  } else if (attempt < maxAttempts) {
-    setTimeout(() => tryStartScrolling(attempt + 1), 200 * (attempt + 1));
-  } else {
-    console.error('Failed to find scrolling container after', maxAttempts, 'attempts');
-  }
-};
-
-const startScrolling = () => {
-  const container = document.getElementById('scrollingContainer');
-  if (!container) {
-    console.error('Scrolling container still not found!');
-    return;
-  }
-
-  scrollPosition.value = 0;
-  scrollCycleCount.value = 0;
-  clearInterval(scrollInterval.value);
-  container.scrollTop = 0;
-
-  const scrollHeight = container.scrollHeight - container.clientHeight;
-
-  if (scrollHeight > 0) {
-    scrollInterval.value = setInterval(() => {
-      scrollPosition.value += 1;
-      container.scrollTop = scrollPosition.value;
-      
-      if (scrollPosition.value >= scrollHeight) {
-        scrollPosition.value = 0;
-        scrollCycleCount.value += 1;
-        container.scrollTop = 0;
-        
-        if (scrollCycleCount.value >= 2 && config.value.enableScreenSwitch) {
-          clearInterval(scrollInterval.value);
-          console.log('Switching to match results page...');
-          router.push('/match-results');
-        }
-      }
-    }, 100);
-  }
-};
-
-// Watch for config changes
 watch(() => USER_CONFIG.value, (newConfig) => {
   if (!newConfig) return;
   
@@ -303,7 +241,6 @@ watch(() => USER_CONFIG.value, (newConfig) => {
   }
 }, { immediate: true, deep: true });
 
-// Lifecycle hooks
 onMounted(() => {
   calculateScrollingContainerHeight(); // Now calling the correctly named function
   window.addEventListener('resize', calculateScrollingContainerHeight);
@@ -314,7 +251,7 @@ onMounted(() => {
 });
 
 onUnmounted(() => {
-  clearInterval(scrollInterval.value);
+  stopScrolling();
   window.removeEventListener('resize', calculateScrollingContainerHeight);
 });
 </script>

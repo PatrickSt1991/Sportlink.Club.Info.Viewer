@@ -152,13 +152,18 @@
   
   const localConfig = ref({ ...props.config });
   
-  watch(localConfig.value, (newValue) => {
-    emit('update:config', newValue);
-  }, { deep: true });
-  
   watch(() => props.config, (newValue) => {
+  if (JSON.stringify(localConfig.value) !== JSON.stringify(newValue)) {
     localConfig.value = { ...newValue };
-  }, { deep: true });
+  }
+}, { deep: true });
+
+watch(localConfig, (newVal) => {
+  if (JSON.stringify(props.config) !== JSON.stringify(newVal)) {
+    console.log(newVal);
+    emit('update:config', { ...newVal });
+  }
+}, { deep: true });
   
   watch(() => localConfig.value.gameType,
     (newValue) => {

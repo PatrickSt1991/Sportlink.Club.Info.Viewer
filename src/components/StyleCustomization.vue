@@ -111,10 +111,18 @@
     emit('update:styles', newValue);
   }, { deep: true });
   
-  // Watch for changes in the incoming styles and update local copy
-  watch(() => props.styles, (newValue) => {
-    localStyles.value = { ...newValue };
-  }, { deep: true });
+// Watch for changes in the incoming styles and update local copy
+watch(() => props.styles, (newStyles) => {
+  // Only update if there are actual changes to avoid infinite loops
+  if (JSON.stringify(localStyles.value) !== JSON.stringify(newStyles)) {
+    localStyles.value = { ...newStyles };
+  }
+}, { deep: true });
+
+// Emit changes immediately when local styles change
+watch(() => ({ ...localStyles.value }), (newStyles) => {
+  emit('update:styles', newStyles);
+}, { deep: true });
   
   function updateColor(field, value) {
     localStyles.value[field] = value.toUpperCase();

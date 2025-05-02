@@ -17,7 +17,7 @@
       </div>
     </div>
     <p class="copyright">
-      <a href="https://github.com/PatrickSt1991" target="_blank">© {{ year }} Patrick Stel. <br/> Released under the MIT License.</a>
+      <a href="https://github.com/PatrickSt1991" target="_blank">© {{ year }} Patrick Stel. <br/> Vrijgegeven onder de MIT-licentie..</a>
     </p>
   </div>
 </template>
