@@ -58,6 +58,7 @@ const router = useRouter();
 const matches = ref([]);
 const error = ref(null);
 const loading = ref(false);
+const refreshInterval = ref(null);
 const config = ref({});
 const now = ref('');
 const threeHoursLater = ref('');
