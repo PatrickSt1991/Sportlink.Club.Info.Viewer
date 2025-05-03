@@ -24,7 +24,7 @@
 
       <NoMatchesDisplay 
         v-else-if="matches.length === 0"
-        title="Geen wedstrijd resultaten"
+        title="Geen wedstrijden"
         :message="dateRangeText" />
       
       <div v-else id="scrollingContainer" ref="scrollingContainer" :style="{ height: scrollingContainerHeight }">

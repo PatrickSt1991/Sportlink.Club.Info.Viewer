@@ -58,7 +58,7 @@ export function useConfigWatchers(config, {
                         password, 
                         validUsername, 
                         validPassword, 
-                        fakeCredentials 
+                        fakeCredentials
                     });
                 }
             },
@@ -123,7 +123,7 @@ export function useConfigWatchers(config, {
         password, 
         validUsername, 
         validPassword, 
-        fakeCredentials 
+        fakeCredentials,
     }) {
         const tokenExpired = !sportlinkAuth.sportlinkTokenInfo.value.access_token || 
                             Date.now() >= sportlinkAuth.sportlinkTokenInfo.value.expires_at;
@@ -132,9 +132,9 @@ export function useConfigWatchers(config, {
             if (tokenExpired || !config.value.clubId) {
                 try {
                     if (fakeCredentials) {
-                        await sportlinkAuth.useFakeCredentials(gameType.label);
+                        await sportlinkAuth.useFakeCredentials(gameType);
                     } else {
-                        await sportlinkAuth.login(username, password, config.value.gameType.url);
+                        await sportlinkAuth.login(username, password, gameType.label);
                     }
                     
                     await clubData.fetchSportlinkClubs(config.value.gameType.instance, config.value.gameType.userAgent, config.value.gameType.url);
@@ -153,7 +153,7 @@ export function useConfigWatchers(config, {
                     const timeLeft = sportlinkAuth.sportlinkTokenInfo.value.expires_at - Date.now();
                     if(timeLeft < 5 * 60 * 1000){
                         console.log(`Refreshing Sportlink token...`)
-                        await sportlinkAuth.refreshToken();
+                        await sportlinkAuth.refreshToken(gameType.label);
                     }
                 }
             }, 60 * 1000);

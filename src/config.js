@@ -1,44 +1,228 @@
 import { ref } from 'vue';
 
 export const FAKE_CREDENTIALS = [
-  { username: 'rxxnrextolzwlqsspy@hthlm.com', password: 'test1234', sport: 'waterpolo', url: 'sportlinked'},
-  { username: 'rxxnrextolzwlqsspy@hthlm.com', password: 'test1234', sport: 'handbal', url: 'sportlinked'},
-  { username: 'rxxnrextolzwlqsspy@hthlm.com', password: 'test1234', sport: 'hockey belgië', url: 'sportlinked'},
-  { username: 'rxxnrextolzwlqsspy@hthlm.com', password: 'test1234', sport: 'softbal', url: 'sportlinked'},
-  { username: 'rxxnrextolzwlqsspy@hthlm.com', password: 'test1234', sport: 'voetbal', url: 'vnl'},
-  { username: 'rxxnrextolzwlqsspy@hthlm.com', password: 'test1234', sport: 'basketbal', url: 'sportlinked'},
-  { username: 'rxxnrextolzwlqsspy@hthlm.com', password: 'test1234', sport: 'korfbal', url: 'sportlinked'},
-  { username: 'rxxnrextolzwlqsspy@hthlm.com', password: 'test1234', sport: 'honkbal', url: 'sportlinked'}
+  { 
+    username: 'rxxnrextolzwlqsspy@hthlm.com', 
+    password: 'test1234', 
+    sports: [
+      { sport: 'voetbal' },
+      { sport: 'waterpolo' },
+      { sport: 'hockey belgië' },
+      { sport: 'soft- en honkbal' },
+      { sport: 'basketbal' },
+      { sport: 'handbal' },
+      { sport: 'korfbal'}
+    ]
+  }
+]
+
+export const APP_CREDENTIALS = [
+  {
+    type: 'Voetbal',
+    client_id: 'oCuV9oozaaz8zee',
+    secret: 'eep7Shoo7i',
+    instance: 'KNVB',
+    userAgent: 'voetbalnl',
+    apiUrl: 'vnl'
+  },
+  {
+    type: 'Waterpolo',
+    client_id: '4BtKnhojt4MSnRScVak5',
+    secret: 'vLD8uPHOgIHJjAj9',
+    instance: 'KNZB',
+    userAgent: 'knzb',
+    apiUrl: 'sportlinked'
+  },
+  {
+    type: 'hockey belgië',
+    client_id: 'YqTh94xQBASRCtTmpa0b',
+    secret: '15T74iIa011VVoAm',
+    instance: 'KBHB',
+    userAgent: 'kbhb',
+    apiUrl: 'sportlinked'
+  },
+  {
+    type: 'soft- en honkbal',
+    client_id: '0SaoFKzAVgn3cTzxUsk8',
+    secret: 'H1LRQnWYxm10YA87',
+    instance: 'KNBSB',
+    userAgent: 'knbsb',
+    apiUrl: 'sportlinked'
+  },
+  {
+    type: 'basketbal',
+    client_id: '4boXZaODcf1A5ffb7zMl',
+    secret: 'netkEQKiWAsFEwl3',
+    instance: 'NBB',
+    userAgent: 'nbb',
+    apiUrl: 'sportlinked'
+  },
+  {
+    type: 'handbal',
+    client_id: 'JUian2haoKqIripvaios',
+    secret: '9BdMs5h9jvr9Agte',
+    instance: 'NHV',
+    userAgent: 'nhv',
+    apiUrl: 'sportlinked'
+  },
+  {
+    type: 'korfbal',
+    client_id: 'SdJSHVPuWzK066Mu28ki',
+    secret: 'j2OInPPCmWJ0VA2W',
+    instance: 'KNKV',
+    userAgent: 'knkv',
+    apiUrl: 'sportlinked'
+  }
 ]
 
 export const GAME_TYPES = [
-  { label: 'Voetbal', type: 'Sportlink API', active: true },
-  { label: 'Basketbal', type: 'Sportlink API', active: true },
-  { label: 'Korfbal', type: 'Sportlink API', active: true },
-  { label: 'Soft- en Honkbal', type: 'Sportlink API', active: true },
-  { label: 'Volleybal', type: 'Sportlink API', active: true },
-  { label: 'Waterpolo', type: 'Sportlink API', active: true },
-  { label: 'Hockey België', type: 'Sportlink API', active: false },
-  { label: 'Handbal', type: 'Sportlink API', active: true },
-  { label: 'Volleybal', type: 'Nevobo Proxy',  active: true },
-  { label: 'Voetbal', type: 'Sportlink Proxy', instance: 'KNVB', userAgent: 'voetbalnl', url: 'vnl', active: false },
-  { label: 'Basketbal', type: 'Sportlink Proxy', instance: 'NBB', userAgent: 'nbb', url: 'sportlinked', active: false },
-  { label: 'Korfbal', type: 'Sportlink Proxy', instance: 'KNKV', userAgent: 'knkv', url: 'sportlinked', active: false },
-  { label: 'Soft- en Honkbal', type: 'Sportlink Proxy', instance: 'KNBSB', userAgent: 'knbsb', url: 'sportlinked', active: false },
-  { label: 'Waterpolo', type: 'Sportlink Proxy', instance: 'KNZB', userAgent: 'knzb', url: 'sportlinked', active: true },
-  { label: 'Hockey België', type: 'Sportlink Proxy', instance: 'KBHB', userAgent: 'kbhb', url: 'sportlinked', active: false },
-  { label: 'Handbal', type: 'Sportlink Proxy', instance: 'NHV', userAgent: 'nhv', url: 'sportlinked', active: false},
+  { 
+    label: 'Voetbal', 
+    types:
+    [
+      { 
+        type: 'Sportlink API', 
+        active: true 
+      },
+      {
+        type: 'Sportlink Proxy',
+        active: true
+      }
+    ]
+  },
+  { 
+    label: 'Basketbal', 
+    types:
+    [
+      { 
+        type: 'Sportlink API', 
+        active: true 
+      },
+      {
+        type: 'Sportlink Proxy',
+        active: false
+      }
+    ] 
+  },
+  { 
+    label: 'Korfbal', 
+    types:
+    [
+      { 
+        type: 'Sportlink API', 
+        active: true 
+      },
+      {
+        type: 'Sportlink Proxy',
+        active: false
+      }
+    ]
+  },
+  { 
+    label: 'Soft- en Honkbal', 
+    types:
+    [
+      { 
+        type: 'Sportlink API', 
+        active: true 
+      },
+      {
+        type: 'Sportlink Proxy',
+        active: false
+      }
+    ]
+  },
+  { 
+    label: 'Volleybal', 
+    types:
+    [
+      { 
+        type: 'Sportlink API', 
+        active: true 
+      },
+      {
+        type: 'Nevobo Proxy',
+        active: true
+      }
+    ]
+  },
+  { 
+    label: 'Waterpolo', 
+    types:
+    [
+      { 
+        type: 'Sportlink API', 
+        active: true 
+      },
+      {
+        type: 'Sportlink Proxy',
+        active: true
+      }
+    ]
+  },
+  { 
+    label: 'Hockey België', 
+    types:
+    [
+      { 
+        type: 'Sportlink API', 
+        active: true 
+      },
+      {
+        type: 'Sportlink Proxy',
+        active: false
+      }
+    ]
+  },
+  { 
+    label: 'Handbal', 
+    types:
+    [
+      { 
+        type: 'Sportlink API', 
+        active: true 
+      },
+      {
+        type: 'Sportlink Proxy',
+        active: false
+      }
+    ]
+  }
 ];
 
 export const backgroundOptions = [
-  { label: 'Voetbal', value: new URL('@/assets/voetbal.jpg', import.meta.url).href },
-  { label: 'Basketbal', value: new URL('@/assets/basketbal.jpg', import.meta.url).href },
-  { label: 'Korfbal', value: new URL('@/assets/korfbal.jpg', import.meta.url).href },
-  { label: 'Soft- en Honkbal', value: new URL('@/assets/basebal.jpg', import.meta.url).href },
-  { label: 'Volleybal', value: new URL('@/assets/volleyball.jpg', import.meta.url).href },
-  { label: 'Waterpolo', value: new URL('@/assets/waterpolo.jpg', import.meta.url).href },
-  { label: 'Hockey België', value: new URL('@/assets/hockey.jpg', import.meta.url).href },
-  { label: 'Handbal', value: new URL('@/assets/handbal.jpg', import.meta.url).href },
+  { 
+    label: 'Voetbal', 
+    value: new URL('@/assets/voetbal.jpg', import.meta.url).href 
+  },
+  { 
+    label: 'Basketbal', 
+    value: new URL('@/assets/basketbal.jpg', import.meta.url).href 
+  },
+  { 
+    label: 'Korfbal', 
+    value: new URL('@/assets/korfbal.jpg', import.meta.url).href 
+  },
+  { 
+    label: 'Soft- en Honkbal', 
+    value: new URL('@/assets/basebal.jpg', import.meta.url).href 
+  },
+  { 
+    label: 'Volleybal', 
+    value: new URL('@/assets/volleyball.jpg', import.meta.url).href 
+  },
+  { 
+    label: 'Waterpolo', 
+    value: new URL('@/assets/waterpolo.jpg', import.meta.url).href 
+  },
+  { 
+    label: 'Hockey België', 
+    value: new URL('@/assets/hockey.jpg', import.meta.url).href 
+  },
+  { 
+    label: 'Handbal', 
+    value: new URL('@/assets/handbal.jpg', import.meta.url).href 
+  },
 ];
 
 export const HOME_SCREENS = {

@@ -34,6 +34,7 @@ export const fetchMatches = async (
 
   try {
     // Get the appropriate URL
+    console.log(config.value)
     const url = fetchType === 'info' 
       ? getMatchInfoUrl(config.value) 
       : getMatchResultsUrl(config.value);

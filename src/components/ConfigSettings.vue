@@ -160,7 +160,6 @@
 
 watch(localConfig, (newVal) => {
   if (JSON.stringify(props.config) !== JSON.stringify(newVal)) {
-    console.log(newVal);
     emit('update:config', { ...newVal });
   }
 }, { deep: true });

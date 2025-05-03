@@ -6,7 +6,7 @@ export const getMatchInfoUrl = (config) => {
         const nevoboUrl = `https://api.nevobo.nl/v1/competitie/wedstrijden/programma?vereniging=${config.clubIdentifer}`;
         return `https://cors-proxy.clubinfoproxy.workers.dev/proxy?url=${encodeURIComponent(nevoboUrl)}`;
       case 'Sportlink Proxy':
-        const sportlinkUrl = `https://app-sportlinked-production.sportlink.com/entity/common/memberportal/app/club/ClubProgram?v=3&ClubId=${config.clubId}`;
+        const sportlinkUrl = `https://app-${config.gameType.url}-production.sportlink.com/entity/common/memberportal/app/club/ClubProgram?v=3&ClubId=${config.clubId}`;
         return `https://cors-proxy.clubinfoproxy.workers.dev/proxy?url=${encodeURIComponent(sportlinkUrl)}`;
       default:
         throw new Error('Unknown game type');
@@ -21,7 +21,7 @@ export const getMatchInfoUrl = (config) => {
         const nevoboUrl = `https://api.nevobo.nl/v1/competitie/wedstrijden/resultaat?vereniging=${config.clubIdentifer}`;
         return `https://cors-proxy.clubinfoproxy.workers.dev/proxy?url=${encodeURIComponent(nevoboUrl)}`;
       case 'Sportlink Proxy':
-        const sportlinkUrl = `production.sportlink.com/entity/common/memberportal/app/club/ClubMatchResults?v=2&ClubId=${config.clubId}`;
+        const sportlinkUrl = `https://app-${config.gameType.url}-production.sportlink.com/entity/common/memberportal/app/club/ClubMatchResults?v=2&ClubId=${config.clubId}`;
         return `https://cors-proxy.clubinfoproxy.workers.dev/proxy?url=${encodeURIComponent(sportlinkUrl)}`;
       default:
         throw new Error('Unknown game type');
@@ -36,7 +36,7 @@ export const getMatchInfoUrl = (config) => {
         const nevoboUrl = `https://api.nevobo.nl/v1/competitie/wedstrijden/programma?vereniging=${config.clubIdentifer}`;
         return `https://cors-proxy.clubinfoproxy.workers.dev/proxy?url=${encodeURIComponent(nevoboUrl)}`;
       case 'Sportlink Proxy':
-        const sportlinkUrl = `https://app-sportlinked-production.sportlink.com/entity/common/memberportal/app/club/ClubProgram?v=3&ClubId=${config.clubId}`;
+        const sportlinkUrl = `https://app-${config.gameType.url}-production.sportlink.com/entity/common/memberportal/app/club/ClubProgram?v=3&ClubId=${config.clubId}`;
         return `https://cors-proxy.clubinfoproxy.workers.dev/proxy?url=${encodeURIComponent(sportlinkUrl)}`;
       default:
         throw new Error('Unknown game type');

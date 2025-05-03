@@ -1,5 +1,5 @@
 import { ref } from 'vue';
-import { FAKE_CREDENTIALS } from '@/config';
+import { FAKE_CREDENTIALS, APP_CREDENTIALS } from '@/config';
 
 export function useSportlinkAuth() {
     const sportlinkTokenInfo = ref({
@@ -8,17 +8,23 @@ export function useSportlinkAuth() {
         expires_at: null,
     });
 
-    async function login(username, password, url) {
+    async function login(username, password, gameTypeLabel) {
         try {
-            const url = `https://app-${url}-production.sportlink.com/oauth/token`;
+
+            const appCreds = APP_CREDENTIALS.find(cred => 
+                cred.type.toLowerCase() === gameTypeLabel.toLowerCase()
+              );
+
+            const url = `https://app-${appCreds.apiUrl}-production.sportlink.com/oauth/token`;
             const proxiedUrl = `https://cors-proxy.clubinfoproxy.workers.dev/proxy?url=${encodeURIComponent(url)}`;
 
             const params = new URLSearchParams();
             params.append('grant_type', 'password');
             params.append('username', username);
             params.append('password', password);
-            params.append('client_id', '4BtKnhojt4MSnRScVak5');
-            params.append('secret', 'vLD8uPHOgIHJjAj9');
+            params.append('client_id', appCreds.client_id);
+            params.append('secret', appCreds.secret)
+
 
             const response = await fetch(proxiedUrl, {
                 method: 'POST',
@@ -35,7 +41,7 @@ export function useSportlinkAuth() {
             
             const data = await response.json();
             const { access_token, refresh_token, expires_in } = data;
-            
+            console.log(access_token);
             sportlinkTokenInfo.value = {
                 access_token,
                 refresh_token,
@@ -50,20 +56,24 @@ export function useSportlinkAuth() {
         }
     }
 
-    async function refreshToken() {
+    async function refreshToken(gameTypeLabel) {
         try {
             if (!sportlinkTokenInfo.value.refresh_token) {
                 throw new Error('No refresh token available');
             }
 
-            const url = 'https://app-sportlinked-production.sportlink.com/oauth/token';
+            const appCreds = APP_CREDENTIALS.find(cred => 
+                cred.type.toLowerCase() === gameTypeLabel.toLowerCase()
+              );
+
+            const url = `https://app-${appCreds.apiUrl}-production.sportlink.com/oauth/token`;
             const proxiedUrl = `https://cors-proxy.clubinfoproxy.workers.dev/proxy?url=${encodeURIComponent(url)}`;
 
             const params = new URLSearchParams();
             params.append('grant_type', 'refresh_token');
             params.append('refresh_token', sportlinkTokenInfo.value.refresh_token);
-            params.append('client_id', '4BtKnhojt4MSnRScVak5');
-            params.append('secret', 'vLD8uPHOgIHJjAj9');
+            params.append('client_id', appCreds.client_id);
+            params.append('secret', appCreds.secret)
 
             const response = await fetch(proxiedUrl, {
                 method: 'POST',
@@ -94,10 +104,15 @@ export function useSportlinkAuth() {
         }
     }
 
-    function useFakeCredentials(gameTypeLabel) {
-        const fakeCred = FAKE_CREDENTIALS.find(c => c.sport.toLowerCase() === gameTypeLabel.toLowerCase());
+    function useFakeCredentials(gameType) {
+        const fakeCred = FAKE_CREDENTIALS.find(credential =>
+            credential.sports.some(s =>
+                s.sport.toLowerCase() === gameType.label.toLowerCase(),
+            )
+        );
+
         if (fakeCred) {
-            return login(fakeCred.username, fakeCred.password, fakeCred.url);
+            return login(fakeCred.username, fakeCred.password, gameType.label.toLowerCase());
         }
         return Promise.resolve(false);
     }
