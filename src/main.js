@@ -11,8 +11,10 @@ import 'core-js/stable';
 import 'regenerator-runtime/runtime'; // If using async/await
 import 'whatwg-fetch';
 import { createApp } from 'vue'
+import { applyPersistentBackground } from '@/utils/background'
 import App from './App.vue'
 import './style.css';
 import router from './router';
 
+applyPersistentBackground();
 createApp(App).use(router).mount('#app')

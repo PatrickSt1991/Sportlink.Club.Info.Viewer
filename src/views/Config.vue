@@ -122,14 +122,16 @@ function updateStyles(newStyles) {
 }
 
 function updateBackground() {
-    const root = document.documentElement;
-    if (backgroundUrl.value) {
-        root.style.background = `linear-gradient(rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.3)), url(${backgroundUrl.value}) no-repeat center center`;
-    } else {
-        root.style.background = `linear-gradient(rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.3)), url(${defaultImg}) no-repeat center center`;
-    }
-    root.style.backgroundSize = 'cover';
-    root.style.minHeight = '100vh';
+    const background = backgroundUrl.value || defaultImg;
+    const backgroundStyle = `linear-gradient(rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.3)), url(${background}) no-repeat center center`;
+  
+    // Apply to document
+    document.documentElement.style.background = backgroundStyle;
+    document.documentElement.style.backgroundSize = 'cover';
+    document.documentElement.style.minHeight = '100vh';
+    
+    // Store in localStorage
+    localStorage.setItem('appBackground', backgroundStyle);
 }
 
 function addSponsor(imageUrl) {
