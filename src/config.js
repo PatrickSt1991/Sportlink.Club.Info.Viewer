@@ -1,14 +1,14 @@
 import { ref } from 'vue';
 
 export const FAKE_CREDENTIALS = [
-  { username: 'rxxnrextolzwlqsspy@hthlm.com', password: 'test1234', sport: 'waterpolo'},
-  { username: 'rxxnrextolzwlqsspy@hthlm.com', password: 'test1234', sport: 'handbal'},
-  { username: 'rxxnrextolzwlqsspy@hthlm.com', password: 'test1234', sport: 'hockey belgië'},
-  { username: 'rxxnrextolzwlqsspy@hthlm.com', password: 'test1234', sport: 'softbal'},
-  { username: 'rxxnrextolzwlqsspy@hthlm.com', password: 'test1234', sport: 'voetbal'},
-  { username: 'rxxnrextolzwlqsspy@hthlm.com', password: 'test1234', sport: 'basketbal'},
-  { username: 'rxxnrextolzwlqsspy@hthlm.com', password: 'test1234', sport: 'korfbal'},
-  { username: 'rxxnrextolzwlqsspy@hthlm.com', password: 'test1234', sport: 'honkbal'}
+  { username: 'rxxnrextolzwlqsspy@hthlm.com', password: 'test1234', sport: 'waterpolo', url: 'sportlinked'},
+  { username: 'rxxnrextolzwlqsspy@hthlm.com', password: 'test1234', sport: 'handbal', url: 'sportlinked'},
+  { username: 'rxxnrextolzwlqsspy@hthlm.com', password: 'test1234', sport: 'hockey belgië', url: 'sportlinked'},
+  { username: 'rxxnrextolzwlqsspy@hthlm.com', password: 'test1234', sport: 'softbal', url: 'sportlinked'},
+  { username: 'rxxnrextolzwlqsspy@hthlm.com', password: 'test1234', sport: 'voetbal', url: 'vnl'},
+  { username: 'rxxnrextolzwlqsspy@hthlm.com', password: 'test1234', sport: 'basketbal', url: 'sportlinked'},
+  { username: 'rxxnrextolzwlqsspy@hthlm.com', password: 'test1234', sport: 'korfbal', url: 'sportlinked'},
+  { username: 'rxxnrextolzwlqsspy@hthlm.com', password: 'test1234', sport: 'honkbal', url: 'sportlinked'}
 ]
 
 export const GAME_TYPES = [
@@ -21,13 +21,13 @@ export const GAME_TYPES = [
   { label: 'Hockey België', type: 'Sportlink API', active: false },
   { label: 'Handbal', type: 'Sportlink API', active: true },
   { label: 'Volleybal', type: 'Nevobo Proxy',  active: true },
-  { label: 'Voetbal', type: 'Sportlink Proxy', instance: 'KNVB', active: true },
-  { label: 'Basketbal', type: 'Sportlink Proxy', instance: 'NBB', active: true },
-  { label: 'Korfbal', type: 'Sportlink Proxy', instance: 'KNKV', active: true },
-  { label: 'Soft- en Honkbal', type: 'Sportlink Proxy', instance: 'KNBSB', active: true },
-  { label: 'Waterpolo', type: 'Sportlink Proxy', instance: 'KNZB', active: true },
-  { label: 'Hockey België', type: 'Sportlink Proxy', instance: 'KBHB', active: false },
-  { label: 'Handbal', type: 'Sportlink Proxy', instance: 'NHV', active: true },
+  { label: 'Voetbal', type: 'Sportlink Proxy', instance: 'KNVB', userAgent: 'voetbalnl', url: 'vnl', active: false },
+  { label: 'Basketbal', type: 'Sportlink Proxy', instance: 'NBB', userAgent: 'nbb', url: 'sportlinked', active: false },
+  { label: 'Korfbal', type: 'Sportlink Proxy', instance: 'KNKV', userAgent: 'knkv', url: 'sportlinked', active: false },
+  { label: 'Soft- en Honkbal', type: 'Sportlink Proxy', instance: 'KNBSB', userAgent: 'knbsb', url: 'sportlinked', active: false },
+  { label: 'Waterpolo', type: 'Sportlink Proxy', instance: 'KNZB', userAgent: 'knzb', url: 'sportlinked', active: true },
+  { label: 'Hockey België', type: 'Sportlink Proxy', instance: 'KBHB', userAgent: 'kbhb', url: 'sportlinked', active: false },
+  { label: 'Handbal', type: 'Sportlink Proxy', instance: 'NHV', userAgent: 'nhv', url: 'sportlinked', active: false},
 ];
 
 export const backgroundOptions = [

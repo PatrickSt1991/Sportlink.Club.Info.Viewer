@@ -4,8 +4,8 @@ export function useClubData(sportlinkTokenInfo) {
     const clubs = ref([]);
     const corsStatus = ref(null);
 
-    async function fetchSportlinkClubs(appInstance) {
-        const url = 'https://app-sportlinked-production.sportlink.com/entity/common/memberportal/app/club/Clubs?v=1';
+    async function fetchSportlinkClubs(appInstance, userAgent, url) {
+        const url = `https://app-${url}-production.sportlink.com/entity/common/memberportal/app/club/Clubs?v=1`;
         const proxiedUrl = `https://cors-proxy.clubinfoproxy.workers.dev/proxy?url=${encodeURIComponent(url)}`;
         
         try {
@@ -13,7 +13,7 @@ export function useClubData(sportlinkTokenInfo) {
                 method: 'GET',
                 headers: {
                     'Authorization': `Bearer ${sportlinkTokenInfo.value.access_token}`,
-                    'X-Real-User-Agent': `sportlink-app-${appInstance.toLowerCase()}/6.26.0-2025017636 android SM-N976N/samsung/25 (6.26.0)`,
+                    'X-Real-User-Agent': `sportlink-app-${userAgent.toLowerCase()}/6.26.0-2025017636 android SM-N976N/samsung/25 (6.26.0)`,
                     'X-Navajo-Instance': `${appInstance}`,
                     'X-Navajo-Locale': 'nl',
                     'X-Navajo-Version': '1',

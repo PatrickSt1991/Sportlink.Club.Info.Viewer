@@ -9,7 +9,6 @@ import {
   processPreMatchNevoboProxyData 
 } from './processors/prematchProcessors';
 import { formatDateTime, formatNevoboDate } from '@/utils/formatDateType.js';
-import noImage from '@/assets/no_image.png';
 
 export const fetchMatches = async (
   fetchType,
@@ -40,7 +39,7 @@ export const fetchMatches = async (
       : getMatchResultsUrl(config.value);
 
     // Make the request
-    const isProxy = config.value.gameType?.type.includes('Proxy');
+    const isProxy = config.value.gameType?.type === 'Sportlink Proxy';
     const response = await fetchWithConfig(url, config.value, isProxy);
     
     if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
@@ -105,7 +104,7 @@ export const fetchPreMatchInfo = async (
 
   try {
     const url = getPreMatchInfoUrl(config.value);
-    const isProxy = config.value.gameType?.type.includes('Proxy');
+    const isProxy = config.value.gameType?.type === 'Sportlink Proxy';
     const response = await fetchWithConfig(url, config.value, isProxy);
     
     if (!response.ok) throw new Error(`HTTP Error! status: ${response.status}`);

@@ -8,9 +8,9 @@ export function useSportlinkAuth() {
         expires_at: null,
     });
 
-    async function login(username, password) {
+    async function login(username, password, url) {
         try {
-            const url = 'https://app-sportlinked-production.sportlink.com/oauth/token';
+            const url = `https://app-${url}-production.sportlink.com/oauth/token`;
             const proxiedUrl = `https://cors-proxy.clubinfoproxy.workers.dev/proxy?url=${encodeURIComponent(url)}`;
 
             const params = new URLSearchParams();
@@ -97,7 +97,7 @@ export function useSportlinkAuth() {
     function useFakeCredentials(gameTypeLabel) {
         const fakeCred = FAKE_CREDENTIALS.find(c => c.sport.toLowerCase() === gameTypeLabel.toLowerCase());
         if (fakeCred) {
-            return login(fakeCred.username, fakeCred.password);
+            return login(fakeCred.username, fakeCred.password, fakeCred.url);
         }
         return Promise.resolve(false);
     }

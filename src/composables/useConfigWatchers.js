@@ -1,4 +1,4 @@
-import { watch } from 'vue';
+import { watch, ref } from 'vue';
 
 export function useConfigWatchers(config, { 
     sportlinkAuth, 
@@ -8,6 +8,7 @@ export function useConfigWatchers(config, {
 }) {
     let refreshInterval;
     let saveTimeout;
+    const showClientIdModal = ref(false); // Add this line
 
     function setupWatchers() {
         watch(
@@ -71,6 +72,7 @@ export function useConfigWatchers(config, {
                     (!newClientVal || newClientVal.trim() === '') && 
                     (!newClubVal || newClubVal.trim() === '')) {
                     if(config.value.showTerms){
+                        console.log('should show')
                         showClientIdModal.value = true;
                         config.value.showTerms = false;
                     }
@@ -132,10 +134,10 @@ export function useConfigWatchers(config, {
                     if (fakeCredentials) {
                         await sportlinkAuth.useFakeCredentials(gameType.label);
                     } else {
-                        await sportlinkAuth.login(username, password);
+                        await sportlinkAuth.login(username, password, config.value.gameType.url);
                     }
                     
-                    await clubData.fetchSportlinkClubs(config.value.gameType.instance);
+                    await clubData.fetchSportlinkClubs(config.value.gameType.instance, config.value.gameType.userAgent, config.value.gameType.url);
                     showClubSelectPopup.value = true;
                 } catch (error) {
                     console.error('Error during login or club fetch:', error);
@@ -169,6 +171,7 @@ export function useConfigWatchers(config, {
 
     return {
         setupWatchers,
-        cleanup
+        cleanup,
+        showClientIdModal
     };
 }

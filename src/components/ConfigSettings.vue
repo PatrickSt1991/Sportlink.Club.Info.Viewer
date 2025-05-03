@@ -119,7 +119,7 @@
   </template>
   
   <script setup>
-  import { nextTick, ref, computed, watch, defineProps, defineEmits } from 'vue';
+  import { nextTick, ref, computed, watch } from 'vue';
   
   const props = defineProps({
     config: {

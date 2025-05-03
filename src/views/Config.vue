@@ -63,7 +63,6 @@ import NavigationButtons from '@/components/NavigationButtons.vue';
 import ClubSelectPopup from '@/components/ClubSelectPopup.vue';
 
 // State
-const showClientIdModal = ref(false);
 const config = ref({});
 const isLoading = ref(true);
 const showClubSelectPopup = ref(false);
@@ -72,7 +71,7 @@ const availableGameTypes = ref(AVAILABLE_GAME_TYPES);
 // Initialize composables
 const sportlinkAuth = useSportlinkAuth();
 const { clubs, corsStatus, fetchSportlinkClubs, fetchCorsStatus } = useClubData(sportlinkAuth.sportlinkTokenInfo);
-const { setupWatchers, cleanup } = useConfigWatchers(config, { 
+const { showClientIdModal, setupWatchers, cleanup } = useConfigWatchers(config, { 
     sportlinkAuth, 
     clubData: { clubs, corsStatus, fetchSportlinkClubs, fetchCorsStatus },
     showClubSelectPopup,
