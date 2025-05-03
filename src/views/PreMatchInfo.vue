@@ -52,12 +52,7 @@ import { formatCompType } from '@/utils/formatCompType.js';
 import { formatTime } from '@/utils/formatDateType.js';
 import NoMatchesDisplay from '@/components/NoMatchesDisplay.vue';
 import { useScrollHelper } from '../utils/scrollHelper';
-import {
-  fetchPreMatchInfo,
-  processPreMatchSportlinkApiData,
-  processPreMatchSportlinkProxyData,
-  processPreMatchNevoboProxyData
-} from '@/utils/matchFetchHelpers';
+import { fetchPreMatchInfo } from '@/utils/matchFetchHelpers';
 
 const router = useRouter();
 
@@ -88,9 +83,6 @@ const loadPreMatchInfo = async () => {
     loading,
     error,
     { 
-      processPreMatchSportlinkApiData,
-      processPreMatchSportlinkProxyData,
-      processPreMatchNevoboProxyData,
       formatTime,
       formatKleedkamer,
       formatVeld,

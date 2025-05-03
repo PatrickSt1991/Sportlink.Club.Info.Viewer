@@ -42,12 +42,7 @@ import { formatNevoboDate } from '@/utils/formatDateType.js';
 import noImage from '@/assets/no_image.png';
 import NoMatchesDisplay from '@/components/NoMatchesDisplay.vue';
 import { useScrollHelper } from '../utils/scrollHelper';
-import {
-  fetchMatches,
-  processSportlinkApiData,
-  processSportlinkProxyData,
-  processNevoboProxyData
-} from '@/utils/matchFetchHelpers';
+import { fetchMatches } from '@/utils/matchFetchHelpers';
 
 const router = useRouter();
 const matches = ref([]);
@@ -72,9 +67,6 @@ const fetchMatchResults = async () => {
     loading,
     error,
     {
-      processSportlinkApiData,
-      processSportlinkProxyData,
-      processNevoboProxyData,
       formatCompType,
       formatDateTime: formatNevoboDate,
       noImage,
