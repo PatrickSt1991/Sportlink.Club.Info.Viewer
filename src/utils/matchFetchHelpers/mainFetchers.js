@@ -9,6 +9,7 @@ import {
   processPreMatchNevoboProxyData 
 } from './processors/prematchProcessors';
 import { formatDateTime, formatNevoboDate } from '@/utils/formatDateType.js';
+import { APP_CREDENTIALS} from '@/config';
 
 export const fetchMatches = async (
   fetchType,
@@ -17,12 +18,11 @@ export const fetchMatches = async (
   loading,
   error,
   { 
-    formatCompType,
     nextTick,
     tryStartScrolling
   }
 ) => {
-  // Validate config
+
   const daysKey = fetchType === 'info' ? 'programmaDagen' : 'uitslagDagen';
   if (!config.value?.[daysKey] || (!config.value?.clientId && !config.value?.clubIdentifer && !config.value?.clubId)) {
     console.error('Config not loaded yet!');
@@ -33,21 +33,24 @@ export const fetchMatches = async (
   error.value = null;
 
   try {
-    // Get the appropriate URL
-    console.log(config.value)
-    const url = fetchType === 'info' 
-      ? getMatchInfoUrl(config.value) 
-      : getMatchResultsUrl(config.value);
+    const isProxy = config.value.connectionType === 'Sportlink Proxy';
+    
+    const appCreds = isProxy 
+      ? APP_CREDENTIALS.find(
+        cred => cred.type.toLowerCase() === config.value.gameType.label.toLowerCase()
+      )
+    : undefined;
 
-    // Make the request
-    const isProxy = config.value.gameType?.type === 'Sportlink Proxy';
-    const response = await fetchWithConfig(url, config.value, isProxy);
+    const url = fetchType === 'info' 
+      ? getMatchInfoUrl(config.value, isProxy ? appCreds?.apiUrl : undefined) 
+      : getMatchResultsUrl(config.value, isProxy ? appCreds?.apiUrl : undefined);
+
+    const response = await fetchWithConfig(url, isProxy, appCreds);
     
     if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
     
     const data = await response.json();
     
-    // Filter by date range
     const now = new Date();
     const dateThreshold = new Date(now);
     dateThreshold.setDate(
@@ -56,12 +59,12 @@ export const fetchMatches = async (
     );
 
     // Process data based on API type
-    switch (config.value.gameType?.type) {
+    switch (config.value.connectionType) {
       case 'Sportlink API':
         matches.value = processSportlinkApiData(data, fetchType, dateThreshold, now, formatDateTime);
         break;
       case 'Sportlink Proxy':
-        matches.value = await processSportlinkProxyData(data, fetchType, dateThreshold, now, config.value, formatDateTime);
+        matches.value = await processSportlinkProxyData(data, fetchType, dateThreshold, now, config.value, formatDateTime, appCreds);
         break;
       case 'Nevobo Proxy':
         matches.value = processNevoboProxyData(data, fetchType, dateThreshold, now, 
@@ -104,9 +107,17 @@ export const fetchPreMatchInfo = async (
   error.value = null;
 
   try {
-    const url = getPreMatchInfoUrl(config.value);
-    const isProxy = config.value.gameType?.type === 'Sportlink Proxy';
-    const response = await fetchWithConfig(url, config.value, isProxy);
+    const isProxy = config.value.connectionType === 'Sportlink Proxy';
+
+    const appCreds = isProxy 
+    ? APP_CREDENTIALS.find(
+      cred => cred.type.toLowerCase() === config.value.gameType.label.toLowerCase()
+    )
+  : undefined;
+
+    const url = getPreMatchInfoUrl(config.value, isProxy ? appCreds.apiUrl : undefined);
+    
+    const response = await fetchWithConfig(url, config.value, isProxy, appCreds);
     
     if (!response.ok) throw new Error(`HTTP Error! status: ${response.status}`);
 
@@ -115,7 +126,7 @@ export const fetchPreMatchInfo = async (
     currentDate.setHours(currentDate.getHours() - 3);
     const laterDate = new Date(currentDate.getTime() + 6 * 60 * 60 * 1000);
 
-    switch (config.value.gameType?.type) {
+    switch (config.value.connectionType) {
       case 'Sportlink API':
         matches.value = processPreMatchSportlinkApiData(
           data, currentDate, laterDate, config.value, 

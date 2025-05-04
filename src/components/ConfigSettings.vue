@@ -9,9 +9,55 @@
             :key="game.label"
             :value="game"
           >
-            {{ game.label }} - [{{ game.type }}]
+            {{ game.label }}
           </option>
         </select>
+      </div>
+  
+      <div class="form-group" v-if="localConfig.gameType">
+        <label class="leftLabel">Type:</label>
+        <select v-model="localConfig.connectionType">
+          <option 
+            v-for="type in localConfig.gameType.types" 
+            :key="type.type"
+            :value="type.type"
+            :disabled="!type.active"
+          >
+            {{ type.type }}
+          </option>
+        </select>
+      </div>
+
+      <div class="form-group" v-if="localConfig.connectionType === 'Sportlink API'">
+        <label class="leftLabel">Client ID:</label>
+        <input type="text" v-model="localConfig.clientId">
+      </div>
+  
+      <div class="form-group" v-if="localConfig.connectionType === 'Nevobo Proxy'">
+        <label class="leftLabel">Identifier:</label>
+        <input type="text" v-model="localConfig.clubIdentifer">
+      </div>
+  
+      <div class="form-group" v-if="localConfig.connectionType === 'Sportlink Proxy'">
+        <label class="leftLabel">ClubId:</label>
+        <input type="text" v-model="localConfig.clubId">
+      </div>
+
+      <div class="form-group" v-if="localConfig.connectionType === 'Sportlink Proxy'">
+        <label class="leftLabel">Gebruikersnaam:</label>
+        <input type="text" :readonly="localConfig.fakeCredentials" v-model="localConfig.username">
+        <input type="checkbox" :disabled="localConfig.fakeCredentials" v-model="localConfig.validUsername">
+      </div>
+  
+      <div class="form-group" v-if="localConfig.connectionType === 'Sportlink Proxy'">
+        <label class="leftLabel">Wachtwoord:</label>
+        <input type="text" :readonly="localConfig.fakeCredentials" v-model="localConfig.password">
+        <input type="checkbox" :disabled="localConfig.fakeCredentials" v-model="localConfig.validPassword">
+      </div>
+  
+      <div class="form-group" v-if="localConfig.connectionType === 'Sportlink Proxy'">
+        <label class="leftLabel">Fake credentials:</label>
+        <input type="checkbox" v-model="localConfig.fakeCredentials">
       </div>
   
       <div class="form-group">
@@ -40,42 +86,10 @@
           </option>
         </select>
       </div>
-  
-      <div class="form-group" v-if="localConfig.gameType?.type === 'Sportlink API'">
-        <label class="leftLabel">Client ID:</label>
-        <input type="text" v-model="localConfig.clientId">
-      </div>
-  
-      <div class="form-group" v-if="localConfig.gameType?.type === 'Nevobo Proxy'">
-        <label class="leftLabel">Identifier:</label>
-        <input type="text" v-model="localConfig.clubIdentifer">
-      </div>
-  
-      <div class="form-group" v-if="localConfig.gameType?.type === 'Sportlink Proxy'">
-        <label class="leftLabel">ClubId:</label>
-        <input type="text" v-model="localConfig.clubId">
-      </div>
 
-      <div class="form-group" v-if="localConfig.gameType?.type === 'Sportlink Proxy'">
-        <label class="leftLabel">Gebruikersnaam:</label>
-        <input type="text" :readonly="localConfig.fakeCredentials" v-model="localConfig.username">
-        <input type="checkbox" :disabled="localConfig.fakeCredentials" v-model="localConfig.validUsername">
-      </div>
-  
-      <div class="form-group" v-if="localConfig.gameType?.type === 'Sportlink Proxy'">
-        <label class="leftLabel">Wachtwoord:</label>
-        <input type="text" :readonly="localConfig.fakeCredentials" v-model="localConfig.password">
-        <input type="checkbox" :disabled="localConfig.fakeCredentials" v-model="localConfig.validPassword">
-      </div>
-  
-      <div class="form-group" v-if="localConfig.gameType?.type === 'Sportlink Proxy'">
-        <label class="leftLabel">Fake credentials:</label>
-        <input type="checkbox" v-model="localConfig.fakeCredentials">
-      </div>
-  
       <div class="form-group">
         <label class="leftLabel">Accommodatie:</label>
-        <input type="text" v-model="localConfig.sportLocatie">
+        <input type="text" disabled v-model="localConfig.sportLocatie">
       </div>
   
       <div class="form-group">
@@ -116,11 +130,11 @@
         </div>
       </div>
     </div>
-  </template>
+</template>
   
-  <script setup>
+<script setup>
   import { nextTick, ref, computed, watch } from 'vue';
-  
+
   const props = defineProps({
     config: {
       type: Object,
@@ -147,37 +161,40 @@
       default: () => []
     }
   });
-  
-  const emit = defineEmits(['update:config', 'updateBackground']);
-  
-  const localConfig = ref({ ...props.config });
-  
-  watch(() => props.config, (newValue) => {
-  if (JSON.stringify(localConfig.value) !== JSON.stringify(newValue)) {
-    localConfig.value = { ...newValue };
-  }
-}, { deep: true });
 
-watch(localConfig, (newVal) => {
-  if (JSON.stringify(props.config) !== JSON.stringify(newVal)) {
-    emit('update:config', { ...newVal });
-  }
-}, { deep: true });
-  
-  watch(() => localConfig.value.gameType,
-    (newValue) => {
-      localConfig.value.clientId = null;
-      localConfig.value.clubIdentifer = null;
-      localConfig.value.clubId = null;
-      localConfig.value.username = null;
-      localConfig.value.password = null;
-      localConfig.value.validUsername = false;
-      localConfig.value.validPassword = false;
-      localConfig.value.fakeCredentials = false;
-      localConfig.value.sportLocatie = null;
-      console.log(`Sport aangepast naar ${newValue.label}, resetting...`)
+  const emit = defineEmits(['update:config', 'updateBackground']);
+
+  const localConfig = ref(JSON.parse(JSON.stringify(props.config)));
+
+  watch(() => props.config, (newValue) => {
+    if (JSON.stringify(localConfig.value) !== JSON.stringify(newValue)) {
+      localConfig.value = JSON.parse(JSON.stringify(newValue));
     }
-  );
+  }, { immediate: true, deep: true });
+
+  watch(localConfig, (newVal) => {
+    if (JSON.stringify(props.config) !== JSON.stringify(newVal)) {
+      emit('update:config', { ...newVal });
+    }
+  }, { deep: true });
+
+  watch(() => localConfig.value.gameType, (newGameType, oldGameType) => {
+    if(!newGameType || JSON.stringify(newGameType) === JSON.stringify(oldGameType)) return;
+    
+    if(newGameType.label !== oldGameType?.label){
+
+      props.config.clientId = null;
+      props.config.clubIdentifer = null;
+      props.config.clubId = null;
+      props.config.username = null;
+      props.config.password = null;
+      props.config.validUsername = false;
+      props.config.validPassword = false;
+      props.config.fakeCredentials = false;
+      props.config.sportLocatie = null;
+      console.log(`Sport aangepast naar ${newGameType.label}, resetting...`)
+    }
+  }, { deep: true});
 
   watch(
     () => ({
@@ -187,9 +204,8 @@ watch(localConfig, (newVal) => {
     async ({ selectedGameLabel, nevoboIdentifier }, prev = { selectedGameLabel: null, nevoboIdentifier: null }) => {
       if(!selectedGameLabel || !nevoboIdentifier) return;
       
-      if(localConfig.value.gameType?.type !== 'Nevobo Proxy') return;
-      console.log(selectedGameLabel)
-      console.log(prev.selectedGameLabel)
+      if(localConfig.value.connectionType !== 'Nevobo Proxy') return;
+      
       if(selectedGameLabel === prev.selectedGameLabel &&
           nevoboIdentifier === prev.nevoboIdentifier){
           return;
@@ -216,10 +232,13 @@ watch(localConfig, (newVal) => {
       selectedGameLabel: localConfig.value.gameType?.label || null,
       sportlinkClientId: localConfig.value.clientId || null
     }),
-    async ({ selectedGameLabel, sportlinkClientId }, prev = { selectedGameLabel: null, sportlinkClientId: null }) => {
+    async ({ selectedGameLabel, sportlinkClientId }, prev = { 
+      selectedGameLabel: null, 
+      sportlinkClientId: null 
+    }) => {
       if(!selectedGameLabel || !sportlinkClientId) return;
 
-      if(localConfig.value.gameType?.type !== 'Sportlink API') return;
+      if(localConfig.value.connectionType !== 'Sportlink API') return;
       
       if(selectedGameLabel === prev.selectedGameLabel &&
           sportlinkClientId === prev.sportlinkClientId){
@@ -245,24 +264,35 @@ watch(localConfig, (newVal) => {
   watch(
     () => ({
       fakeCredentialsEnabled: localConfig.value.fakeCredentials,
-      selectedGameLabel: localConfig.value.gameType?.label || null
+      selectedGameLabel: localConfig.value.gameType?.label || null,
+      selectedGameType: localConfig.value.connectionType || null
+      
     }),
-    async ({ fakeCredentialsEnabled, selectedGameLabel }, prev = { fakeCredentialsEnabled: null, selectedGameLabel: null }) => {
+    async ({ fakeCredentialsEnabled, selectedGameLabel, selectedGameType }, prev = { 
+      fakeCredentialsEnabled: null, 
+      selectedGameLabel: null,
+      selectedGameType: null
+    }) => {
+
       if (!selectedGameLabel || !Array.isArray(props.fakeCredentials)) {
         return;
       }
 
-      if(localConfig.value.gameType?.type !== 'Sportlink Proxy') return;
+      if(selectedGameType !== 'Sportlink Proxy') return;
     
       if (fakeCredentialsEnabled === prev.fakeCredentialsEnabled &&
-          selectedGameLabel === prev.selectedGameLabel) {
+          selectedGameLabel === prev.selectedGameLabel &&
+          selectedGameType === prev.selectedGameType
+        ) {
         return;
       }
 
       try{
         const selectedSport = selectedGameLabel.toLowerCase();
-        const fakeCredential = props.fakeCredentials.find(
-          (cred) => cred.sport.toLowerCase() === selectedSport
+        const fakeCredential = props.fakeCredentials.find(credential =>
+          credential.sports.some(sport => 
+            sport.sport.toLowerCase() === selectedSport.toLowerCase()
+          )
         );
 
         if(fakeCredentialsEnabled && !fakeCredential){
@@ -297,20 +327,20 @@ watch(localConfig, (newVal) => {
     },
     { deep: true, immediate: true, flush: 'post' }
   );
-  
+
   function updateBackground() {
     emit('updateBackground');
   }
-  
+
   const progressBarClass = computed(() => {
     const percentage = (props.corsStatus?.requestsToday ?? 0) / (props.corsStatus?.limit ?? 1);
     if (percentage >= 0.9) return 'danger';
     if (percentage >= 0.75) return 'warning';
     return 'success';
   });
-  </script>
+</script>
   
-  <style scoped>
+<style scoped>
   .config-container {
     padding: 20px;
     width: 100%;
@@ -369,4 +399,4 @@ watch(localConfig, (newVal) => {
   .cors-status {
     flex: 1.5;
   } 
-  </style>
+</style>

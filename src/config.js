@@ -231,8 +231,6 @@ export const HOME_SCREENS = {
   'Wedstrijd Uitslagen': '/match-results'
 };
 
-export const AVAILABLE_GAME_TYPES = GAME_TYPES.filter(game => game.active);
-
 export const AVAILABLE_HOME_SCREENS = Object.keys(HOME_SCREENS).filter(
   (key) => HOME_SCREENS[key]
 );
@@ -242,6 +240,7 @@ const defaultConfig = {
   clientId: null,
   clubIdentifer: null,
   clubId: null,
+  connectionType: null,
   username: '',
   password: '',
   validUsername: false,

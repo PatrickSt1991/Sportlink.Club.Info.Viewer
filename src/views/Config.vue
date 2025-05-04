@@ -45,7 +45,7 @@
 
 <script setup>
 import { ref, computed, onMounted, onUnmounted } from 'vue';
-import { USER_CONFIG, updateUserConfig, HOME_SCREENS, AVAILABLE_GAME_TYPES, backgroundOptions, FAKE_CREDENTIALS } from '@/config';
+import { USER_CONFIG, updateUserConfig, HOME_SCREENS, GAME_TYPES, backgroundOptions, FAKE_CREDENTIALS } from '@/config';
 import { userSponsorImages, loadSponsorImages, saveSponsorImages } from '@/stores/sponsorStore';
 import defaultImg from '@/assets/voetbal.jpg';
 
@@ -66,19 +66,18 @@ import ClubSelectPopup from '@/components/ClubSelectPopup.vue';
 const config = ref({});
 const isLoading = ref(true);
 const showClubSelectPopup = ref(false);
-const availableGameTypes = ref(AVAILABLE_GAME_TYPES);
+const availableGameTypes = ref(GAME_TYPES);
 
 // Initialize composables
 const sportlinkAuth = useSportlinkAuth();
-const { clubs, corsStatus, fetchSportlinkClubs, fetchCorsStatus } = useClubData(sportlinkAuth.sportlinkTokenInfo);
+const { clubs, corsStatus, fetchSportlinkClubs, fetchNevoboClubs, fetchCorsStatus } = useClubData(sportlinkAuth.sportlinkTokenInfo);
 const { showClientIdModal, setupWatchers, cleanup } = useConfigWatchers(config, { 
     sportlinkAuth, 
-    clubData: { clubs, corsStatus, fetchSportlinkClubs, fetchCorsStatus },
+    clubData: { clubs, corsStatus, fetchSportlinkClubs, fetchNevoboClubs, fetchCorsStatus },
     showClubSelectPopup,
     updateUserConfig 
 });
 
-// Computed
 const styleConfig = computed(() => {
     const styles = {};
     const styleProps = [
@@ -103,7 +102,6 @@ const backgroundUrl = computed(() => {
     return config.value.selectedBackground || '';
 });
 
-// Methods
 function updateConfig(newConfig) {
     config.value = {
         ...config.value,
@@ -112,7 +110,6 @@ function updateConfig(newConfig) {
 }
 
 function updateStyles(newStyles) {
-  // Create a new object reference to ensure reactivity
   const updatedConfig = {
     ...config.value,
     ...newStyles
@@ -124,12 +121,10 @@ function updateBackground() {
     const background = backgroundUrl.value || defaultImg;
     const backgroundStyle = `linear-gradient(rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.3)), url(${background}) no-repeat center center`;
   
-    // Apply to document
     document.documentElement.style.background = backgroundStyle;
     document.documentElement.style.backgroundSize = 'cover';
     document.documentElement.style.minHeight = '100vh';
     
-    // Store in localStorage
     localStorage.setItem('appBackground', backgroundStyle);
 }
 
@@ -144,13 +139,22 @@ function removeSponsor(index) {
 }
 
 function handleClubSelected(club) {
-    config.value.clubId = club.ClubId;
     config.value.clubName = club.ClubName;
     config.value.sportLocatie = club.City;
+
+    const type = config.value.connectionType;
+
+    if (type === 'Nevobo Proxy') {
+        config.value.clubIdentifer = club.ClubId;
+    } else if (type === 'Sportlink Proxy') {
+        config.value.clubId = club.ClubId;
+    }
+
+    console.log(config.value.clubId)
+    console.log(config.value.clubIdentifer)
     showClubSelectPopup.value = false;
 }
 
-// Lifecycle
 onMounted(async () => {
     config.value = JSON.parse(JSON.stringify(USER_CONFIG.value));
   
@@ -166,7 +170,7 @@ onMounted(async () => {
     updateBackground();
     sportlinkAuth.loadSavedToken();
     
-    if(config.value.gameType?.type === 'Nevobo Proxy') {
+    if(config.value.connectionType !== 'Sportlink API') {
         await fetchCorsStatus();
     }
 
@@ -180,34 +184,34 @@ onUnmounted(() => {
 </script>
 
 <style scoped>
-.wrapper {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 20px;
-    margin: 0 auto;
-    padding: 20px;
-    width: 100%;
-}
-
-.containers-row {
-    display: flex;
-    justify-content: center;
-    gap: 20px;
-    width: 100%;
-}
-
-.loading {
-    padding: 20px;
-    text-align: center;
-    font-size: 1.2em;
-}
-
-/* Responsive adjustments */
-@media (max-width: 940px) {
-    .containers-row {
+    .wrapper {
+        display: flex;
         flex-direction: column;
         align-items: center;
+        gap: 20px;
+        margin: 0 auto;
+        padding: 20px;
+        width: 100%;
     }
-}
+
+    .containers-row {
+        display: flex;
+        justify-content: center;
+        gap: 20px;
+        width: 100%;
+    }
+
+    .loading {
+        padding: 20px;
+        text-align: center;
+        font-size: 1.2em;
+    }
+
+    /* Responsive adjustments */
+    @media (max-width: 940px) {
+        .containers-row {
+            flex-direction: column;
+            align-items: center;
+        }
+    }
 </style>

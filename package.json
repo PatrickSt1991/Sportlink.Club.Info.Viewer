@@ -14,7 +14,8 @@
     "@vitejs/plugin-vue": "^5.2.3",
     "axios": "^1.9.0",
     "vue": "^3.4.37",
-    "vue-router": "^4.4.5"
+    "vue-router": "^4.4.5",
+    "vue-toastification": "^2.0.0-rc.5"
   },
   "devDependencies": {
     "@babel/preset-env": "^7.25.4",

@@ -1,5 +1,5 @@
 import { ref } from 'vue';
-import { FAKE_CREDENTIALS, APP_CREDENTIALS } from '@/config';
+import { FAKE_CREDENTIALS } from '@/config';
 
 export function useSportlinkAuth() {
     const sportlinkTokenInfo = ref({
@@ -8,12 +8,8 @@ export function useSportlinkAuth() {
         expires_at: null,
     });
 
-    async function login(username, password, gameTypeLabel) {
+    async function login(username, password, appCreds) {
         try {
-
-            const appCreds = APP_CREDENTIALS.find(cred => 
-                cred.type.toLowerCase() === gameTypeLabel.toLowerCase()
-              );
 
             const url = `https://app-${appCreds.apiUrl}-production.sportlink.com/oauth/token`;
             const proxiedUrl = `https://cors-proxy.clubinfoproxy.workers.dev/proxy?url=${encodeURIComponent(url)}`;
@@ -41,7 +37,7 @@ export function useSportlinkAuth() {
             
             const data = await response.json();
             const { access_token, refresh_token, expires_in } = data;
-            console.log(access_token);
+
             sportlinkTokenInfo.value = {
                 access_token,
                 refresh_token,
@@ -56,15 +52,11 @@ export function useSportlinkAuth() {
         }
     }
 
-    async function refreshToken(gameTypeLabel) {
+    async function refreshToken(appCreds) {
         try {
             if (!sportlinkTokenInfo.value.refresh_token) {
                 throw new Error('No refresh token available');
             }
-
-            const appCreds = APP_CREDENTIALS.find(cred => 
-                cred.type.toLowerCase() === gameTypeLabel.toLowerCase()
-              );
 
             const url = `https://app-${appCreds.apiUrl}-production.sportlink.com/oauth/token`;
             const proxiedUrl = `https://cors-proxy.clubinfoproxy.workers.dev/proxy?url=${encodeURIComponent(url)}`;
@@ -104,15 +96,15 @@ export function useSportlinkAuth() {
         }
     }
 
-    function useFakeCredentials(gameType) {
+    function useFakeCredentials(appCreds) {
         const fakeCred = FAKE_CREDENTIALS.find(credential =>
             credential.sports.some(s =>
-                s.sport.toLowerCase() === gameType.label.toLowerCase(),
+                s.sport.toLowerCase() === appCreds.type.toLowerCase(),
             )
         );
 
         if (fakeCred) {
-            return login(fakeCred.username, fakeCred.password, gameType.label.toLowerCase());
+            return login(fakeCred.username, fakeCred.password, appCreds);
         }
         return Promise.resolve(false);
     }

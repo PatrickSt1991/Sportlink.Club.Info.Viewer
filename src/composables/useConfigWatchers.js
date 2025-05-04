@@ -1,4 +1,5 @@
 import { watch, ref } from 'vue';
+import { APP_CREDENTIALS} from '@/config';
 
 export function useConfigWatchers(config, { 
     sportlinkAuth, 
@@ -8,11 +9,12 @@ export function useConfigWatchers(config, {
 }) {
     let refreshInterval;
     let saveTimeout;
-    const showClientIdModal = ref(false); // Add this line
+    let handlerTimeout = null;
+    const showClientIdModal = ref(false);
 
     function setupWatchers() {
         watch(
-            () => JSON.parse(JSON.stringify(config.value)), // Deep clone for comparison
+            () => JSON.parse(JSON.stringify(config.value)),
             (newConfig) => {
               clearTimeout(saveTimeout);
               saveTimeout = setTimeout(() => {
@@ -25,54 +27,60 @@ export function useConfigWatchers(config, {
         watch(
             () => ({
                 gameType: config.value.gameType,
+                connectionType: config.value.connectionType,
                 username: config.value.username?.trim(),
                 password: config.value.password?.trim(),
                 validUsername: config.value.validUsername,
                 validPassword: config.value.validPassword,
                 fakeCredentials: config.value.fakeCredentials,
-                clientId: config.value.clientId,
-                clubIdentifer: config.value.clubIdentifer
+                clientId: config.value.clientId
             }),
             async ({ 
                 gameType, 
+                connectionType,
                 username, 
                 password, 
                 validUsername, 
                 validPassword, 
                 clientId, 
-                fakeCredentials,
-                clubIdentifer 
+                fakeCredentials
             }) => {
-                if (gameType?.type === 'Sportlink API' && clientId) {
-                    await handleSportlinkApi(clientId);
+                if(handlerTimeout){
+                    clearTimeout(handlerTimeout);
                 }
-                
-                if (gameType?.type === 'Nevobo Proxy' && clubIdentifer) {
-                    await handleNevoboProxy(clubIdentifer);
-                }
-                
-                if (gameType?.type === 'Sportlink Proxy' && (username && password || fakeCredentials)) {
-                    await handleSportlinkProxy({ 
-                        gameType, 
-                        username, 
-                        password, 
-                        validUsername, 
-                        validPassword, 
-                        fakeCredentials
-                    });
-                }
+
+                handlerTimeout = setTimeout(async () => {
+                    if (connectionType === 'Sportlink API' && clientId) {
+                        await handleSportlinkApi(clientId);
+                    }
+
+                    if (connectionType === 'Nevobo Proxy') {
+                        await handleNevoboProxy();
+                    }
+
+                    if (connectionType === 'Sportlink Proxy' && (username && password || fakeCredentials)) {
+                        await handleSportlinkProxy({ 
+                            gameType, 
+                            username, 
+                            password, 
+                            validUsername, 
+                            validPassword, 
+                            fakeCredentials
+                        });
+                    }
+
+                    handlerTimeout = null;
+                }, 50);
             },
             { deep: true, immediate: true }
         );
 
-        // Watch for empty credentials
         watch(() => [config.value.clientId, config.value.clubIdentifer, config.value.clubId], 
             ([newClientVal, newIdentifierVal, newClubVal]) => {
                 if ((!newIdentifierVal || newIdentifierVal.trim() === '') && 
                     (!newClientVal || newClientVal.trim() === '') && 
                     (!newClubVal || newClubVal.trim() === '')) {
                     if(config.value.showTerms){
-                        console.log('should show')
                         showClientIdModal.value = true;
                         config.value.showTerms = false;
                     }
@@ -97,9 +105,17 @@ export function useConfigWatchers(config, {
         }
     }
 
-    async function handleNevoboProxy(clubIdentifer) {
+    async function handleNevoboProxy() {
         try {
-            const url = `https://api.nevobo.nl/relatiebeheer/verenigingen/${clubIdentifer}`;
+            if (!config.value.clubIdentifer) {
+                try {                    
+                    await clubData.fetchNevoboClubs();
+                    showClubSelectPopup.value = true;
+                } catch (error) {
+                    console.error('Error during nevobo club fetch:', error);
+                }
+            }
+            const url = `https://api.nevobo.nl/relatiebeheer/verenigingen/${config.value.clubIdentifer}`;
             const proxiedUrl = `https://cors-proxy.clubinfoproxy.workers.dev/proxy?url=${encodeURIComponent(url)}`;
 
             const response = await fetch(proxiedUrl);
@@ -128,16 +144,22 @@ export function useConfigWatchers(config, {
         const tokenExpired = !sportlinkAuth.sportlinkTokenInfo.value.access_token || 
                             Date.now() >= sportlinkAuth.sportlinkTokenInfo.value.expires_at;
 
+        const appCreds = APP_CREDENTIALS.find(cred => 
+            cred.type.toLowerCase() === gameType.label.toLowerCase()
+        );
+
+        if(!appCreds) return;
+
         if((validUsername && validPassword) || fakeCredentials) {
             if (tokenExpired || !config.value.clubId) {
                 try {
                     if (fakeCredentials) {
-                        await sportlinkAuth.useFakeCredentials(gameType);
+                        await sportlinkAuth.useFakeCredentials(appCreds);
                     } else {
-                        await sportlinkAuth.login(username, password, gameType.label);
+                        await sportlinkAuth.login(username, password, appCreds);
                     }
                     
-                    await clubData.fetchSportlinkClubs(config.value.gameType.instance, config.value.gameType.userAgent, config.value.gameType.url);
+                    await clubData.fetchSportlinkClubs(appCreds);
                     showClubSelectPopup.value = true;
                 } catch (error) {
                     console.error('Error during login or club fetch:', error);
@@ -153,7 +175,7 @@ export function useConfigWatchers(config, {
                     const timeLeft = sportlinkAuth.sportlinkTokenInfo.value.expires_at - Date.now();
                     if(timeLeft < 5 * 60 * 1000){
                         console.log(`Refreshing Sportlink token...`)
-                        await sportlinkAuth.refreshToken(gameType.label);
+                        await sportlinkAuth.refreshToken(appCreds);
                     }
                 }
             }, 60 * 1000);
@@ -166,6 +188,9 @@ export function useConfigWatchers(config, {
         }
         if (saveTimeout) {
             clearTimeout(saveTimeout);
+        }
+        if(handlerTimeout){
+            clearTimeout(handlerTimeout)
         }
     }
 
