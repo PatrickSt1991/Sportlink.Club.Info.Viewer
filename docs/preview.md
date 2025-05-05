@@ -18,7 +18,7 @@ __Club zoeken via Sportlink Proxy__
 
 Toont de komende wedstrijden met tijd, teams, locatie en eventueel veld- of kleedkamerindeling.
 
-![Programma](./screenshots/progamma.png)
+![Programma](./screenshots/programma_new.png)
 
 ---
 
@@ -26,18 +26,17 @@ Toont de komende wedstrijden met tijd, teams, locatie en eventueel veld- of klee
 
 Toont de recente wedstrijdresultaten van de vereniging.
 
-![Uitslagen](./screenshots/uitslagen.png)
+![Uitslagen](./screenshots/uitslagen_new.png)
 
 ---
 
 ## 🧾 Wedstrijdinformatie
 
 Toont informatie over de wedstrijden die binnenkort starten, inclusief kleedkamer- en veldindeling.  
-📷 *Afbeelding volgt binnenkort…*
-![Uitslagen](./screenshots/wedstrijdinfoFilled.png)
+![WedstrijdInformatieFilled](./screenshots/wedstrijdinfoFilled.png)
 Wedstrijd informatie beschikbaar
 
-![Uitslagen](./screenshots/wedstrijd-informatie.png)
+![WedstrijdInformatieLeeg](./screenshots/wedstrijd-informatie.png)
 Wedstrijd informatie beschikbaar
 
 ---
