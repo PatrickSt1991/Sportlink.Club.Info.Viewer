@@ -33,7 +33,7 @@ Toont de recente wedstrijdresultaten van de vereniging.
 ## 🧾 Wedstrijdinformatie
 
 Toont informatie over de wedstrijden die binnenkort starten, inclusief kleedkamer- en veldindeling.  
-![WedstrijdInformatieFilled](./screenshots/wedstrijdinfoFilled.png)
+![WedstrijdInformatieFilled](./screenshots/wedstrijdInfoFilled.png)
 Wedstrijd informatie beschikbaar
 
 ![WedstrijdInformatieLeeg](./screenshots/wedstrijd-informatie.png)

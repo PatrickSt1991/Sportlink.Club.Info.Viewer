@@ -12,7 +12,7 @@ Welkom bij **ClubInfoBoard** – dé oplossing voor sportverenigingen om wedstri
 - ✅ **Uitslagen**
 - 🧾 **Wedstrijdinformatie**, inclusief kleedkamer- en veldindeling (voor de komende 3 uur)
 
-De app is geoptimaliseerd voor gebruik op Smart TVs, tablets en andere displays binnen sportaccommodaties.
+De app is geoptimaliseerd voor gebruik op Smart TV's, tablets én computers of laptops – ideaal voor elk scherm binnen uw vereniging!
 
 ---
 
