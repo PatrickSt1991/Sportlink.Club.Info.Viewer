@@ -1,4 +1,4 @@
-# ⚙️ Sportlink Club Info Viewer – Instellingen
+# ⚙️ ClubInfoBoard – Instellingen
 
 ## 🔧 Instellingen
 
