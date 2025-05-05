@@ -1,8 +1,9 @@
 import { fetchTeamLogo } from '../fetchUtils';
 import { formatCompType } from '@/utils/formatCompType.js';
 
-export const processSportlinkProxyData = async (data, fetchType, dateThreshold, now, config, formatDateFn, appCreds) => {
+export const processSportlinkProxyData = async (data, fetchType, dateThreshold, now, formatDateFn, formatNevoboDate, appCreds) => {
   try {
+
     const items = fetchType === 'info' 
       ? data.ProgramItemMatchClub 
       : data.MatchResult;
@@ -29,8 +30,11 @@ export const processSportlinkProxyData = async (data, fetchType, dateThreshold, 
       };
 
       if (fetchType === 'results') {
-        result.datumopgemaakt = formatDateFn(match.MatchDateTime);
-        result.uitslag = item.uitslag?.code || '-';
+        const homeScore = match.HomeResult?.Score;
+        const awayScore = match.AwayResult?.Score;
+        
+        result.uitslag = (homeScore != null && awayScore != null) ? `${homeScore}-${awayScore}` : '--';
+        result.datumopgemaakt = formatNevoboDate(match.MatchDateTime);
       }
 
       return result;

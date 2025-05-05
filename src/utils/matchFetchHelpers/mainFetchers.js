@@ -50,7 +50,6 @@ export const fetchMatches = async (
     if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
     
     const data = await response.json();
-    
     const now = new Date();
     const dateThreshold = new Date(now);
     dateThreshold.setDate(
@@ -61,10 +60,10 @@ export const fetchMatches = async (
     // Process data based on API type
     switch (config.value.connectionType) {
       case 'Sportlink API':
-        matches.value = processSportlinkApiData(data, fetchType, dateThreshold, now, formatDateTime);
+        matches.value = processSportlinkApiData(data, fetchType, dateThreshold, now, formatDateTime, formatNevoboDate);
         break;
       case 'Sportlink Proxy':
-        matches.value = await processSportlinkProxyData(data, fetchType, dateThreshold, now, config.value, formatDateTime, appCreds);
+        matches.value = await processSportlinkProxyData(data, fetchType, dateThreshold, now, formatDateTime, formatNevoboDate, appCreds);
         break;
       case 'Nevobo Proxy':
         matches.value = processNevoboProxyData(data, fetchType, dateThreshold, now, 
@@ -117,7 +116,7 @@ export const fetchPreMatchInfo = async (
 
     const url = getPreMatchInfoUrl(config.value, isProxy ? appCreds.apiUrl : undefined);
     
-    const response = await fetchWithConfig(url, config.value, isProxy, appCreds);
+    const response = await fetchWithConfig(url, isProxy, appCreds);
     
     if (!response.ok) throw new Error(`HTTP Error! status: ${response.status}`);
 

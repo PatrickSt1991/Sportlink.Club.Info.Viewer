@@ -69,12 +69,15 @@
           </option>
           <option value="custom">Andere URL</option>
         </select>
-  
+      </div>
+
+      <div class="form-group" v-if="localConfig.selectedBackground === 'custom'">
+        <label class="leftLabel">URL:</label>
         <input
-          v-if="localConfig.selectedBackground === 'custom'"
           v-model="localConfig.customBackgroundUrl"
           @input="updateBackground"
-          placeholder="Enter image URL"
+          placeholder="Geef URL in..."
+          type="text"
         />
       </div>
   

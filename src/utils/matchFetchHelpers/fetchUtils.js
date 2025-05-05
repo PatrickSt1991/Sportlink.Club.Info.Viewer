@@ -1,7 +1,8 @@
-import noImage from '@/assets/no_image.png'; // or relative: './assets/no_image.png'
+import noImage from '@/assets/no_image.png';
 
 export const fetchWithConfig = async (url, isProxy = false, appCreds) => {
   try {
+
     if (!isProxy) {
       return await fetch(url);
     }

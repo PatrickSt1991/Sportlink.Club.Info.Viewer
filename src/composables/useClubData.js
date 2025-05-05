@@ -8,7 +8,7 @@ export function useClubData(sportlinkTokenInfo) {
 
     async function fetchSportlinkClubs(appCreds) {
 
-        const toastId = toast.info("Alle clubs ophalen bij Nevobo, even geduld a.u.b.", {
+        const toastId = toast.info("Alle clubs ophalen bij Sportlink, even geduld a.u.b.", {
             timeout: false,
             closeOnClick: false,
             draggable: false,
@@ -69,9 +69,7 @@ export function useClubData(sportlinkTokenInfo) {
         const maxRetries = 3;
         let totalPages = null;
     
-        try {
-            console.log(`Starting fetch of clubs...`);
-            
+        try {           
             while (nextPage) {
                 // Add minimal delay between requests to avoid rate limiting
                 if (currentPage > 1) {

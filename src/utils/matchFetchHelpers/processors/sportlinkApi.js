@@ -1,6 +1,6 @@
 import { formatCompType } from '@/utils/formatCompType.js';
 
-export const processSportlinkApiData = (data, fetchType, dateThreshold, now, formatDateFn) => {
+export const processSportlinkApiData = (data, fetchType, dateThreshold, now, formatDateFn, formatDate) => {
   try {
     const filtered = data.filter(item => {
       const matchDate = new Date(item.wedstrijddatum);
@@ -13,7 +13,7 @@ export const processSportlinkApiData = (data, fetchType, dateThreshold, now, for
       ...item,
       competitiesoort: formatCompType(item.competitiesoort),
       wedstrijddatum: formatDateFn(item.wedstrijddatum),
-      datumopgemaakt: fetchType === 'results' ? formatDateFn(item.wedstrijddatum) : undefined
+      datumopgemaakt: fetchType === 'results' ? formatDate(item.wedstrijddatum) : undefined
     }));
   } catch (error) {
     console.error(`Unexpected data format on Sportlink API:`, error);

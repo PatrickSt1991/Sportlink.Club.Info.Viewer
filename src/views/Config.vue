@@ -150,8 +150,6 @@ function handleClubSelected(club) {
         config.value.clubId = club.ClubId;
     }
 
-    console.log(config.value.clubId)
-    console.log(config.value.clubIdentifer)
     showClubSelectPopup.value = false;
 }
 
