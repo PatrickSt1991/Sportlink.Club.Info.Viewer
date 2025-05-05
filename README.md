@@ -1,4 +1,4 @@
-# Sportlink Club Info Viewer
+# ClubInfoBoard (Sportlink Club Info Viewer)
 ![Support Ukraine](https://img.shields.io/badge/Support-Ukraine-FFD500?style=flat&labelColor=005BBB)
 
 ## **Terms of use**
