@@ -1,5 +1,6 @@
 import { watch, ref } from 'vue';
 import { APP_CREDENTIALS} from '@/config';
+import { useToast } from "vue-toastification";
 
 export function useConfigWatchers(config, { 
     sportlinkAuth, 
@@ -11,6 +12,7 @@ export function useConfigWatchers(config, {
     let saveTimeout;
     let handlerTimeout = null;
     const showClientIdModal = ref(false);
+    const toast = useToast();
 
     function setupWatchers() {
         watch(
@@ -92,6 +94,22 @@ export function useConfigWatchers(config, {
     async function handleSportlinkApi(clientId) {
         try {
             const response = await fetch(`https://data.sportlink.com/clubgegevens?client_id=${clientId}`);
+            if(response.status === 401){
+                toast.error(`Inloggen bij Sportlink is mislukt met clientId: ${clientId}`, {
+                    position: "top-right",
+                    timeout: 5000,
+                    closeOnClick: true,
+                    pauseOnFocusLoss: false,
+                    pauseOnHover: false,
+                    draggable: true,
+                    draggablePercent: 0.6,
+                    showCloseButtonOnHover: false,
+                    hideProgressBar: true,
+                    closeButton: "button",
+                    icon: true,
+                    rtl: false
+                });
+            }
             if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
             
             const data = await response.json();
@@ -99,9 +117,13 @@ export function useConfigWatchers(config, {
                 config.value.sportLocatie = data.bezoekadres.naam;
             }
         } catch (error) {
+            toast.info(`Iets ging fout, controleer de console!`, {
+                timeout: 15,
+                closeOnClick: false,
+                draggable: false,
+                closeButton: false
+            });
             console.error('Error fetching club data:', error);
-        } finally {
-            config.value.clubIdentifer = null;
         }
     }
 
@@ -127,6 +149,12 @@ export function useConfigWatchers(config, {
                 config.value.sportLocatie = data.vestigingsplaats;
             }
         } catch (error) {
+            toast.info(`Iets ging fout, controleer de console!`, {
+                timeout: 15,
+                closeOnClick: false,
+                draggable: false,
+                closeButton: false
+            });
             console.error('Error fetching vereniging data from Nevobo API:', error);
         } finally {
             config.value.clientId = null;
@@ -162,6 +190,12 @@ export function useConfigWatchers(config, {
                     await clubData.fetchSportlinkClubs(appCreds);
                     showClubSelectPopup.value = true;
                 } catch (error) {
+                    toast.info(`Iets ging fout, controleer de console!`, {
+                        timeout: 15,
+                        closeOnClick: false,
+                        draggable: false,
+                        closeButton: false
+                    });
                     console.error('Error during login or club fetch:', error);
                 }
             }

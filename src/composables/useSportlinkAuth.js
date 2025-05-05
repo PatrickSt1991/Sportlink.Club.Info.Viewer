@@ -1,5 +1,6 @@
 import { ref } from 'vue';
 import { FAKE_CREDENTIALS } from '@/config';
+import { useToast } from "vue-toastification";
 
 export function useSportlinkAuth() {
     const sportlinkTokenInfo = ref({
@@ -13,7 +14,8 @@ export function useSportlinkAuth() {
 
             const url = `https://app-${appCreds.apiUrl}-production.sportlink.com/oauth/token`;
             const proxiedUrl = `https://cors-proxy.clubinfoproxy.workers.dev/proxy?url=${encodeURIComponent(url)}`;
-
+            const toast = useToast();
+            
             const params = new URLSearchParams();
             params.append('grant_type', 'password');
             params.append('username', username);
@@ -30,6 +32,23 @@ export function useSportlinkAuth() {
                 },
                 body: params,
             });
+
+            if(response.status === 401){
+                toast.error(`Inloggen bij Sportlink is mislukt met gebruikersnaam: ${username} en wachtwoord ${password}`, {
+                    position: "top-right",
+                    timeout: 5000,
+                    closeOnClick: true,
+                    pauseOnFocusLoss: false,
+                    pauseOnHover: false,
+                    draggable: true,
+                    draggablePercent: 0.6,
+                    showCloseButtonOnHover: false,
+                    hideProgressBar: true,
+                    closeButton: "button",
+                    icon: true,
+                    rtl: false
+                });
+            }
 
             if (!response.ok) {
                 throw new Error(`HTTP error with sportlinkLogin! ${response.status}`);
