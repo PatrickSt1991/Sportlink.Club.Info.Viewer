@@ -10,7 +10,8 @@ Gebruik dit als referentie bij het instellen van je eigen weergave via de [inste
 Hier configureer je onder andere sport, type verbinding, weergave-instellingen, styling en sponsors.
 
 ![Instellingen](./screenshots/instellingen.png)
-
+![Instellingen](./screenshots/searchClub.png)
+__Club zoeken via Sportlink Proxy__
 ---
 
 ## 🗓️ Programmaweergave
@@ -33,6 +34,11 @@ Toont de recente wedstrijdresultaten van de vereniging.
 
 Toont informatie over de wedstrijden die binnenkort starten, inclusief kleedkamer- en veldindeling.  
 📷 *Afbeelding volgt binnenkort…*
+![Uitslagen](./screenshots/wedstrijdinfoFilled.png)
+Wedstrijd informatie beschikbaar
+
+![Uitslagen](./screenshots/wedstrijd-informatie.png)
+Wedstrijd informatie beschikbaar
 
 ---
 
