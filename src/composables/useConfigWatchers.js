@@ -35,7 +35,8 @@ export function useConfigWatchers(config, {
                 validUsername: config.value.validUsername,
                 validPassword: config.value.validPassword,
                 fakeCredentials: config.value.fakeCredentials,
-                clientId: config.value.clientId
+                clientId: config.value.clientId,
+                validClientId: config.value.validClientId
             }),
             async ({ 
                 gameType, 
@@ -45,7 +46,8 @@ export function useConfigWatchers(config, {
                 validUsername, 
                 validPassword, 
                 clientId, 
-                fakeCredentials
+                fakeCredentials,
+                validClientId
             }) => {
                 if(handlerTimeout){
                     clearTimeout(handlerTimeout);
@@ -53,7 +55,7 @@ export function useConfigWatchers(config, {
 
                 handlerTimeout = setTimeout(async () => {
                     if (connectionType === 'Sportlink API' && clientId) {
-                        await handleSportlinkApi(clientId);
+                        await handleSportlinkApi(clientId, validClientId);
                     }
 
                     if (connectionType === 'Nevobo Proxy') {
@@ -91,7 +93,8 @@ export function useConfigWatchers(config, {
         );
     }
 
-    async function handleSportlinkApi(clientId) {
+    async function handleSportlinkApi(clientId, validClientId) {
+        if(!validClientId) return;
         try {
             const response = await fetch(`https://data.sportlink.com/clubgegevens?client_id=${clientId}`);
             if(response.status === 401){
@@ -109,13 +112,30 @@ export function useConfigWatchers(config, {
                     icon: true,
                     rtl: false
                 });
+
+                localConfig.value.validClientId = false;
             }
             if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
             
             const data = await response.json();
             if (data?.bezoekadres?.naam) {
                 config.value.sportLocatie = data.bezoekadres.naam;
+                toast.success("Sportlink API met success ingelogd", {
+                    position: "top-right",
+                    timeout: 5000,
+                    closeOnClick: true,
+                    pauseOnFocusLoss: false,
+                    pauseOnHover: false,
+                    draggable: false,
+                    draggablePercent: 0.6,
+                    showCloseButtonOnHover: false,
+                    hideProgressBar: true,
+                    closeButton: "button",
+                    icon: true,
+                    rtl: false
+                  });
             }
+            
         } catch (error) {
             toast.info(`Iets ging fout, controleer de console!`, {
                 timeout: 15,

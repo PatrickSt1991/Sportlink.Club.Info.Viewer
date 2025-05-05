@@ -31,6 +31,7 @@
       <div class="form-group" v-if="localConfig.connectionType === 'Sportlink API'">
         <label class="leftLabel">Client ID:</label>
         <input type="text" v-model="localConfig.clientId">
+        <input type="checkbox" v-model="localConfig.validClientId">
       </div>
   
       <div class="form-group" v-if="localConfig.connectionType === 'Nevobo Proxy'">
@@ -193,6 +194,7 @@
       props.config.password = null;
       props.config.validUsername = false;
       props.config.validPassword = false;
+      props.config.validClientId = false;
       props.config.fakeCredentials = false;
       props.config.sportLocatie = null;
       console.log(`Sport aangepast naar ${newGameType.label}, resetting...`)
@@ -233,16 +235,18 @@
   watch(
     () => ({
       selectedGameLabel: localConfig.value.gameType?.label || null,
-      sportlinkClientId: localConfig.value.clientId || null
+      sportlinkClientId: localConfig.value.clientId || null,
+      sportlinkClientIdValid: localConfig.value.validClientId || false,
     }),
-    async ({ selectedGameLabel, sportlinkClientId }, prev = { 
+    async ({ selectedGameLabel, sportlinkClientId, sportlinkClientIdValid }, prev = { 
       selectedGameLabel: null, 
-      sportlinkClientId: null 
+      sportlinkClientId: null,
+      sportlinkClientIdValid: false
     }) => {
-      if(!selectedGameLabel || !sportlinkClientId) return;
+      if(!selectedGameLabel || !sportlinkClientId || !sportlinkClientIdValid) return;
 
       if(localConfig.value.connectionType !== 'Sportlink API') return;
-      
+
       if(selectedGameLabel === prev.selectedGameLabel &&
           sportlinkClientId === prev.sportlinkClientId){
         return;
@@ -258,7 +262,7 @@
           emit('update:config', { ...localConfig.value });
         }
       } catch(error) {
-        console.error('Error in fake credentials watch:', error)
+        console.error('Error in sportlink api watch:', error)
       }
     },
     { deep: true, immediate: true, flush: 'post' }

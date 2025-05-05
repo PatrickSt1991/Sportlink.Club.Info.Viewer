@@ -245,6 +245,7 @@ const defaultConfig = {
   password: '',
   validUsername: false,
   validPassword: false,
+  validClientId: false,
   fakeCredentials: false,
   sportLocatie: null,
   programmaDagen: 7,

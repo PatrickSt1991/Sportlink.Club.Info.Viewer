@@ -48,6 +48,7 @@ export function useSportlinkAuth() {
                     icon: true,
                     rtl: false
                 });
+                localConfig.value.validClientId = false;
             }
 
             if (!response.ok) {
@@ -63,6 +64,21 @@ export function useSportlinkAuth() {
                 expires_at: Date.now() + expires_in * 1000
             };
             
+            toast.success("Sportlink Proxy met success ingelogd", {
+                position: "top-right",
+                timeout: 5000,
+                closeOnClick: true,
+                pauseOnFocusLoss: false,
+                pauseOnHover: false,
+                draggable: false,
+                draggablePercent: 0.6,
+                showCloseButtonOnHover: false,
+                hideProgressBar: true,
+                closeButton: "button",
+                icon: true,
+                rtl: false
+              });
+
             localStorage.setItem('sportlinkTokenInfo', JSON.stringify(sportlinkTokenInfo.value));
             return true;
         } catch (error) {
