@@ -11,6 +11,18 @@
     - **Sportlink Proxy** – Vereist een gebruikersnaam en wachtwoord zoals gebruikt in de Sportlink-app, of kies voor *Fake Credentials* voor testdoeleinden.
     - **Nevobo Proxy** – Alleen beschikbaar voor volleybal. Vereist geen verdere authenticatie.
 
+- **Sportlink API-instellingen**  
+    - **Client ID** – Voer hier het Sportlink Client ID in.  
+    - **Client ID bevestigen** – Vink aan als het ingevoerde Client ID correct is.
+
+- **Sportlink Proxy-instellingen**  
+    - **ClubId** – Wordt automatisch ingevuld door de applicatie.  
+    - **Gebruikersnaam** – Voer de gebruikersnaam in die je gebruikt voor de app (bijv. de Voetbal.nl-app).  
+    - **Gebruikersnaam bevestigen** – Vink aan als de ingevoerde gebruikersnaam correct is.  
+    - **Wachtwoord** – Voer het wachtwoord in dat je gebruikt voor de app.  
+    - **Wachtwoord bevestigen** – Vink aan als het ingevoerde wachtwoord correct is.
+Daarna zal het authenticatieproces automatisch starten.
+
 - **Achtergrond**  
   Kies uit de voorgedefinieerde achtergronden of selecteer "Andere URL" om een eigen achtergrondafbeelding in te voeren.
 
