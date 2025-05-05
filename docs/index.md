@@ -30,14 +30,9 @@ De app is geoptimaliseerd voor gebruik op Smart TVs, tablets en andere displays 
 - **Fallback voor teamlogo's**  
   Indien een specifiek teamlogo ontbreekt, wordt het standaard clublogo getoond.
 
-- **Configuratie op maat**  
-  Stel eenvoudig parameters in zoals het aantal getoonde dagen of de startweergave.
-
-- **Styling op maat**  
-  Pas eenvoudig de kleuren aan zodat de weergave perfect aansluit bij de huisstijl van de club. Ook is het mogelijk om een eigen achtergrondafbeelding in te stellen.
-
-- **Sponsoring**  
-  Voeg sponsors toe die automatisch zichtbaar worden in de lay-out.
+- **Volledig configureerbaar**  
+  Van weergave-opties en huisstijl tot data-instellingen – alles is naar wens aan te passen.  
+  👉 Zie [Instellingen](./settings.md) voor een compleet overzicht van alle opties.
 
 ---
 
@@ -55,7 +50,7 @@ Host de applicatie zelf op een eigen server of Raspberry Pi.
 ❌ Geen automatische updates  
 ✅ Volledige controle over hosting en configuratie  
 
-### 📺 Tizen (Samsung Smart TV-app) *(in ontwikkeling)*
+### 📺 Tizen (Samsung Smart TV-app) *(in ontwikkeling)*  
 De [Tizen-app](https://github.com/PatrickSt1991/Sportlink.Club.Info.Viewer.Tizen) kan direct op een Smart TV worden geïnstalleerd.  
 ⚠️ Let op: de huidige versie is verouderd en bevat nog een oude build.  
 ✅ Eenmalige installatie  
@@ -75,14 +70,11 @@ Iedereen kan de software gebruiken en aanpassen naar eigen wensen.
 De applicatie ondersteunt meerdere methoden om sportgegevens op te halen:
 
 - **Sportlink API**  
-  Vereist een Client ID vanuit Sportlink.
-
 - **Sportlink Proxy**  
-  Vereist e-mailadres en wachtwoord van een bestaand Sportlink-account.  
-  _Er is ook een optie om ingebouwde gegevens (fake credentials) te gebruiken._
+- **Nevobo Proxy**
 
-- **Nevobo Proxy**  
-  Vereist een Identifier (clubcode) van jouw volleybalvereniging zoals geregistreerd bij Nevobo.
+Meer uitleg over het instellen van deze gegevensbronnen vindt u op de [instellingenpagina](./settings.md),  
+of neem een kijkje bij de [voorbeelden](./preview.md) voor een visuele indruk van de mogelijkheden.
 
 ---
 

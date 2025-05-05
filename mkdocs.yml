@@ -4,6 +4,8 @@ theme:
 
 nav:
   - Home: index.md
+  - Instellingen: settings.md
+  - Voorbeeld: preview.md
 
 markdown_extensions:
   - toc:
