@@ -1,10 +1,18 @@
-import { createRouter, createWebHistory } from 'vue-router';
+import { createRouter, createWebHashHistory } from 'vue-router';
 import PreMatchInfo from '@/views/PreMatchInfo.vue';
 import MatchInfo from '@/views/MatchInfo.vue';
 import MatchResults from '@/views/MatchResults.vue';
-import { BASE_URL,HOMESCREEN } from '@/config';
+import Config from '@/views/Config.vue';
+import { HOME_SCREENS, USER_CONFIG, BASE_URL } from '@/config';
 
 const routes = [
+  {
+    path: '/settings',
+    name: 'Settings',
+    component: Config,
+    // Add this to prevent Suspense warning
+    meta: { suspensible: false }
+  },
   {
     path: '/prematch-info',
     name: 'PreMatchInfo',
@@ -22,12 +30,12 @@ const routes = [
   },
   {
     path: '/:pathMatch(.*)*',
-    redirect: HOMESCREEN,
+    redirect: () => HOME_SCREENS[USER_CONFIG.homeScreen] || '/match-info',
   },
 ];
 
 const router = createRouter({
-  history: createWebHistory(BASE_URL),
+  history: createWebHashHistory(BASE_URL),
   routes,
 });
 

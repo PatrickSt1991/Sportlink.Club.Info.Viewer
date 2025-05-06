@@ -5,15 +5,27 @@
 
   color-scheme: light dark;
   color: rgba(255, 255, 255, 0.87);
-  background-image: url('@/assets/background.jpg'); /* Adjust the path accordingly */
-	height: 100%;
-	background-position: center;
-	background-repeat: no-repeat;
-	background-size: cover;
+  
+  /* Safe background implementation */
+  background-size: cover;
+  
+  min-height: 100vh;
+  width: 100%;
+  overflow-x: hidden; /* Prevents horizontal scrollbar */
+  
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+/* Optional: Add these rules to ensure no horizontal overflow */
+html, body {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  max-width: 100%;
+  overflow-x: hidden;
 }
 
 a {
@@ -114,7 +126,6 @@ button:focus-visible {
 
 #datumUitslag_fixed {
   width: 10%;
-  background: #b40808; /* WVV red */
   padding: 18px 15px;
   border-top-left-radius: 25px;
   border-bottom-left-radius: 25px;
@@ -123,7 +134,6 @@ button:focus-visible {
 
 #datumProgramma_fixed {
   width: 10%;
-  background: #b40808; /* WVV red */
   padding: 5px 15px;
   border-top-left-radius: 25px;
   border-bottom-left-radius: 25px;
@@ -133,19 +143,16 @@ button:focus-visible {
 #thuisteam_fixed,
 #uitteam_fixed {
   width: 45%; /* Fixed width for team names */
-  background: #000000; /* Black background */
   padding: 18px 15px;
 }
 
 #kleedkamer_fixed {
   width: 20%; /* Fixed width for dressing rooms */
-  background: #de0b0b; /* WVV red */
   padding: 18px 15px;
 }
 
 #wedstrijdveld_fixed {
   width: 15%; /* Fixed width for field info */
-  background: #b40808; /* WVV red */
   padding: 18px 15px;
   border-top-right-radius: 25px;
   border-bottom-right-radius: 25px;
@@ -158,17 +165,76 @@ button:focus-visible {
   border-radius: 25px;
   color: #000000;
   padding-top: 10px;
+  min-width: 97%;
+  margin-bottom: 10px;
 }
 
-#noMatchMessage img {
-  width: auto; /* Adjust size as needed */
-  height: auto; /* Maintain aspect ratio */
+.no-matches-container {
+  text-align: center;
+  padding: 3rem 1rem;
+  max-width: 400px;
+  margin: 0 auto;
+  color: #666;
 }
 
-#noMatchMessage h1 {
-  font-size: 24px; /* Adjust the font size */
-  margin-top: 10px; /* Space between image and text */
-  padding-bottom: 10px;
+.calendar-icon {
+  width: 120px;
+  height: 120px;
+  position: relative;
+  margin: 0 auto 2rem;
+  perspective: 1000px;
+  margin-top: 10px;
+}
+
+.calendar-page {
+  width: 100%;
+  height: 100%;
+  background: white;
+  border-radius: 5px;
+  box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+  padding: 15px;
+  position: relative;
+  transform-style: preserve-3d;
+}
+
+.empty-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  height: 100%;
+}
+
+.grid-cell {
+  background: #f5f5f5;
+  border-radius: 2px;
+}
+
+.calendar-spine {
+  position: absolute;
+  left: -8px;
+  top: 5px;
+  bottom: 5px;
+  width: 8px;
+  background: #e0e0e0;
+  border-radius: 3px 0 0 3px;
+}
+
+.calh2 {
+  margin: 0 0 0.5rem;
+  font-weight: 500;
+}
+
+.calp {
+  margin: 0;
+  color: #999;
+}
+.calendar-icon {
+  animation: gentleFloat 3s ease-in-out infinite;
+}
+
+@keyframes gentleFloat {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-8px); }
 }
 
 #scrollingContainer {

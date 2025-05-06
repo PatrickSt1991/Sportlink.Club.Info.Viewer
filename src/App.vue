@@ -1,16 +1,10 @@
 <template>
   <div id="app">
-    <router-view></router-view>
-    <SponsorBar />
+    <router-view />
+    <SponsorBar/>
   </div>
 </template>
 
-<script>
+<script setup>
 import SponsorBar from './components/SponsorBar.vue';
-
-export default {
-  components: {
-    SponsorBar,
-  },
-};
 </script>

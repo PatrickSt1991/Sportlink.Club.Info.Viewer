@@ -3,10 +3,11 @@
     <div class="sponsor-bar">
       <div class="sponsor-images">
         <img 
-          v-for="(image, index) in images" 
+        v-for="(image, index) in sponsorImages" 
           :key="index" 
-          :src="getImage(image)" 
+          :src="image" 
           class="sponsor-image" 
+          :style="sponsorStyle" 
         />
         <img 
           v-if="imageSrc" 
@@ -16,56 +17,55 @@
       </div>
     </div>
     <p class="copyright">
-      <a href="https://github.com/PatrickSt1991" target="_blank">© {{ year }} Patrick Stel. Released under the MIT License.</a>
+      <a href="https://github.com/PatrickSt1991" target="_blank">© {{ year }} Patrick Stel. <br/> Vrijgegeven onder de MIT-licentie..</a>
     </p>
   </div>
 </template>
 
 <script>
+import { ref, computed, onMounted } from 'vue';
+import { USER_CONFIG } from '@/config';
+import { sponsorImages, loadSponsorImages } from '@/stores/sponsorStore';
+
 export default {
   name: 'SponsorBar',
-  data() {
-    return {
-      year: new Date().getFullYear(),
-      imageSrc: null,
-      images: [
-        'caravan.jpg',
-        'detreffer.png',
-        'hartman.png',
-        'hofman.png',
-        'hyzon.png',
-        'jumbojan.png',
-        'rse_bev.svg',
-        'rse_tel.png',
-        'schrantee.png',
-        'soko.png',
-        'stukaschuur.jpg',
-        'top1toys.png',
-      ],
-    };
-  },
-  methods: {
-    getImage(imageName) {
-      return new URL(`../assets/sponsors/${imageName}`, import.meta.url).href;
-    },
-    loadBinaryImage() {
+  setup() {
+    const year = ref(new Date().getFullYear());
+    const imageSrc = ref(null);
+
+    const sponsorStyle = computed(() => {
+      return USER_CONFIG.value.activeSponsors ? {} : { visibility: 'hidden' };
+    });
+
+    const loadBinaryImage = () => {
       fetch(new URL('../assets/main.bin', import.meta.url).href)
         .then((response) => response.arrayBuffer())
         .then((arrayBuffer) => {
           const blob = new Blob([arrayBuffer], { type: 'image/jpg' });
-          this.imageSrc = URL.createObjectURL(blob);
+          imageSrc.value = URL.createObjectURL(blob);
         })
         .catch((error) => {
           console.error('Error loading binary image:', error);
         });
-    },
-  },
-  mounted() {
-    this.loadBinaryImage(); // Load the binary image when the component is mounted
-  },
+    };
+
+    window.addEventListener('storage', (event) => {
+      if (event.key === 'sponsorImages') {
+        loadSponsorImages();
+      }
+    });
+
+    onMounted(() => {
+      loadBinaryImage();
+      loadSponsorImages();
+    });
+
+    return {
+      year,
+      imageSrc,
+      sponsorStyle,
+      sponsorImages,
+    };
+  }
 };
 </script>
-
-<style scoped>
-
-</style>

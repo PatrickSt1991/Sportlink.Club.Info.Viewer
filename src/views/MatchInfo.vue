@@ -1,32 +1,32 @@
 <template>
   <main role="main" class="container-fluid" id="contentBox">
     <div id="rcorners">
-      <p id="topbar">Wedstrijd programma aankomende {{ programmaDagen }} dagen</p>
+      <p id="topbar">Wedstrijd programma aankomende {{ config.programmaDagen }} dagen</p>
     </div>
     <div id="rcorners_matchinfo_fixed">
       <div v-if="loading" id="noMatchMessage">
-        <h1>Wedstrijd uitslagen worden geladen...</h1>
+        <h1>Wedstrijd programma worden geladen...</h1>
       </div>
 
       <div v-else-if="error" id="noMatchMessage">
         <h1>{{ error }}</h1>
       </div>
 
-      <div v-else-if="matches.length === 0" id="noMatchMessage">
-        <img src="../assets/no_data.jpg" alt="No Matches"/>
-        <h1>Er is momenteel geen wedstrijd data beschikbaar...</h1>
-      </div>
+      <NoMatchesDisplay 
+        v-else-if="matches.length === 0"
+        title="Geen wedstrijd programma"
+        :message="dateRangeText" />
 
       <div v-else id="scrollingContainer" :style="{ height: scrollingContainerHeight }">
         <transition-group name="fade" tag="div">
           <div v-for="match in matches" :key="match.id" class="matchEntry">
-            <div id="datumProgramma_fixed">{{ formatDate(match.wedstrijddatum) }}</div>
-            <img id="clublogo" :src="match.thuisteamlogo">
-            <div id="thuisteam_fixed">{{ match.thuisteam }}</div>
-            <div id="kleedkamer_fixed">-</div>
-            <div id="uitteam_fixed">{{ match.uitteam }}</div>
-            <img id="clublogo" :src="match.uitteamlogo">
-            <div id="wedstrijdveld_fixed">{{ formatCompType(match.competitiesoort) }}</div>
+            <div :style="{ background: config.leftBoxColor, color: config.leftBoxText }" id="datumProgramma_fixed">{{ match.wedstrijddatum }}</div>
+            <img :style="{ background: config.leftMidBoxColor, color: config.leftMidBoxText }" id="clublogo" :src="match.thuisteamlogo">
+            <div :style="{ background: config.leftMidBoxColor, color: config.leftMidBoxText }" id="thuisteam_fixed">{{ match.thuisteam }}</div>
+            <div :style="{ background: config.midBoxColor, color: config.midBoxText }" id="kleedkamer_fixed">-</div>
+            <div :style="{ background: config.rightMidBoxColor, color: config.rightMidBoxText }" id="uitteam_fixed">{{ match.uitteam }}</div>
+            <img :style="{ background: config.rightMidBoxColor, color: config.rightMidBoxText }" id="clublogo" :src="match.uitteamlogo">
+            <div :style="{ background: config.rightBoxColor, color: config.rightBoxText }" id="wedstrijdveld_fixed">{{ match.competitiesoort }}</div>
           </div>
         </transition-group>
       </div>
@@ -34,127 +34,77 @@
   </main>
 </template>
 
-<script>
-import { nextTick } from 'vue';
-import { CLIENT_ID, PROGRAMMA_DAGEN, ENABLE_SCREEN_SWITCH } from '@/config';
+<script setup>
+import { ref, onMounted, watch, onUnmounted, nextTick } from 'vue';
+import { USER_CONFIG } from '@/config';
+import { useRouter } from 'vue-router';
+import { formatCompType } from '@/utils/formatCompType.js';
+import { formatDateTime } from '@/utils/formatDateType.js';
+import noImage from '@/assets/no_image.png';
+import NoMatchesDisplay from '@/components/NoMatchesDisplay.vue';
+import { useScrollHelper } from '@/utils/scrollHelper.js';
+import { fetchMatches } from '@/utils/matchFetchHelpers';
 
-export default {
-  name: 'MatchInfo',
-  data() {
-    return {
-      matches: [],
-      error: null,
-      loading: false,
-      scrollInterval: null,
-      scrollingContainerHeight: '300px',
-      scrollPosition: 0,
-      scrollCycleCount: 0,
-      programmaDagen: PROGRAMMA_DAGEN,
-    };
-  },
-  methods: {
-    async fetchMatchInfo() {
-      this.error = null;
-      this.loading = true;
+const router = useRouter();
+const matches = ref([]);
+const error = ref(null);
+const loading = ref(false);
+const config = ref({});
 
-      try {
-        const response = await fetch('https://data.sportlink.com/programma?gebruiklokaleteamgegevens=NEE&aantaldagen=' + PROGRAMMA_DAGEN + '&eigenwedstrijden=JA&thuis=JA&uit=JA&client_id=' + CLIENT_ID);
+const {
+    scrollingContainerHeight,
+    calculateScrollingContainerHeight,
+    startScrolling,
+    tryStartScrolling,
+    stopScrolling
+} = useScrollHelper(router, config);
 
-        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-
-        const data = await response.json();
-        this.matches = data;
-
-        nextTick(() => {
-          if (this.matches.length > 0)
-            this.startScrolling();
-        });
-
-      } catch (error) {
-        this.error = 'Error tijdens het laden van de wedstrijd informatie...';
-        console.error('Error fetching match results info:', error);
-      } finally {
-        console.log('Done loading MatchInfo');
-        this.loading = false;
-      }
-    },
-    calculateScrollingContainerHeight() {
-      const windowHeight = window.innerHeight;
-      this.scrollingContainerHeight = `${windowHeight - 265}px`;
-    },
-    formatDate(dateString) {
-      const options = {
-        day: '2-digit',
-        month: 'short',
-        hour: '2-digit',
-        minute: '2-digit',
-      };
-
-      return new Date(dateString)
-        .toLocaleString('nl-NL', options)
-        .replace(',', '');
-    },
-    formatCompType(compType) {
-    switch (compType) {
-      case 'regulier':
-        return 'Competitie';
-      case 'beker':
-        return 'Beker';
-      case 'oefen':
-        return 'Oefen';
-      default:
-        return 'Onbekend';
+// Simplified fetch function using our helpers
+const fetchMatchInfo = async () => {
+  await fetchMatches(
+    'info',
+    config,
+    matches,
+    loading,
+    error,
+    {
+      formatCompType,
+      formatDateTime,
+      noImage,
+      nextTick,
+      tryStartScrolling
     }
-  },
-  startScrolling() {
-      nextTick(() => {
-        const container = document.getElementById('scrollingContainer');
-        if (!container) {
-          console.error('Scrolling container not found in DOM!');
-          return;
-        }
-
-        this.scrollPosition = 0;
-
-        this.scrollInterval = setInterval(() => {
-          this.scrollPosition += 1;
-
-          if (this.scrollPosition >= container.scrollHeight / 2) {
-            this.scrollPosition = 0;
-            this.scrollCycleCount += 1;
-
-            if(this.scrollCycleCount >= 2){
-              if(ENABLE_SCREEN_SWITCH == true){
-                clearInterval(this.scrollInterval);
-                this.scrollInterval = null;
-
-                this.goToMatchResults();
-              }
-            }
-          }
-          container.scrollTop = this.scrollPosition;
-        }, 100);
-      });
-    },
-    goToMatchResults(){
-      this.$router.push('/match-results');
-    },
-    stopScrolling() {
-      if (this.scrollInterval) {
-        clearInterval(this.scrollInterval);
-        this.scrollInterval = null;
-      }
-    },
-  },
-  mounted() {
-    this.calculateScrollingContainerHeight();
-    window.addEventListener('resize', this.calculateScrollingContainerHeight);
-
-    this.fetchMatchInfo();
-  },
-  beforeUnmount() {
-    this.stopScrolling();
-    window.removeEventListener('resize', this.calculateScrollingContainerHeight);
-  }
+  );
 };
+
+watch(() => USER_CONFIG.value, (newConfig) => {
+  if (!newConfig) return;
+  
+  config.value = { ...newConfig };
+  
+  const missingClientId = !newConfig.clientId;
+  const missingClubIdentifier = !newConfig.clubIdentifer;
+  const missingClubId = !newConfig.clubId;
+  const missingProgrammaDagen = !newConfig.programmaDagen;
+  
+  if (missingProgrammaDagen || (missingClientId && missingClubIdentifier && missingClubId)) {
+    router.push('/settings');
+  } else {
+    fetchMatchInfo();
+  }
+}, { immediate: true, deep: true });
+
+onMounted(() => {
+  calculateScrollingContainerHeight();
+  window.addEventListener('resize', calculateScrollingContainerHeight);
+
+  if(matches.value.length > 0){
+    nextTick().then(startScrolling);
+  }
+});
+
+onUnmounted(() => {
+  stopScrolling();
+  window.removeEventListener('resize', calculateScrollingContainerHeight);
+});
 </script>
