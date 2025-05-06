@@ -1,0 +1,16 @@
+site_name: ClubInfoBoard
+theme:
+  name: mkdocs
+
+nav:
+  - Home: index.md
+  - Instellingen: settings.md
+  - Voorbeeld: preview.md
+
+markdown_extensions:
+  - toc:
+      permalink: true
+  - admonition
+  - codehilite
+  - footnotes
+  - tables
