@@ -37,7 +37,6 @@ export function useScrollHelper(router, config) {
         const scrollHeight = container.scrollHeight - container.clientHeight;
         if (scrollHeight <= 0) {
             console.log('Not enough content to scroll');
-            // Set timeout to switch to match-info after 1-2 minutes if no content
             noContentTimeout.value = setTimeout(() => {
                 if (config.value.enableScreenSwitch) {
                     router.push('/match-info');
