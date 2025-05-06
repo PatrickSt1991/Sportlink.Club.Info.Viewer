@@ -46,9 +46,10 @@ De [online versie](https://patrickst1991.github.io/Sportlink.Club.Info.Viewer/) 
 ✅ Werkt zonder installatie  
 
 ### 🖥️ On-premise (eigen hosting)
-Host de applicatie zelf op een eigen server of Raspberry Pi.  
-❌ Geen automatische updates  
+Host de applicatie zelf op een eigen server of Raspberry Pi. 
+📦 [Download de meest recente versie](https://github.com/PatrickSt1991/Sportlink.Club.Info.Viewer/releases/latest)
 ✅ Volledige controle over hosting en configuratie  
+❌ Geen automatische updates beschikbaar
 
 ### 📺 Tizen (Samsung Smart TV-app) *(in ontwikkeling)*  
 De [Tizen-app](https://github.com/PatrickSt1991/Sportlink.Club.Info.Viewer.Tizen) kan direct op een Smart TV worden geïnstalleerd.  
