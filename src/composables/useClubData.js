@@ -167,9 +167,14 @@ export function useClubData(sportlinkTokenInfo) {
 
     async function fetchCorsStatus() {
         try {
-            const res = await fetch("https://cors-proxy.clubinfoproxy.workers.dev/status");
+            const res = await fetch("https://cors-proxy.clubinfoproxy.workers.dev/counter/count");
             if (res.ok) {
-                corsStatus.value = await res.json();
+                const data = await res.json();
+                corsStatus.value = {
+                    requestsToday: data.count,
+                    limit: 100000,
+                    status: 'OK'
+                };
             } else {
                 throw new Error("CORS proxy status fetch failed");
             }

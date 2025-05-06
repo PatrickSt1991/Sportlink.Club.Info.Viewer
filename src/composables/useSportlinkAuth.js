@@ -14,6 +14,7 @@ export function useSportlinkAuth() {
 
             const url = `https://app-${appCreds.apiUrl}-production.sportlink.com/oauth/token`;
             const proxiedUrl = `https://cors-proxy.clubinfoproxy.workers.dev/proxy?url=${encodeURIComponent(url)}`;
+            
             const toast = useToast();
             
             const params = new URLSearchParams();

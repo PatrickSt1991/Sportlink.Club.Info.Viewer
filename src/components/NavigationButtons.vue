@@ -1,20 +1,24 @@
 <template>
-    <div class="button-group">
-      <router-link to="/prematch-info" custom v-slot="{ navigate }">
-        <button @click="navigate">Snel naar Wedstrijd Informatie</button>
-      </router-link>
+  <div class="button-group">
+    <router-link to="/prematch-info" custom v-slot="{ navigate }">
+      <button @click="navigate">Snel naar Wedstrijd Informatie</button>
+    </router-link>
       
-      <router-link to="/match-results" custom v-slot="{ navigate }">
-        <button @click="navigate">Snel naar Wedstrijd Uitslagen</button>
-      </router-link>
+    <router-link to="/match-results" custom v-slot="{ navigate }">
+      <button @click="navigate">Snel naar Wedstrijd Uitslagen</button>
+    </router-link>
       
-      <router-link to="/match-info" custom v-slot="{ navigate }">
-        <button @click="navigate">Ga naar Wedstrijd Programma</button>
-      </router-link>
-    </div>
-  </template>
+    <router-link to="/match-info" custom v-slot="{ navigate }">
+      <button @click="navigate">Ga naar Wedstrijd Programma</button>
+    </router-link>
+
+    <a href="https://sportlinkclubinfoviewer.readthedocs.io/" target="_blank" rel="noopener">
+      <button>Ga naar Documentatie / Handleiding</button>
+    </a>
+  </div>
+</template>
     
-  <style scoped>
+<style scoped>
   .button-group {
     display: flex;
     gap: 12px;
@@ -58,4 +62,4 @@
       max-width: 300px;
     }
   }
-  </style>
+</style>
