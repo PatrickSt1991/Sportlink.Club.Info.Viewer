@@ -13,14 +13,22 @@
           </ul>
           <p>Wil je meer weten over de oorlog en hoe je kunt helpen?<br/> <a href="https://tyrrrz.me/ukraine" target="_blank">klik hier</a>.</p>
           <p>Glorie aan Oekraïne! 🇺🇦</p>
-          <button @click="agree" class="modal-button" @keydown="props.handleKeydown">Ik ga akkoord!</button>
+              <button 
+                ref="agreeButton"
+                @click="agree" 
+                class="modal-button" 
+                @keydown="props.handleKeydown"
+                tabindex="0"
+              >Ik ga akkoord!</button>
+          
         </div>
       </div>
     </div>
   </template>
   
   <script setup>
-   
+  import { ref, onMounted } from 'vue';
+  
   const props = defineProps({
     show: {
       type: Boolean,
@@ -30,10 +38,17 @@
   });
   
   const emit = defineEmits(['agree']);
+  const agreeButton = ref(null);
   
   function agree() {
     emit('agree');
   }
+
+  onMounted(() => {
+    if(props.show && agreeButton.value) {
+      agreeButton.value.focus();
+    }
+  });
   </script>
   
   <style scoped>

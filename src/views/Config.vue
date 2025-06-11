@@ -1,7 +1,8 @@
 <template>
   <TermsModal 
-    :show="showClientIdModal" 
-    @agree="showClientIdModal = false" 
+    v-if="showTermsInitially"
+    :show="showTermsInitially" 
+    @agree="handleAgreeTerms"
     :handleKeydown="handleKeyDown"
   />
 
@@ -42,11 +43,6 @@
     </div>
 
     <NavigationButtons />
-
-    <div class="debug-info" v-if="showDebug">
-      <p>Current Focus: {{ currentFocusOrder[currentFocusIndex] }} ({{ currentFocusIndex }}/{{ currentFocusOrder.length - 1 }})</p>
-      <p>Last Key: {{ lastKeyPressed }}</p>
-    </div>
   </div>
   <div v-else class="loading">
     Configuratie laden...
@@ -54,7 +50,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, onUnmounted, watch } from 'vue';
+import { ref, computed, onMounted, onUnmounted, watch,nextTick } from 'vue';
 import { USER_CONFIG, updateUserConfig, HOME_SCREENS, GAME_TYPES, backgroundOptions, FAKE_CREDENTIALS } from '@/config';
 import { userSponsorImages, loadSponsorImages, saveSponsorImages } from '@/stores/sponsorStore';
 import defaultImg from '@/assets/voetbal.jpg';
@@ -71,6 +67,8 @@ import StyleCustomization from '@/components/StyleCustomization.vue';
 import SponsorManager from '@/components/SponsorManager.vue';
 import NavigationButtons from '@/components/NavigationButtons.vue';
 import ClubSelectPopup from '@/components/ClubSelectPopup.vue';
+
+const showTermsInitially = ref(USER_CONFIG.value.showTerms);
 
 // Samsung TV Navigation State
 const currentFocusIndex = ref(0);
@@ -137,7 +135,7 @@ const availableGameTypes = ref(GAME_TYPES);
 // Initialize composables
 const sportlinkAuth = useSportlinkAuth();
 const { clubs, corsStatus, fetchSportlinkClubs, fetchNevoboClubs, fetchCorsStatus } = useClubData(sportlinkAuth.sportlinkTokenInfo);
-const { showClientIdModal, setupWatchers, cleanup } = useConfigWatchers(config, { 
+const { setupWatchers, cleanup } = useConfigWatchers(config, { 
     sportlinkAuth, 
     clubData: { clubs, corsStatus, fetchSportlinkClubs, fetchNevoboClubs, fetchCorsStatus },
     showClubSelectPopup,
@@ -145,6 +143,19 @@ const { showClientIdModal, setupWatchers, cleanup } = useConfigWatchers(config, 
 });
 
 const styleConfig = computed(() => {
+    const defaultStyles = {
+        leftBoxColor: "#b40808",
+        leftBoxText: "#ffffff",
+        leftMidBoxColor: "#000000",
+        leftMidBoxText: "#ffffff",
+        midBoxColor: "#de0b0b",
+        midBoxText: "#ffffff",
+        rightMidBoxColor: "#000000",
+        rightMidBoxText: "#ffffff",
+        rightBoxColor: "#b40808",
+        rightBoxText: "#ffffff"
+    };
+    
     const styles = {};
     const styleProps = [
         'leftBoxColor', 'leftBoxText', 'leftMidBoxColor', 'leftMidBoxText',
@@ -153,9 +164,7 @@ const styleConfig = computed(() => {
     ];
     
     styleProps.forEach(prop => {
-        if (config.value[prop]) {
-            styles[prop] = config.value[prop];
-        }
+        styles[prop] = config.value[prop] || defaultStyles[prop];
     });
     
     return styles;
@@ -167,6 +176,66 @@ const backgroundUrl = computed(() => {
     }
     return config.value.selectedBackground || '';
 });
+
+// Modify your existing handleAgree function or add this new one
+async function handleAgreeTerms() {
+    try {
+        showTermsInitially.value = false;
+
+        const updatedConfig = {
+            ...config.value,
+            showTerms: false
+        };
+
+        config.value = updatedConfig;
+        USER_CONFIG.value.showTerms = false;
+        updateUserConfig({ showTerms: false });
+        
+        await initializeApp();
+        await nextTick();
+        initializeTVNavigation();
+    }catch(error) {
+        isLoading.value = false
+    }
+}
+
+async function initializeApp() {
+  try {
+    isLoading.value = true;
+    
+    // Only set config if it hasn't been set yet
+    if (Object.keys(config.value).length === 0) {
+      config.value = JSON.parse(JSON.stringify(USER_CONFIG.value));
+    }
+    
+    if(!config.value.selectedBackground) {
+      config.value.selectedBackground = '';
+    }
+    
+    if(!config.value.customBackgroundUrl) {
+      config.value.customBackgroundUrl = '';
+    }
+    
+    loadSponsorImages();
+    updateBackground();
+    await sportlinkAuth.loadSavedToken();
+    
+    if(config.value.connectionType !== 'Sportlink API') {
+      await fetchCorsStatus();
+    }
+
+    setupWatchers();
+    
+    // Add global key event listeners
+    document.addEventListener('keydown', handleKeyDown, true);
+    window.addEventListener('keydown', handleKeyDown, true);
+  } catch (error) {
+    console.error('Error initializing app:', error);
+    throw error; // Re-throw to be caught by caller
+  } finally {
+    isLoading.value = false;
+  }
+}
 
 function updateConfig(newConfig) {
     config.value = {
@@ -181,6 +250,7 @@ function updateStyles(newStyles) {
     ...newStyles
   };
   config.value = updatedConfig;
+  updateUserConfig(newStyles);
 }
 
 function updateBackground() {
@@ -220,36 +290,19 @@ function handleClubSelected(club) {
 }
 
 onMounted(async () => {
-    config.value = JSON.parse(JSON.stringify(USER_CONFIG.value));
-  
-    if(!config.value.selectedBackground) {
-        config.value.selectedBackground = '';
-    }
-  
-    if(!config.value.customBackgroundUrl) {
-        config.value.customBackgroundUrl = '';
-    }
-  
-    loadSponsorImages();
-    updateBackground();
-    sportlinkAuth.loadSavedToken();
-    
-    if(config.value.connectionType !== 'Sportlink API') {
-        await fetchCorsStatus();
-    }
-
-    setupWatchers();
-    isLoading.value = false;
-
-    // Initialize Samsung TV navigation
+  if (USER_CONFIG.value.showTerms) {
+    showTermsInitially.value = true;
     await nextTick();
-    initializeTVNavigation();
-    
-    // Add global key event listener
-    document.addEventListener('keydown', handleKeyDown, true);
-    
-    // Add Samsung TV specific event listeners
-    window.addEventListener('keydown', handleKeyDown, true);
+    const agreeButton = document.querySelector('.modal-button');
+    if (agreeButton) {
+      agreeButton.focus();
+    }
+    return; // Don't proceed with other initialization until terms are accepted
+  }
+
+  await initializeApp();
+  await nextTick();
+  initializeTVNavigation();
 });
 
 onUnmounted(() => {
@@ -339,15 +392,53 @@ function handleEnterKey() {
                 currentElement.checked = !currentElement.checked;
                 currentElement.dispatchEvent(new Event('change', { bubbles: true }));
                 currentElement.dispatchEvent(new Event('input', { bubbles: true }));
-            } else if (type === 'text' || type === 'number') {
+            } else if (type === 'text' || type === 'number' || type === 'password') {
                 // For Samsung TV, simulate click to open virtual keyboard
                 currentElement.click();
                 currentElement.select();
             }
             break;
         case 'select':
-            // Open dropdown
-            currentElement.click();
+            // Samsung TV specific: Force dropdown to open
+            try {
+                // Method 1: Trigger click event
+                currentElement.click();
+                
+                // Method 2: If click doesn't work, try focus + space
+                setTimeout(() => {
+                    currentElement.focus();
+                    // Simulate space key press to open dropdown
+                    const spaceEvent = new KeyboardEvent('keydown', {
+                        key: ' ',
+                        code: 'Space',
+                        keyCode: 32,
+                        which: 32,
+                        bubbles: true
+                    });
+                    currentElement.dispatchEvent(spaceEvent);
+                }, 100);
+                
+                // Method 3: If still not working, try mouse events
+                setTimeout(() => {
+                    const mouseDownEvent = new MouseEvent('mousedown', {
+                        bubbles: true,
+                        cancelable: true,
+                        view: window
+                    });
+                    const mouseUpEvent = new MouseEvent('mouseup', {
+                        bubbles: true,
+                        cancelable: true,
+                        view: window
+                    });
+                    currentElement.dispatchEvent(mouseDownEvent);
+                    currentElement.dispatchEvent(mouseUpEvent);
+                }, 200);
+                
+            } catch (error) {
+                console.log('Error opening select dropdown:', error);
+                // Fallback: just ensure focus
+                currentElement.focus();
+            }
             break;
         case 'button':
             currentElement.click();

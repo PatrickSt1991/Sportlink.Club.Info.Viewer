@@ -11,7 +11,6 @@ export function useConfigWatchers(config, {
     let refreshInterval;
     let saveTimeout;
     let handlerTimeout = null;
-    const showClientIdModal = ref(false);
     const toast = useToast();
 
     function setupWatchers() {
@@ -85,7 +84,6 @@ export function useConfigWatchers(config, {
                     (!newClientVal || newClientVal.trim() === '') && 
                     (!newClubVal || newClubVal.trim() === '')) {
                     if(config.value.showTerms){
-                        showClientIdModal.value = true;
                         config.value.showTerms = false;
                     }
                 }
@@ -251,6 +249,5 @@ export function useConfigWatchers(config, {
     return {
         setupWatchers,
         cleanup,
-        showClientIdModal
     };
 }
