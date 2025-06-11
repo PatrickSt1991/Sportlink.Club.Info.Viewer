@@ -18,9 +18,12 @@
     "vue-toastification": "^2.0.0-rc.5"
   },
   "devDependencies": {
-    "@babel/preset-env": "^7.25.4",
+    "@babel/core": "^7.27.4",
+    "@babel/preset-env": "^7.27.2",
+    "@rollup/plugin-babel": "^6.0.4",
     "@vitejs/plugin-legacy": "^6.0.2",
-    "core-js": "^3.38.1",
+    "@vitejs/plugin-react": "^4.5.2",
+    "core-js": "^3.43.0",
     "gh-pages": "^6.3.0",
     "terser": "^5.34.1",
     "vite": "^6.3.5",

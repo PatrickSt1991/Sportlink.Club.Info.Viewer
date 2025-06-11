@@ -4,13 +4,13 @@
       <p>{{ sponsorHint }}</p>
       <div class="input-container">
         <input v-model="newImageUrl" placeholder="Voer de URL van de afbeelding in" style="height: 25px; width: 200px;" />
-        <button @click="addImage">Toevoegen</button>
+        <button @click="addImage" tabindex="0" id="add-sponsor" @keydown="props.handleKeydown">Toevoegen</button>
       </div>
       <div class="form-group">
         <div v-if="sponsorImages.length > 0" class="image-grid">
           <div v-for="(image, index) in sponsorImages" :key="index" class="image-item">
             <img :src="image" class="preview" />
-            <button @click="removeImage(index)" class="remove-button">X</button>
+            <button @click="removeImage(index)" class="remove-button" tabindex="0" id="remove-sponsor" @keydown="props.handleKeydown">X</button>
           </div>
         </div>
         <p v-else>Er zijn nog geen sponsoren toegevoegd.</p>
@@ -25,7 +25,8 @@
     sponsorImages: {
       type: Array,
       required: true
-    }
+    },
+    handleKeydown: Function
   });
   
   const emit = defineEmits(['add-sponsor', 'remove-sponsor']);

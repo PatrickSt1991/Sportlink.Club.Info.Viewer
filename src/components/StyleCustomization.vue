@@ -12,13 +12,13 @@
       <div class="form-group">
         <label>Kolom:</label>
         <div class="color-input-wrapper">
-          <input type="color" :value="localStyles.leftBoxColor" @input="updateColor('leftBoxColor', $event.target.value)">
-          <input type="text" v-model="localStyles.leftBoxColor" placeholder="#RRGGBB" @blur="validateColor('leftBoxColor')">
+          <input type="color" :value="localStyles.leftBoxColor" @input="updateColor('leftBoxColor', $event.target.value)" tabindex="0" id="leftBoxColumnColor" @keydown="props.handleKeydown">
+          <input type="text" v-model="localStyles.leftBoxColor" placeholder="#RRGGBB" @blur="validateColor('leftBoxColor')" tabindex="0" id="leftBoxColumnColorText" @keydown="props.handleKeydown">
         </div>
         <label>Tekst:</label>
         <div class="color-input-wrapper">
-          <input type="color" :value="localStyles.leftBoxText" @input="updateColor('leftBoxText', $event.target.value)">
-          <input type="text" v-model="localStyles.leftBoxText" placeholder="#RRGGBB" @blur="validateColor('leftBoxText')">
+          <input type="color" :value="localStyles.leftBoxText" @input="updateColor('leftBoxText', $event.target.value)" tabindex="0" id="leftBoxTextColor" @keydown="props.handleKeydown">
+          <input type="text" v-model="localStyles.leftBoxText" placeholder="#RRGGBB" @blur="validateColor('leftBoxText')" tabindex="0" id="leftBoxTextColorText" @keydown="props.handleKeydown">
         </div>
       </div>
       <hr/>
@@ -26,13 +26,13 @@
       <div class="form-group">
         <label>Kolom:</label>
         <div class="color-input-wrapper">
-          <input type="color" :value="localStyles.leftMidBoxColor" @input="updateColor('leftMidBoxColor', $event.target.value)">
-          <input type="text" v-model="localStyles.leftMidBoxColor" placeholder="#RRGGBB" @blur="validateColor('leftMidBoxColor')">
+          <input type="color" :value="localStyles.leftMidBoxColor" @input="updateColor('leftMidBoxColor', $event.target.value)" tabindex="0" id="leftMidBoxColumnColor" @keydown="props.handleKeydown">
+          <input type="text" v-model="localStyles.leftMidBoxColor" placeholder="#RRGGBB" @blur="validateColor('leftMidBoxColor')" tabindex="0" id="leftMidBoxColumnColor" @keydown="props.handleKeydown">
         </div>
         <label>Tekst:</label>
         <div class="color-input-wrapper">
-          <input type="color" :value="localStyles.leftMidBoxText" @input="updateColor('leftMidBoxText', $event.target.value)">
-          <input type="text" v-model="localStyles.leftMidBoxText" placeholder="#RRGGBB" @blur="validateColor('leftMidBoxText')">
+          <input type="color" :value="localStyles.leftMidBoxText" @input="updateColor('leftMidBoxText', $event.target.value)" tabindex="0" id="leftMidBoxTextColor" @keydown="props.handleKeydown">
+          <input type="text" v-model="localStyles.leftMidBoxText" placeholder="#RRGGBB" @blur="validateColor('leftMidBoxText')" tabindex="0" id="leftMidBoxTextColor" @keydown="props.handleKeydown">
         </div>
       </div>
       <hr/>
@@ -40,13 +40,13 @@
       <div class="form-group">
         <label>Kolom:</label>
         <div class="color-input-wrapper">
-          <input type="color" :value="localStyles.midBoxColor" @input="updateColor('midBoxColor', $event.target.value)">
-          <input type="text" v-model="localStyles.midBoxColor" placeholder="#RRGGBB" @blur="validateColor('midBoxColor')">
+          <input type="color" :value="localStyles.midBoxColor" @input="updateColor('midBoxColor', $event.target.value)" tabindex="0" id="midBoxColumnColor" @keydown="props.handleKeydown">
+          <input type="text" v-model="localStyles.midBoxColor" placeholder="#RRGGBB" @blur="validateColor('midBoxColor')" tabindex="0" id="midBoxColumnColor" @keydown="props.handleKeydown">
         </div>
         <label>Tekst:</label>
         <div class="color-input-wrapper">
-          <input type="color" :value="localStyles.midBoxText" @input="updateColor('midBoxText', $event.target.value)">
-          <input type="text" v-model="localStyles.midBoxText" placeholder="#RRGGBB" @blur="validateColor('midBoxText')">
+          <input type="color" :value="localStyles.midBoxText" @input="updateColor('midBoxText', $event.target.value)" tabindex="0" id="midBoxTextColor" @keydown="props.handleKeydown">
+          <input type="text" v-model="localStyles.midBoxText" placeholder="#RRGGBB" @blur="validateColor('midBoxText')" tabindex="0" id="midBoxTextColor" @keydown="props.handleKeydown">
         </div>
       </div>
       <hr/>
@@ -54,13 +54,13 @@
       <div class="form-group">
         <label>Kolom:</label>
         <div class="color-input-wrapper">
-          <input type="color" :value="localStyles.rightMidBoxColor" @input="updateColor('rightMidBoxColor', $event.target.value)">
-          <input type="text" v-model="localStyles.rightMidBoxColor" placeholder="#RRGGBB" @blur="validateColor('rightMidBoxColor')">
+          <input type="color" :value="localStyles.rightMidBoxColor" @input="updateColor('rightMidBoxColor', $event.target.value)" tabindex="0" id="rightMidBoxColumnColor" @keydown="props.handleKeydown">
+          <input type="text" v-model="localStyles.rightMidBoxColor" placeholder="#RRGGBB" @blur="validateColor('rightMidBoxColor')" tabindex="0" id="rightMidBoxColumnColor" @keydown="props.handleKeydown">
         </div>
         <label>Tekst:</label>
         <div class="color-input-wrapper">
-          <input type="color" :value="localStyles.rightMidBoxText" @input="updateColor('rightMidBoxText', $event.target.value)">
-          <input type="text" v-model="localStyles.rightMidBoxText" placeholder="#RRGGBB" @blur="validateColor('rightMidBoxText')">
+          <input type="color" :value="localStyles.rightMidBoxText" @input="updateColor('rightMidBoxText', $event.target.value)" tabindex="0" id="rightMidBoxTextColor" @keydown="props.handleKeydown">
+          <input type="text" v-model="localStyles.rightMidBoxText" placeholder="#RRGGBB" @blur="validateColor('rightMidBoxText')" tabindex="0" id="rightMidBoxTextColor" @keydown="props.handleKeydown">
         </div>
       </div>
       <hr/>
@@ -68,13 +68,13 @@
       <div class="form-group">
         <label>Kolom:</label>
         <div class="color-input-wrapper">
-          <input type="color" :value="localStyles.rightBoxColor" @input="updateColor('rightBoxColor', $event.target.value)">
-          <input type="text" v-model="localStyles.rightBoxColor" placeholder="#RRGGBB" @blur="validateColor('rightBoxColor')">
+          <input type="color" :value="localStyles.rightBoxColor" @input="updateColor('rightBoxColor', $event.target.value)" tabindex="0" id="rightBoxColumnColor" @keydown="props.handleKeydown">
+          <input type="text" v-model="localStyles.rightBoxColor" placeholder="#RRGGBB" @blur="validateColor('rightBoxColor')" tabindex="0" id="rightBoxColumnColor" @keydown="props.handleKeydown">
         </div>
         <label>Tekst:</label>
         <div class="color-input-wrapper">
-          <input type="color" :value="localStyles.rightBoxText" @input="updateColor('rightBoxText', $event.target.value)">
-          <input type="text" v-model="localStyles.rightBoxText" placeholder="#RRGGBB" @blur="validateColor('rightBoxText')">
+          <input type="color" :value="localStyles.rightBoxText" @input="updateColor('rightBoxText', $event.target.value)" tabindex="0" id="rightBoxTextColor" @keydown="props.handleKeydown">
+          <input type="text" v-model="localStyles.rightBoxText" placeholder="#RRGGBB" @blur="validateColor('rightBoxText')" tabindex="0" id="rightBoxTextColor" @keydown="props.handleKeydown">
         </div>
       </div>
     </div>
@@ -87,7 +87,8 @@
     styles: {
       type: Object,
       required: true
-    }
+    },
+    handleKeydown: Function
   });
   
   const emit = defineEmits(['update:styles']);

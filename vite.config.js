@@ -1,25 +1,34 @@
 import { defineConfig } from 'vite';
 import vue from '@vitejs/plugin-vue';
 import legacy from '@vitejs/plugin-legacy';
+import babel from '@rollup/plugin-babel';
 import { fileURLToPath, URL } from 'url';
 
 export default defineConfig({
-  base: './',
+  base: './', // must be './' for Tizen
   plugins: [
     vue(),
     legacy({
-      targets: ['defaults', 'not IE 11'],
+      targets: ['> 0.25%', 'last 2 versions', 'ie >= 10'], // stricter targets
       additionalLegacyPolyfills: ['regenerator-runtime/runtime'],
+      modernPolyfills: true,
+    }),
+    babel({
+      babelHelpers: 'bundled',
+      extensions: ['.js','.jsx','.ts','.tsx','.vue'],
+      exclude: ['node_modules/**', '**/*.css', '**/*.scss', '**/*.sass'], // Exclude CSS and similar
     }),
   ],
   build: {
-    target: 'es5',
     outDir: 'dist',
     assetsDir: 'assets',
     rollupOptions: {
       output: {
-        manualChunks: undefined,
+        manualChunks: undefined, // disables code splitting → important!
       },
+    },
+    commonjsOptions: {
+      transformMixedEsModules: true, // allow full transpile of node_modules
     },
   },
   resolve: {

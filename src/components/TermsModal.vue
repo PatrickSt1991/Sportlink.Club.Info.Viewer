@@ -13,7 +13,7 @@
           </ul>
           <p>Wil je meer weten over de oorlog en hoe je kunt helpen?<br/> <a href="https://tyrrrz.me/ukraine" target="_blank">klik hier</a>.</p>
           <p>Glorie aan Oekraïne! 🇺🇦</p>
-          <button @click="agree" class="modal-button">Ik ga akkoord!</button>
+          <button @click="agree" class="modal-button" @keydown="props.handleKeydown">Ik ga akkoord!</button>
         </div>
       </div>
     </div>
@@ -25,7 +25,8 @@
     show: {
       type: Boolean,
       default: false
-    }
+    },
+    handleKeydown: Function
   });
   
   const emit = defineEmits(['agree']);

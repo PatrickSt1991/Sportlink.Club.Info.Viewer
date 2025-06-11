@@ -1,9 +1,14 @@
 <template>
     <div class="config-container" id="configTop">
       <h2>Instellingen</h2>
+      <!-- (Sport) Game Type -->
       <div class="form-group">
         <label class="leftLabel">Sport:</label>
-        <select v-model="localConfig.gameType">
+        <select v-model="localConfig.gameType" 
+        tabindex="0" 
+        id="select-gameType" 
+        @keydown="handleTVKeydown"
+        @focus="onElementFocus('select-gameType')">
           <option
             v-for="game in availableGameTypes"
             :key="game.label"
@@ -14,9 +19,14 @@
         </select>
       </div>
   
+      <!-- Connection Type -->
       <div class="form-group" v-if="localConfig.gameType">
         <label class="leftLabel">Type:</label>
-        <select v-model="localConfig.connectionType">
+        <select v-model="localConfig.connectionType" 
+        tabindex="0" 
+        id="select-connectionType" 
+        @keydown="handleTVKeydown"
+        @focus="onElementFocus('select-connectionType')">
           <option 
             v-for="type in localConfig.gameType.types" 
             :key="type.type"
@@ -28,42 +38,49 @@
         </select>
       </div>
 
+      <!-- Sportlink API ClientId -->
       <div class="form-group" v-if="localConfig.connectionType === 'Sportlink API'">
         <label class="leftLabel">Client ID:</label>
-        <input type="text" v-model="localConfig.clientId">
-        <input type="checkbox" v-model="localConfig.validClientId">
+        <input type="text" v-model="localConfig.clientId" tabindex="0" id="sportlink-clientid" @keydown="handleTVKeydown" @focus="onElementFocus('sportlink-clientid')" placeholder="Voer Client Id in...">
+        <input type="checkbox" v-model="localConfig.validClientId" tabindex="0" id="sportlink-clientid-valid" @keydown="handleTVKeydown" @focus="onElementFocus('sportlink-clientid-valid')">
       </div>
   
+      <!-- Nevobo Proxy Identifier -->
       <div class="form-group" v-if="localConfig.connectionType === 'Nevobo Proxy'">
         <label class="leftLabel">Identifier:</label>
         <input type="text" v-model="localConfig.clubIdentifer">
       </div>
   
+      <!-- Sportlink Proxy ClubId -->
       <div class="form-group" v-if="localConfig.connectionType === 'Sportlink Proxy'">
         <label class="leftLabel">ClubId:</label>
         <input type="text" v-model="localConfig.clubId">
       </div>
 
+      <!-- Sportlink Proxy Username -->
       <div class="form-group" v-if="localConfig.connectionType === 'Sportlink Proxy'">
         <label class="leftLabel">Gebruikersnaam:</label>
-        <input type="text" :readonly="localConfig.fakeCredentials" v-model="localConfig.username">
-        <input type="checkbox" :disabled="localConfig.fakeCredentials" v-model="localConfig.validUsername">
+        <input type="text" :readonly="localConfig.fakeCredentials" v-model="localConfig.username" tabindex="0" id="sportlink-username" @keydown="handleTVKeydown" @focus="onElementFocus('sportlink-username')">
+        <input type="checkbox" :disabled="localConfig.fakeCredentials" v-model="localConfig.validUsername" tabindex="0" id="sportlink-username-valid" @keydown="handleTVKeydown" @focus="onElementFocus('sportlink-username-valid')">
       </div>
   
+      <!-- Sportlink Proxy Password -->
       <div class="form-group" v-if="localConfig.connectionType === 'Sportlink Proxy'">
         <label class="leftLabel">Wachtwoord:</label>
-        <input type="text" :readonly="localConfig.fakeCredentials" v-model="localConfig.password">
-        <input type="checkbox" :disabled="localConfig.fakeCredentials" v-model="localConfig.validPassword">
+        <input type="text" :readonly="localConfig.fakeCredentials" v-model="localConfig.password" tabindex="0" id="sportlink-password" @keydown="handleTVKeydown" @focus="onElementFocus('sportlink-password')">
+        <input type="checkbox" :disabled="localConfig.fakeCredentials" v-model="localConfig.validPassword" tabindex="0" id="sportlink-password-valid" @keydown="handleTVKeydown" @focus="onElementFocus('sportlink-password-valid')">
       </div>
   
+      <!-- Sportlink buildin credentials -->
       <div class="form-group" v-if="localConfig.connectionType === 'Sportlink Proxy'">
         <label class="leftLabel">Fake credentials:</label>
-        <input type="checkbox" v-model="localConfig.fakeCredentials">
+        <input type="checkbox" v-model="localConfig.fakeCredentials" tabindex="0" id="sportlink-fake-credentials" @keydown="handleTVKeydown" @focus="onElementFocus('sportlink-fake-credentials')">
       </div>
   
+      <!-- User background -->
       <div class="form-group">
         <label class="leftLabel">Achtegrond:</label>
-        <select v-model="localConfig.selectedBackground" @change="updateBackground">
+        <select v-model="localConfig.selectedBackground" @change="updateBackground" tabindex="0" id="user-background" @keydown="handleTVKeydown" @focus="onElementFocus('user-background')">
           <option disabled value="">Kies Achtergrond</option>
           <option v-for="option in backgroundOptions" :key="option.value" :value="option.value">
             {{ option.label }}
@@ -72,55 +89,59 @@
         </select>
       </div>
 
+      <!-- Custom url background -->
       <div class="form-group" v-if="localConfig.selectedBackground === 'custom'">
         <label class="leftLabel">URL:</label>
-        <input
-          v-model="localConfig.customBackgroundUrl"
-          @input="updateBackground"
-          placeholder="Geef URL in..."
-          type="text"
-        />
+        <input v-model="localConfig.customBackgroundUrl" @input="updateBackground" placeholder="Geef URL in..." type="text" tabindex="0" id="user-background-custom" @keydown="handleTVKeydown" @focus="onElementFocus('user-background-custom')"/>
       </div>
   
+      <!-- Default start screen -->
       <div class="form-group">
         <label class="leftLabel">Start scherm:</label>
-        <select v-model="localConfig.homeScreen">
+        <select v-model="localConfig.homeScreen" tabindex="0" id="home-screen" @keydown="handleTVKeydown" @focus="onElementFocus('home-screen')">
           <option v-for="(path, label) in homeScreens" :key="label" :value="label">
             {{ label }}
           </option>
         </select>
       </div>
 
+      <!-- Accomondation (disabled)-->
       <div class="form-group">
         <label class="leftLabel">Accommodatie:</label>
         <input type="text" disabled v-model="localConfig.sportLocatie">
       </div>
   
+      <!-- Program days ahead -->
       <div class="form-group">
         <label class="leftLabel">Programma dagen:</label>
-        <input type="number" v-model.number="localConfig.programmaDagen">
+        <input type="number" v-model.number="localConfig.programmaDagen" tabindex="0" id="days-ahead" @keydown="handleTVKeydown" @focus="onElementFocus('days-ahead')">
       </div>
   
+      <!-- Results days past-->
       <div class="form-group">
         <label class="leftLabel">Uitslagen dagen:</label>
-        <input type="number" v-model.number="localConfig.uitslagDagen">
+        <input type="number" v-model.number="localConfig.uitslagDagen" tabindex="0" id="days-past" @keydown="handleTVKeydown" @focus="onElementFocus('days-past')">
       </div>
   
+      <!-- Refresh interval-->
       <div class="form-group">
         <label class="leftLabel">Informatie verversen na x seconden:</label>
-        <input type="number" v-model.number="localConfig.prematchRefresh">
+        <input type="number" v-model.number="localConfig.prematchRefresh" tabindex="0" id="refresh-interval" @keydown="handleTVKeydown" @focus="onElementFocus('refresh-interval')">
       </div>
   
+      <!-- Allow screen rotation -->
       <div class="form-group">
         <label class="leftLabel">Weergave automatisch laten schakelen:</label>
-        <input type="checkbox" v-model="localConfig.enableScreenSwitch">
+        <input type="checkbox" v-model="localConfig.enableScreenSwitch" tabindex="0" id="screen-switch" @keydown="handleTVKeydown" @focus="onElementFocus('screen-switch')">
       </div>
   
+      <!-- Show sponsors -->
       <div class="form-group">
         <label class="leftLabel">Sponsoren weergeven:</label>
-        <input type="checkbox" v-model="localConfig.activeSponsors">
+        <input type="checkbox" v-model="localConfig.activeSponsors" tabindex="0" id="show-sponsors" @keydown="handleTVKeydown" @focus="onElementFocus('show-sponsors')">
       </div>
   
+      <!-- Proxy status (informational) -->
       <div class="form-group" v-if="corsStatus">
         <div>
           <label class="leftLabel">Proxy Status:</label><br/>
@@ -140,27 +161,24 @@
   import { nextTick, ref, computed, watch } from 'vue';
 
   const props = defineProps({
-    config: {
-      type: Object,
-      required: true
-    },
-    availableGameTypes: {
-      type: Array,
-      required: true
-    },
-    backgroundOptions: {
-      type: Array,
-      required: true
-    },
-    homeScreens: {
-      type: Object,
-      required: true
-    },
+    config: Object,
+    availableGameTypes: Array,
+    backgroundOptions: Array,
+    homeScreens: Object,
     corsStatus: {
       type: Object,
       default: null
     },
     fakeCredentials: {
+      type: Array,
+      default: () => []
+    },
+    handleKeydown: Function,
+    currentFocusIndex: {
+      type: Number,
+      default: 0
+    },
+    focusOrder: {
       type: Array,
       default: () => []
     }
@@ -335,6 +353,15 @@
     { deep: true, immediate: true, flush: 'post' }
   );
 
+  function handleTVKeydown(event) {
+    if (props.handleKeydown) {
+      props.handleKeydown(event);
+    }
+  }
+
+  function onElementFocus(elementId) {
+    console.log(`ConfigSettings: Focus on ${elementId}`);
+  }
   function updateBackground() {
     emit('updateBackground');
   }

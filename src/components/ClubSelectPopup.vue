@@ -7,8 +7,8 @@
           v-model="search"
           placeholder="Zoek op clubnaam"
           class="search-input"
-        />
-        <select v-model="selectedClubId" size="10" class="club-select">
+          tabindex="0" id="club-search"/>
+        <select v-model="selectedClubId" size="10" class="club-select" tabindex="0" id="club-filter" @keydown="props.handleKeydown">
           <option
             v-for="club in filteredClubs"
             :key="club.ClubId"
@@ -18,8 +18,8 @@
           </option>
         </select>
         <div class="buttons">
-          <button @click="cancel">Terug</button>
-          <button :disabled="!selectedClub" @click="save">Kies</button>
+          <button @click="cancel" tabindex="0" id="club-filter-back" @keydown="props.handleKeydown">Terug</button>
+          <button :disabled="!selectedClub" @click="save" tabindex="0" id="club-filter-save" @keydown="props.handleKeydown">Kies</button>
         </div>
       </div>
     </div>
@@ -31,6 +31,7 @@
   const props = defineProps({
     clubs: Array,
     visible: Boolean,
+    handleKeydown: Function
   });
   const emit = defineEmits(['close', 'save']);
   

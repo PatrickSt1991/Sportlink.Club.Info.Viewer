@@ -1,0 +1,11 @@
+{
+  "presets": [
+    ["@babel/preset-env", {
+      "targets": {
+        "chrome": "56" // roughly matches Tizen 5.0 Web engine
+      },
+      "useBuiltIns": "entry",
+      "corejs": 3
+    }]
+  ]
+}

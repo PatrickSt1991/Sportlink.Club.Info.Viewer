@@ -63,10 +63,6 @@ button {
 button:hover {
   border-color: #646cff;
 }
-button:focus,
-button:focus-visible {
-  outline: 4px auto -webkit-focus-ring-color;
-}
 
 .card {
   padding: 2em;
@@ -308,6 +304,9 @@ button:focus-visible {
 button:focus,
 input[type="checkbox"]:focus,
 select:focus {
-    outline: 3px solid #00f; /* or any style you like */
+    outline: 3px solid #00f; /* visible focus ring */
     outline-offset: 2px;
+    border-radius: 4px;
+    transition: outline 0.2s ease-in-out;
 }
+
