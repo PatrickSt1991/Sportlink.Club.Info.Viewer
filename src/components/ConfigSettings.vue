@@ -4,7 +4,8 @@
       <!-- (Sport) Game Type -->
       <div class="form-group">
         <label class="leftLabel">Sport:</label>
-        <select v-model="localConfig.gameType" 
+        <select 
+        v-model="localConfig.gameType" 
         tabindex="0" 
         id="select-gameType" 
         @keydown="handleTVKeydown"
@@ -28,7 +29,9 @@
         tabindex="0" 
         id="select-connectionType" 
         @keydown="handleTVKeydown"
-        @focus="onElementFocus('select-connectionType')">
+        @focus="onElementFocus('select-connectionType')"
+        data-tv-focusable="true"
+        class="tv-focusable">
           <option 
             v-for="type in localConfig.gameType.types" 
             :key="type.type"
@@ -43,46 +46,107 @@
       <!-- Sportlink API ClientId -->
       <div class="form-group" v-if="localConfig.connectionType === 'Sportlink API'">
         <label class="leftLabel">Client ID:</label>
-        <input type="text" v-model="localConfig.clientId" tabindex="0" id="sportlink-clientid" @keydown="handleTVKeydown" @focus="onElementFocus('sportlink-clientid')" placeholder="Voer Client Id in...">
-        <input type="checkbox" v-model="localConfig.validClientId" tabindex="0" id="sportlink-clientid-valid" @keydown="handleTVKeydown" @focus="onElementFocus('sportlink-clientid-valid')">
+        <input type="text" v-model="localConfig.clientId" 
+               tabindex="0" 
+               id="sportlink-clientid" 
+               @keydown="handleTVKeydown" 
+               @focus="onElementFocus('sportlink-clientid')" 
+               data-tv-focusable="true"
+               class="tv-focusable"
+               placeholder="Voer Client Id in...">
+        <input type="checkbox" v-model="localConfig.validClientId" 
+               tabindex="0" 
+               id="sportlink-clientid-valid" 
+               @keydown="handleTVKeydown" 
+               @focus="onElementFocus('sportlink-clientid-valid')"
+               data-tv-focusable="true"
+               class="tv-focusable">
       </div>
   
       <!-- Nevobo Proxy Identifier -->
       <div class="form-group" v-if="localConfig.connectionType === 'Nevobo Proxy'">
         <label class="leftLabel">Identifier:</label>
-        <input type="text" v-model="localConfig.clubIdentifer">
+        <input type="text" v-model="localConfig.clubIdentifer"
+               tabindex="0" 
+               id="nevobo-identifier" 
+               @keydown="handleTVKeydown" 
+               @focus="onElementFocus('nevobo-identifier')"
+               data-tv-focusable="true"
+               class="tv-focusable">
       </div>
   
       <!-- Sportlink Proxy ClubId -->
       <div class="form-group" v-if="localConfig.connectionType === 'Sportlink Proxy'">
         <label class="leftLabel">ClubId:</label>
-        <input type="text" v-model="localConfig.clubId">
+        <input type="text" v-model="localConfig.clubId"
+               tabindex="0" 
+               id="sportlink-clubid" 
+               @keydown="handleTVKeydown" 
+               @focus="onElementFocus('sportlink-clubid')"
+               data-tv-focusable="true"
+               class="tv-focusable">
       </div>
 
       <!-- Sportlink Proxy Username -->
       <div class="form-group" v-if="localConfig.connectionType === 'Sportlink Proxy'">
         <label class="leftLabel">Gebruikersnaam:</label>
-        <input type="text" :readonly="localConfig.fakeCredentials" v-model="localConfig.username" tabindex="0" id="sportlink-username" @keydown="handleTVKeydown" @focus="onElementFocus('sportlink-username')">
-        <input type="checkbox" :disabled="localConfig.fakeCredentials" v-model="localConfig.validUsername" tabindex="0" id="sportlink-username-valid" @keydown="handleTVKeydown" @focus="onElementFocus('sportlink-username-valid')">
+        <input type="text" :readonly="localConfig.fakeCredentials" v-model="localConfig.username" 
+               tabindex="0" 
+               id="sportlink-username" 
+               @keydown="handleTVKeydown" 
+               @focus="onElementFocus('sportlink-username')"
+               data-tv-focusable="true"
+               class="tv-focusable">
+        <input type="checkbox" :disabled="localConfig.fakeCredentials" v-model="localConfig.validUsername" 
+               tabindex="0" 
+               id="sportlink-username-valid" 
+               @keydown="handleTVKeydown" 
+               @focus="onElementFocus('sportlink-username-valid')"
+               data-tv-focusable="true"
+               class="tv-focusable">
       </div>
   
       <!-- Sportlink Proxy Password -->
       <div class="form-group" v-if="localConfig.connectionType === 'Sportlink Proxy'">
         <label class="leftLabel">Wachtwoord:</label>
-        <input type="text" :readonly="localConfig.fakeCredentials" v-model="localConfig.password" tabindex="0" id="sportlink-password" @keydown="handleTVKeydown" @focus="onElementFocus('sportlink-password')">
-        <input type="checkbox" :disabled="localConfig.fakeCredentials" v-model="localConfig.validPassword" tabindex="0" id="sportlink-password-valid" @keydown="handleTVKeydown" @focus="onElementFocus('sportlink-password-valid')">
+        <input type="text" :readonly="localConfig.fakeCredentials" v-model="localConfig.password" 
+               tabindex="0" 
+               id="sportlink-password" 
+               @keydown="handleTVKeydown" 
+               @focus="onElementFocus('sportlink-password')"
+               data-tv-focusable="true"
+               class="tv-focusable">
+        <input type="checkbox" :disabled="localConfig.fakeCredentials" v-model="localConfig.validPassword" 
+               tabindex="0" 
+               id="sportlink-password-valid" 
+               @keydown="handleTVKeydown" 
+               @focus="onElementFocus('sportlink-password-valid')"
+               data-tv-focusable="true"
+               class="tv-focusable">
       </div>
   
       <!-- Sportlink buildin credentials -->
       <div class="form-group" v-if="localConfig.connectionType === 'Sportlink Proxy'">
         <label class="leftLabel">Fake credentials:</label>
-        <input type="checkbox" v-model="localConfig.fakeCredentials" tabindex="0" id="sportlink-fake-credentials" @keydown="handleTVKeydown" @focus="onElementFocus('sportlink-fake-credentials')">
+        <input type="checkbox" v-model="localConfig.fakeCredentials" 
+               tabindex="0" 
+               id="sportlink-fake-credentials" 
+               @keydown="handleTVKeydown" 
+               @focus="onElementFocus('sportlink-fake-credentials')"
+               data-tv-focusable="true"
+               class="tv-focusable">
       </div>
   
       <!-- User background -->
       <div class="form-group">
         <label class="leftLabel">Achtegrond:</label>
-        <select v-model="localConfig.selectedBackground" @change="updateBackground" tabindex="0" id="user-background" @keydown="handleTVKeydown" @focus="onElementFocus('user-background')">
+        <select v-model="localConfig.selectedBackground" @change="updateBackground" 
+                tabindex="0" 
+                id="user-background" 
+                @keydown="handleTVKeydown" 
+                @focus="onElementFocus('user-background')"
+                data-tv-focusable="true"
+                class="tv-focusable">
           <option disabled value="">Kies Achtergrond</option>
           <option v-for="option in backgroundOptions" :key="option.value" :value="option.value">
             {{ option.label }}
@@ -94,13 +158,25 @@
       <!-- Custom url background -->
       <div class="form-group" v-if="localConfig.selectedBackground === 'custom'">
         <label class="leftLabel">URL:</label>
-        <input v-model="localConfig.customBackgroundUrl" @input="updateBackground" placeholder="Geef URL in..." type="text" tabindex="0" id="user-background-custom" @keydown="handleTVKeydown" @focus="onElementFocus('user-background-custom')"/>
+        <input v-model="localConfig.customBackgroundUrl" @input="updateBackground" placeholder="Geef URL in..." type="text" 
+               tabindex="0" 
+               id="user-background-custom" 
+               @keydown="handleTVKeydown" 
+               @focus="onElementFocus('user-background-custom')"
+               data-tv-focusable="true"
+               class="tv-focusable"/>
       </div>
   
       <!-- Default start screen -->
       <div class="form-group">
         <label class="leftLabel">Start scherm:</label>
-        <select v-model="localConfig.homeScreen" tabindex="0" id="home-screen" @keydown="handleTVKeydown" @focus="onElementFocus('home-screen')">
+        <select v-model="localConfig.homeScreen" 
+                tabindex="0" 
+                id="home-screen" 
+                @keydown="handleTVKeydown" 
+                @focus="onElementFocus('home-screen')"
+                data-tv-focusable="true"
+                class="tv-focusable">
           <option v-for="(path, label) in homeScreens" :key="label" :value="label">
             {{ label }}
           </option>
@@ -116,31 +192,61 @@
       <!-- Program days ahead -->
       <div class="form-group">
         <label class="leftLabel">Programma dagen:</label>
-        <input type="number" v-model.number="localConfig.programmaDagen" tabindex="0" id="days-ahead" @keydown="handleTVKeydown" @focus="onElementFocus('days-ahead')">
+        <input type="number" v-model.number="localConfig.programmaDagen" 
+               tabindex="0" 
+               id="days-ahead" 
+               @keydown="handleTVKeydown" 
+               @focus="onElementFocus('days-ahead')"
+               data-tv-focusable="true"
+               class="tv-focusable">
       </div>
   
       <!-- Results days past-->
       <div class="form-group">
         <label class="leftLabel">Uitslagen dagen:</label>
-        <input type="number" v-model.number="localConfig.uitslagDagen" tabindex="0" id="days-past" @keydown="handleTVKeydown" @focus="onElementFocus('days-past')">
+        <input type="number" v-model.number="localConfig.uitslagDagen" 
+               tabindex="0" 
+               id="days-past" 
+               @keydown="handleTVKeydown" 
+               @focus="onElementFocus('days-past')"
+               data-tv-focusable="true"
+               class="tv-focusable">
       </div>
   
       <!-- Refresh interval-->
       <div class="form-group">
         <label class="leftLabel">Informatie verversen na x seconden:</label>
-        <input type="number" v-model.number="localConfig.prematchRefresh" tabindex="0" id="refresh-interval" @keydown="handleTVKeydown" @focus="onElementFocus('refresh-interval')">
+        <input type="number" v-model.number="localConfig.prematchRefresh" 
+               tabindex="0" 
+               id="refresh-interval" 
+               @keydown="handleTVKeydown" 
+               @focus="onElementFocus('refresh-interval')"
+               data-tv-focusable="true"
+               class="tv-focusable">
       </div>
   
       <!-- Allow screen rotation -->
       <div class="form-group">
         <label class="leftLabel">Weergave automatisch laten schakelen:</label>
-        <input type="checkbox" v-model="localConfig.enableScreenSwitch" tabindex="0" id="screen-switch" @keydown="handleTVKeydown" @focus="onElementFocus('screen-switch')">
+        <input type="checkbox" v-model="localConfig.enableScreenSwitch" 
+               tabindex="0" 
+               id="screen-switch" 
+               @keydown="handleTVKeydown" 
+               @focus="onElementFocus('screen-switch')"
+               data-tv-focusable="true"
+               class="tv-focusable">
       </div>
   
       <!-- Show sponsors -->
       <div class="form-group">
         <label class="leftLabel">Sponsoren weergeven:</label>
-        <input type="checkbox" v-model="localConfig.activeSponsors" tabindex="0" id="show-sponsors" @keydown="handleTVKeydown" @focus="onElementFocus('show-sponsors')">
+        <input type="checkbox" v-model="localConfig.activeSponsors" 
+               tabindex="0" 
+               id="show-sponsors" 
+               @keydown="handleTVKeydown" 
+               @focus="onElementFocus('show-sponsors')"
+               data-tv-focusable="true"
+               class="tv-focusable">
       </div>
   
       <!-- Proxy status (informational) -->
@@ -355,8 +461,14 @@
     { deep: true, immediate: true, flush: 'post' }
   );
 
+  // FIXED: Properly handle TV keydown events
   function handleTVKeydown(event) {
+    // Don't let the event bubble up - let the parent handle it completely
+    //event.preventDefault();
+    //event.stopPropagation();
+    
     if (props.handleKeydown) {
+      // Call the parent's keydown handler
       props.handleKeydown(event);
     }
   }
@@ -364,6 +476,7 @@
   function onElementFocus(elementId) {
     console.log(`ConfigSettings: Focus on ${elementId}`);
   }
+  
   function updateBackground() {
     emit('updateBackground');
   }
@@ -387,17 +500,33 @@ select.tv-focused {
     position: relative;
 }
 
-select.tv-focusable {
+select.tv-focusable,
+input.tv-focusable {
     -webkit-appearance: none;
     -moz-appearance: none;
     appearance: none;
-    background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='black'%3e%3cpath d='M7 10l5 5 5-5z'/%3e%3c/svg%3e");
     background-repeat: no-repeat;
     background-position: right 10px center;
     background-size: 12px;
     padding-right: 30px;
 }
-  .config-container {
+
+select.tv-focusable {
+    background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='black'%3e%3cpath d='M7 10l5 5 5-5z'/%3e%3c/svg%3e");
+}
+
+/* Enhanced focus styles for TV navigation */
+.tv-focusable:focus {
+    outline: 4px solid #007bff !important;
+    outline-offset: 2px !important;
+    box-shadow: 0 0 10px rgba(0, 123, 255, 0.5) !important;
+    transform: scale(1.02);
+    transition: all 0.2s ease;
+    z-index: 10;
+    position: relative;
+}
+
+.config-container {
     padding: 20px;
     width: 100%;
     max-width: 450px;
@@ -406,53 +535,53 @@ select.tv-focusable {
     color: black;
     border-radius: 8px;
     box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
-  }
-  
-  .form-group {
+}
+
+.form-group {
     display: flex;
     align-items: center;
     gap: 10px;
     margin-bottom: 12px;
-  }
+}
 
-  .leftLabel {
+.leftLabel {
     font-weight: bold;
     width: 150px;
     flex-shrink: 0;
-  }
+}
 
-  input[type="text"],
-  input[type="number"],
-  select {
+input[type="text"],
+input[type="number"],
+select {
     flex: 1;
     padding: 8px;
     border: 1px solid #ccc;
     border-radius: 4px;
-  }
+}
 
-  input[type="checkbox"] {
+input[type="checkbox"] {
     width: 20px;
     height: 20px;
     accent-color: #007bff;
-  }
+}
 
-  progress {
+progress {
     inline-size: 16em;
-  }
-  
-  progress.danger {
+}
+
+progress.danger {
     accent-color: #ff4d4d;
-  }
-  
-  progress.warning {
+}
+
+progress.warning {
     accent-color: #ffcc00;
-  }
-  
-  progress.success {
+}
+
+progress.success {
     accent-color: #44cc44;
-  }
-  
-  .cors-status {
+}
+
+.cors-status {
     flex: 1.5;
-  } 
+} 
 </style>

@@ -413,8 +413,8 @@ function updateFocusIndex() {
 }
 
 function navigateNext() {
-    if (navigationLocked.value || currentFocusOrder.value.length === 0) return;
-    
+    //if (navigationLocked.value || currentFocusOrder.value.length === 0) return;
+    if (navigationLocked.value) return;
     navigationLocked.value = true;
     const oldIndex = currentFocusIndex.value;
     
@@ -457,6 +457,7 @@ function handleEnterKey() {
     
     // Special handling for select elements
     if (tagName === 'select') {
+        alert('its select')
         openSelectDropdown(currentElement);
         return;
     }
@@ -508,6 +509,7 @@ function handleKeyDown(e) {
     // Terms modal handling
     if (showTermsInitially.value) {
         if (e.key === 'Enter' || e.key === 'Return' || e.key === 'OK') {
+            alert(e.key);
             e.preventDefault();
             e.stopPropagation();
             handleAgreeTerms();
@@ -517,19 +519,30 @@ function handleKeyDown(e) {
     
     // Special handling for open select dropdowns
     const currentEl = document.activeElement;
-    if (currentEl?.tagName === 'SELECT' && currentEl.size > 1) {
+    console.log(currentEl?.tagName);
+    if (currentEl?.tagName === 'SELECT') {
         // Allow arrow keys to navigate options
         if (e.key === 'ArrowUp' || e.key === 'ArrowDown') {
+            // If not already open, open the select box
+            if (currentEl.size <= 1) {
+                currentEl.size = currentEl.options.length; // or a smaller number like 5
+            }
             return;
         }
-        // Close on Enter/OK when options are visible
+
+        // Open on Enter/OK if not already open
         if (e.key === 'Enter' || e.key === 'Return' || e.key === 'OK') {
-            currentEl.size = 0;
+            if (currentEl.size <= 1) {
+                currentEl.size = currentEl.options.length; // open it
+            } else {
+                currentEl.size = 0; // close it
+            }
             e.preventDefault();
             e.stopPropagation();
             return;
         }
     }
+
     
     // Key mapping
     const keyActions = {
@@ -547,6 +560,7 @@ function handleKeyDown(e) {
     };
     
     const action = keyActions[e.key];
+    console.log('action: ' + action)
     if (!action) return;
     
     e.preventDefault();
@@ -729,26 +743,5 @@ function initializeTVNavigation() {
 .debug-info p {
     margin: 2px 0;
     color: #ffffff;
-}
-:deep(select.tv-focused) {
-    position: relative;
-    z-index: 1000;
-}
-
-:deep(select[size]) {
-    background-color: white;
-    border: 2px solid #007bff !important;
-    box-shadow: 0 0 10px rgba(0, 123, 255, 0.5);
-}
-
-:deep(select option) {
-    padding: 8px;
-    background-color: white;
-    color: black;
-}
-
-:deep(select option:checked) {
-    background-color: #007bff;
-    color: white;
 }
 </style>
