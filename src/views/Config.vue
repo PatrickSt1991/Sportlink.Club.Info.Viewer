@@ -1,4 +1,15 @@
 <template>
+<div v-if="showVisualDebug" class="debug-overlay">
+  <div class="debug-info">
+    <h4>Debug Info:</h4>
+    <p>Last Key: {{ debugInfo.lastKey }}</p>
+    <p>Key Count: {{ debugInfo.keyCount }}</p>
+    <p>Current Element: {{ debugInfo.currentElement }}</p>
+    <p>Navigation Locked: {{ debugInfo.navigationLocked }}</p>
+    <p>Focus Index: {{ currentFocusIndex }}</p>
+    <p>Total Focusable: {{ currentFocusOrder.length }}</p>
+  </div>
+</div>
   <TermsModal 
     v-if="showTermsInitially"
     :show="showTermsInitially" 
@@ -177,9 +188,9 @@ const backgroundUrl = computed(() => {
     return config.value.selectedBackground || '';
 });
 
-// Modify your existing handleAgree function or add this new one
 async function handleAgreeTerms() {
     try {
+        navigationLocked.value = true;
         showTermsInitially.value = false;
 
         const updatedConfig = {
@@ -189,13 +200,46 @@ async function handleAgreeTerms() {
 
         config.value = updatedConfig;
         USER_CONFIG.value.showTerms = false;
-        updateUserConfig({ showTerms: false });
+        await updateUserConfig({ showTerms: false });
         
+        // Initialize app
         await initializeApp();
+        
+        // Wait for DOM to update
         await nextTick();
-        initializeTVNavigation();
-    }catch(error) {
-        isLoading.value = false
+        await new Promise(resolve => setTimeout(resolve, 300));
+        
+        // DIRECTLY FOCUS THE GAME TYPE SELECT BOX
+        const gameTypeSelect = document.getElementById('select-gameType');
+        if (gameTypeSelect) {
+            // Reset focus index to match this element
+            const index = currentFocusOrder.value.indexOf('select-gameType');
+            if (index >= 0) {
+                currentFocusIndex.value = index;
+            }
+            
+            // Focus with multiple attempts if needed
+            let focusSuccess = false;
+            for (let i = 0; i < 3; i++) {
+                if (focusElementById('select-gameType')) {
+                    focusSuccess = true;
+                    break;
+                }
+                await new Promise(resolve => setTimeout(resolve, 100));
+            }
+            
+            if (!focusSuccess) {
+                console.error('Failed to focus game type select after multiple attempts');
+            }
+        } else {
+            console.error('Game type select element not found');
+        }
+        
+        navigationLocked.value = false;
+    } catch(error) {
+        console.error('Error in handleAgreeTerms:', error);
+        isLoading.value = false;
+        navigationLocked.value = false;
     }
 }
 
@@ -311,28 +355,52 @@ onUnmounted(() => {
     window.removeEventListener('keydown', handleKeyDown, true);
 });
 
-// Samsung TV Navigation Functions
 function focusElementById(id) {
     const element = document.getElementById(id);
-    if (element) {
-        element.focus();
-        
-        // Add visual feedback for Samsung TV
-        element.scrollIntoView({ 
-            behavior: 'smooth', 
-            block: 'center' 
-        });
-        
-        // Add focus class for enhanced styling
-        document.querySelectorAll('.tv-focused').forEach(el => {
-            el.classList.remove('tv-focused');
-        });
-        element.classList.add('tv-focused');
-        
-        return true;
-    } else {
+    if (!element) {
+        console.warn(`Element ${id} not found`);
         return false;
     }
+    
+    // Special handling for select elements
+    if (element.tagName === 'SELECT') {
+        try {
+            // First try standard focus
+            element.focus();
+            
+            // Samsung TV sometimes needs this
+            element.click();
+            
+            // Add visual feedback
+            element.classList.add('tv-focused');
+            element.scrollIntoView({ 
+                behavior: 'auto',
+                block: 'center',
+                inline: 'center'
+            });
+            
+            // Verify focus
+            if (document.activeElement === element) {
+                return true;
+            }
+            
+            // Fallback - set tabIndex if needed
+            const originalTabIndex = element.tabIndex;
+            if (originalTabIndex < 0) {
+                element.tabIndex = 0;
+                element.focus();
+                element.tabIndex = originalTabIndex;
+            }
+            
+            return document.activeElement === element;
+        } catch (error) {
+            console.error(`Error focusing select element ${id}:`, error);
+            return false;
+        }
+    }
+    
+    // Standard focus handling for other elements
+    // ... (keep your existing non-select element handling)
 }
 
 function updateFocusIndex() {
@@ -350,31 +418,34 @@ function navigateNext() {
     navigationLocked.value = true;
     const oldIndex = currentFocusIndex.value;
     
-    currentFocusIndex.value = (currentFocusIndex.value + 1) % currentFocusOrder.value.length;
-    
-    if (!focusElementById(currentFocusOrder.value[currentFocusIndex.value])) {
-        // If focus failed, try next element
-        currentFocusIndex.value = (currentFocusIndex.value + 1) % currentFocusOrder.value.length;
-        focusElementById(currentFocusOrder.value[currentFocusIndex.value]);
+    // Try next elements until we find one that can be focused
+    for (let i = 1; i <= currentFocusOrder.value.length; i++) {
+        const newIndex = (oldIndex + i) % currentFocusOrder.value.length;
+        if (focusElementById(currentFocusOrder.value[newIndex])) {
+            currentFocusIndex.value = newIndex;
+            break;
+        }
     }
     
-    setTimeout(() => { navigationLocked.value = false; }, 100);
+    setTimeout(() => { navigationLocked.value = false; }, 150);
 }
 
 function navigatePrevious() {
     if (navigationLocked.value || currentFocusOrder.value.length === 0) return;
     
     navigationLocked.value = true;
+    const oldIndex = currentFocusIndex.value;
     
-    currentFocusIndex.value = (currentFocusIndex.value - 1 + currentFocusOrder.value.length) % currentFocusOrder.value.length;
-    
-    if (!focusElementById(currentFocusOrder.value[currentFocusIndex.value])) {
-        // If focus failed, try previous element
-        currentFocusIndex.value = (currentFocusIndex.value - 1 + currentFocusOrder.value.length) % currentFocusOrder.value.length;
-        focusElementById(currentFocusOrder.value[currentFocusIndex.value]);
+    // Try previous elements until we find one that can be focused
+    for (let i = 1; i <= currentFocusOrder.value.length; i++) {
+        const newIndex = (oldIndex - i + currentFocusOrder.value.length) % currentFocusOrder.value.length;
+        if (focusElementById(currentFocusOrder.value[newIndex])) {
+            currentFocusIndex.value = newIndex;
+            break;
+        }
     }
     
-    setTimeout(() => { navigationLocked.value = false; }, 100);
+    setTimeout(() => { navigationLocked.value = false; }, 150);
 }
 
 function handleEnterKey() {
@@ -384,60 +455,21 @@ function handleEnterKey() {
     const tagName = currentElement.tagName.toLowerCase();
     const type = currentElement.type;
     
-    console.log(`Enter pressed on: ${tagName} (${type})`);
+    // Special handling for select elements
+    if (tagName === 'select') {
+        openSelectDropdown(currentElement);
+        return;
+    }
     
+    // Existing handling for other elements
     switch(tagName) {
         case 'input':
             if (type === 'checkbox') {
                 currentElement.checked = !currentElement.checked;
                 currentElement.dispatchEvent(new Event('change', { bubbles: true }));
-                currentElement.dispatchEvent(new Event('input', { bubbles: true }));
             } else if (type === 'text' || type === 'number' || type === 'password') {
-                // For Samsung TV, simulate click to open virtual keyboard
                 currentElement.click();
                 currentElement.select();
-            }
-            break;
-        case 'select':
-            // Samsung TV specific: Force dropdown to open
-            try {
-                // Method 1: Trigger click event
-                currentElement.click();
-                
-                // Method 2: If click doesn't work, try focus + space
-                setTimeout(() => {
-                    currentElement.focus();
-                    // Simulate space key press to open dropdown
-                    const spaceEvent = new KeyboardEvent('keydown', {
-                        key: ' ',
-                        code: 'Space',
-                        keyCode: 32,
-                        which: 32,
-                        bubbles: true
-                    });
-                    currentElement.dispatchEvent(spaceEvent);
-                }, 100);
-                
-                // Method 3: If still not working, try mouse events
-                setTimeout(() => {
-                    const mouseDownEvent = new MouseEvent('mousedown', {
-                        bubbles: true,
-                        cancelable: true,
-                        view: window
-                    });
-                    const mouseUpEvent = new MouseEvent('mouseup', {
-                        bubbles: true,
-                        cancelable: true,
-                        view: window
-                    });
-                    currentElement.dispatchEvent(mouseDownEvent);
-                    currentElement.dispatchEvent(mouseUpEvent);
-                }, 200);
-                
-            } catch (error) {
-                console.log('Error opening select dropdown:', error);
-                // Fallback: just ensure focus
-                currentElement.focus();
             }
             break;
         case 'button':
@@ -448,30 +480,80 @@ function handleEnterKey() {
     }
 }
 
+
+// Add these to your data/refs section
+const debugInfo = ref({
+    lastKey: '',
+    keyCount: 0,
+    currentElement: '',
+    navigationLocked: false
+});
+
+const showVisualDebug = ref(true); // Set to true to see what's happening
+
 function handleKeyDown(e) {
-    lastKeyPressed.value = e.key;
-    
-    // Samsung TV specific key mapping
-    const keyMap = {
-        'ArrowRight': 'next',
-        'ArrowDown': 'next',
-        'Right': 'next',        // Samsung TV specific
-        'Down': 'next',         // Samsung TV specific
-        'ArrowLeft': 'previous',
-        'ArrowUp': 'previous', 
-        'Left': 'previous',     // Samsung TV specific
-        'Up': 'previous',       // Samsung TV specific
-        'Enter': 'enter',
-        'Return': 'enter',      // Samsung TV specific
-        'OK': 'enter'           // Samsung TV specific
+    // Update debug info
+    debugInfo.value = {
+        lastKey: e.key || 'EMPTY',
+        keyCount: debugInfo.value.keyCount + 1,
+        currentElement: document.activeElement?.id || 'none',
+        navigationLocked: navigationLocked.value
     };
     
-    const action = keyMap[e.key];
+    // Ignore if navigation is locked or no key
+    if (!e.key || navigationLocked.value) {
+        return;
+    }
+    
+    // Terms modal handling
+    if (showTermsInitially.value) {
+        if (e.key === 'Enter' || e.key === 'Return' || e.key === 'OK') {
+            e.preventDefault();
+            e.stopPropagation();
+            handleAgreeTerms();
+        }
+        return;
+    }
+    
+    // Special handling for open select dropdowns
+    const currentEl = document.activeElement;
+    if (currentEl?.tagName === 'SELECT' && currentEl.size > 1) {
+        // Allow arrow keys to navigate options
+        if (e.key === 'ArrowUp' || e.key === 'ArrowDown') {
+            return;
+        }
+        // Close on Enter/OK when options are visible
+        if (e.key === 'Enter' || e.key === 'Return' || e.key === 'OK') {
+            currentEl.size = 0;
+            e.preventDefault();
+            e.stopPropagation();
+            return;
+        }
+    }
+    
+    // Key mapping
+    const keyActions = {
+        'ArrowRight': 'next',
+        'ArrowDown': 'next',
+        'Right': 'next',
+        'Down': 'next',
+        'ArrowLeft': 'previous',
+        'ArrowUp': 'previous',
+        'Left': 'previous',
+        'Up': 'previous',
+        'Enter': 'enter',
+        'Return': 'enter',
+        'OK': 'enter'
+    };
+    
+    const action = keyActions[e.key];
     if (!action) return;
     
     e.preventDefault();
     e.stopPropagation();
+    e.stopImmediatePropagation();
     
+    // Handle actions
     switch(action) {
         case 'next':
             navigateNext();
@@ -483,12 +565,47 @@ function handleKeyDown(e) {
             handleEnterKey();
             break;
     }
-    
-    // Toggle debug info with specific key combination
-    if (e.key === 'F12' || (e.ctrlKey && e.key === 'd')) {
-        showDebug.value = !showDebug.value;
-    }
 }
+
+function openSelectDropdown(selectElement) {
+    navigationLocked.value = true;
+    
+    // Samsung TV specific sequence to open dropdown
+    setTimeout(() => {
+        // 1. Ensure focus
+        selectElement.focus();
+        
+        // 2. Create and dispatch mouse events (some TVs need this)
+        const mouseDown = new MouseEvent('mousedown', {
+            bubbles: true,
+            cancelable: true,
+            view: window
+        });
+        const mouseUp = new MouseEvent('mouseup', {
+            bubbles: true,
+            cancelable: true,
+            view: window
+        });
+        selectElement.dispatchEvent(mouseDown);
+        selectElement.dispatchEvent(mouseUp);
+        
+        // 3. Programmatic click (fallback)
+        selectElement.click();
+        
+        // 4. Temporary size expansion (last resort)
+        if (!selectElement.size || selectElement.size === 0) {
+            selectElement.size = selectElement.options.length;
+            setTimeout(() => {
+                selectElement.size = 0;
+                navigationLocked.value = false;
+            }, 3000);
+            return;
+        }
+        
+        navigationLocked.value = false;
+    }, 100);
+}
+
 
 // Watch for config changes that might affect visible elements
 watch(() => config.value, () => {
@@ -501,33 +618,55 @@ watch(() => config.value, () => {
     });
 }, { deep: true });
 
+watch(() => showTermsInitially.value, (newVal) => {
+    if (!newVal) {
+        // Terms just closed - focus the game type select
+        setTimeout(() => {
+            focusElementById('select-gameType');
+        }, 500);
+    }
+});
+
 function initializeTVNavigation() {
-    // Make all focusable elements properly configured
     nextTick(() => {
+        // Make sure all focusable elements are properly configured
         baseFocusOrder.forEach(id => {
             const element = document.getElementById(id);
             if (element) {
-                // Ensure element is focusable
-                if (element.tabIndex < 0) {
-                    element.tabIndex = 0;
-                }
-                
-                // Add Samsung TV specific attributes
+                element.tabIndex = element.tabIndex < 0 ? 0 : element.tabIndex;
                 element.setAttribute('data-tv-focusable', 'true');
                 
-                // Prevent default browser focus behavior that might interfere
+                // Add event listeners for better focus handling
                 element.addEventListener('focus', (e) => {
                     e.stopPropagation();
+                    const index = currentFocusOrder.value.indexOf(id);
+                    if (index >= 0) {
+                        currentFocusIndex.value = index;
+                    }
                 });
             }
         });
         
-        // Set initial focus
-        if (currentFocusOrder.value.length > 0) {
-            focusElementById(currentFocusOrder.value[0]);
-        }
-        
-        console.log(`TV Navigation initialized. ${currentFocusOrder.value.length} focusable elements found.`);
+        // Set initial focus with more robust checking
+        setTimeout(() => {
+            if (currentFocusOrder.value.length === 0) {
+                console.warn('No focusable elements found');
+                return;
+            }
+            
+            let focusSet = false;
+            for (let i = 0; i < currentFocusOrder.value.length; i++) {
+                if (focusElementById(currentFocusOrder.value[i])) {
+                    currentFocusIndex.value = i;
+                    focusSet = true;
+                    break;
+                }
+            }
+            
+            if (!focusSet) {
+                console.error('Failed to set initial focus on any element');
+            }
+        }, 300);
     });
 }
 
@@ -566,5 +705,50 @@ function initializeTVNavigation() {
     box-shadow: 0 0 10px rgba(0, 123, 255, 0.5) !important;
     transform: scale(1.02);
     transition: all 0.2s ease;
+}
+
+.debug-overlay {
+    position: fixed;
+    top: 10px;
+    right: 10px;
+    background: rgba(0, 0, 0, 0.8);
+    color: white;
+    padding: 10px;
+    border-radius: 5px;
+    font-family: monospace;
+    font-size: 12px;
+    z-index: 9999;
+    min-width: 200px;
+}
+
+.debug-info h4 {
+    margin: 0 0 10px 0;
+    color: #00ff00;
+}
+
+.debug-info p {
+    margin: 2px 0;
+    color: #ffffff;
+}
+:deep(select.tv-focused) {
+    position: relative;
+    z-index: 1000;
+}
+
+:deep(select[size]) {
+    background-color: white;
+    border: 2px solid #007bff !important;
+    box-shadow: 0 0 10px rgba(0, 123, 255, 0.5);
+}
+
+:deep(select option) {
+    padding: 8px;
+    background-color: white;
+    color: black;
+}
+
+:deep(select option:checked) {
+    background-color: #007bff;
+    color: white;
 }
 </style>

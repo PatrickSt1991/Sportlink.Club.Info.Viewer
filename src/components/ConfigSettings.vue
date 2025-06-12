@@ -8,7 +8,9 @@
         tabindex="0" 
         id="select-gameType" 
         @keydown="handleTVKeydown"
-        @focus="onElementFocus('select-gameType')">
+        @focus="onElementFocus('select-gameType')"
+        data-tv-focusable="true"
+        class="tv-focusable">
           <option
             v-for="game in availableGameTypes"
             :key="game.label"
@@ -375,6 +377,26 @@
 </script>
   
 <style scoped>
+select.tv-focused {
+    outline: 4px solid #007bff !important;
+    outline-offset: 2px !important;
+    box-shadow: 0 0 10px rgba(0, 123, 255, 0.5) !important;
+    transform: scale(1.02);
+    transition: all 0.2s ease;
+    z-index: 10;
+    position: relative;
+}
+
+select.tv-focusable {
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='black'%3e%3cpath d='M7 10l5 5 5-5z'/%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: right 10px center;
+    background-size: 12px;
+    padding-right: 30px;
+}
   .config-container {
     padding: 20px;
     width: 100%;

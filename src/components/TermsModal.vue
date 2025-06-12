@@ -11,7 +11,7 @@
             <li>Je steunt de territoriale integriteit van Oekraïne, inclusief de claims op tijdelijk bezette gebieden zoals de Krim en de Donbas.</li>
             <li>Je verwerpt de valse verhalen die worden verspreid door de Russische staatspropaganda.</li>
           </ul>
-          <p>Wil je meer weten over de oorlog en hoe je kunt helpen?<br/> <a href="https://tyrrrz.me/ukraine" target="_blank">klik hier</a>.</p>
+          <p>Wil je meer weten over de oorlog en hoe je kunt helpen?<br/> Ga naar: https://tyrrrz.me/ukraine</p>
           <p>Glorie aan Oekraïne! 🇺🇦</p>
               <button 
                 ref="agreeButton"
