@@ -13,13 +13,25 @@
     @agree="handleAgreeTerms"
   />
 
-  <div class="wrapper" v-if="!isLoading">
+  <div class="wrapper" v-if="!isLoading" @keydown="handleKeyDown">
     <div class="containers-row">
       <ClubSelectPopup
         :visible="showClubSelectPopup"
         :clubs="clubs"
         @close="showClubSelectPopup = false"
         @save="handleClubSelected"
+      />
+
+      <ConfigSettings 
+        :config="config" 
+        :available-game-types="availableGameTypes" 
+        :background-options="backgroundOptions" 
+        :home-screens="HOME_SCREENS" 
+        :cors-status="corsStatus"
+        :fake-credentials="FAKE_CREDENTIALS"
+        @update:config="updateConfig" 
+        @update-background="updateBackground" 
+        :handleKeydown="handleKeyDown"
       />
 
       <StyleCustomization 
@@ -61,7 +73,7 @@ import NavigationButtons from '@/components/NavigationButtons.vue';
 import ClubSelectPopup from '@/components/ClubSelectPopup.vue';
 
 const showTermsInitially = ref(USER_CONFIG.value.showTerms);
-const config = ref({});
+const config = ref({...USER_CONFIG.value});
 const isLoading = ref(true);
 const showClubSelectPopup = ref(false);
 const availableGameTypes = ref(GAME_TYPES);
@@ -117,6 +129,15 @@ const backgroundUrl = computed(() => {
   return config.value.selectedBackground || '';
 });
 
+// Watch for USER_CONFIG changes
+watch(() => USER_CONFIG.value, (newConfig) => {
+  // Only update if the config has actually changed
+  if (JSON.stringify(config.value) !== JSON.stringify(newConfig)) {
+    config.value = {...newConfig};
+    setupWatchers();
+  }
+}, { deep: true });
+
 async function handleAgreeTerms() {
   try {
     showTermsInitially.value = false;
@@ -167,10 +188,20 @@ async function initializeApp() {
 }
 
 function updateConfig(newConfig) {
-  config.value = {
+  // Create a new config object to ensure reactivity
+  const updatedConfig = {
     ...config.value,
     ...newConfig
   };
+  
+  // Update the local config
+  config.value = updatedConfig;
+  
+  // Save to localStorage and update global config
+  updateUserConfig(updatedConfig);
+  
+  // Force a re-initialization of the watchers
+  setupWatchers();
 }
 
 function updateStyles(newStyles) {
@@ -220,6 +251,112 @@ function handleKeyDown(e) {
     lastKey: e.key || 'EMPTY',
     currentElement: document.activeElement?.id || 'none'
   };
+
+  const activeElement = document.activeElement;
+  const isSelectOpen = activeElement?.classList?.contains('is-open');
+  
+  // If a select is open, handle arrow keys for option selection
+  if (isSelectOpen) {
+    switch (e.key) {
+      case 'ArrowUp':
+      case 'Up':
+        e.preventDefault();
+        const prevOption = activeElement.querySelector('.tv-select-option.is-focused')?.previousElementSibling;
+        if (prevOption) {
+          activeElement.querySelector('.tv-select-option.is-focused')?.classList.remove('is-focused');
+          prevOption.classList.add('is-focused');
+        }
+        break;
+      case 'ArrowDown':
+      case 'Down':
+        e.preventDefault();
+        const nextOption = activeElement.querySelector('.tv-select-option.is-focused')?.nextElementSibling;
+        if (nextOption) {
+          activeElement.querySelector('.tv-select-option.is-focused')?.classList.remove('is-focused');
+          nextOption.classList.add('is-focused');
+        }
+        break;
+      case 'Enter':
+      case 'Return':
+      case 'OK':
+        e.preventDefault();
+        const selectedOption = activeElement.querySelector('.tv-select-option.is-focused');
+        if (selectedOption) {
+          selectedOption.click();
+        }
+        break;
+    }
+    return;
+  }
+
+  // If no select is open, handle navigation between elements
+  const focusableElements = document.querySelectorAll('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])');
+  const focusableArray = Array.from(focusableElements);
+  const currentIndex = focusableArray.indexOf(activeElement);
+
+  switch (e.key) {
+    case 'ArrowUp':
+    case 'Up':
+      e.preventDefault();
+      if (currentIndex > 0) {
+        focusableArray[currentIndex - 1].focus();
+      }
+      break;
+
+    case 'ArrowDown':
+    case 'Down':
+      e.preventDefault();
+      if (currentIndex < focusableArray.length - 1) {
+        focusableArray[currentIndex + 1].focus();
+      }
+      break;
+
+    case 'ArrowLeft':
+    case 'Left':
+      e.preventDefault();
+      if (activeElement.tagName === 'SELECT') {
+        const select = activeElement;
+        if (select.selectedIndex > 0) {
+          select.selectedIndex--;
+          select.dispatchEvent(new Event('change', { bubbles: true }));
+        }
+      } else if (currentIndex > 0) {
+        focusableArray[currentIndex - 1].focus();
+      }
+      break;
+
+    case 'ArrowRight':
+    case 'Right':
+      e.preventDefault();
+      if (activeElement.tagName === 'SELECT') {
+        const select = activeElement;
+        if (select.selectedIndex < select.options.length - 1) {
+          select.selectedIndex++;
+          select.dispatchEvent(new Event('change', { bubbles: true }));
+        }
+      } else if (currentIndex < focusableArray.length - 1) {
+        focusableArray[currentIndex + 1].focus();
+      }
+      break;
+
+    case 'Enter':
+    case 'Return':
+    case 'OK':
+      e.preventDefault();
+      if (activeElement.tagName === 'SELECT') {
+        // For Samsung TV, we need to explicitly open the dropdown
+        activeElement.focus();
+        // Force the dropdown to open
+        activeElement.click();
+        // Ensure the dropdown stays open
+        setTimeout(() => {
+          activeElement.focus();
+        }, 50);
+      } else if (activeElement.tagName === 'BUTTON' || activeElement.tagName === 'A') {
+        activeElement.click();
+      }
+      break;
+  }
 }
 
 onMounted(async () => {
@@ -228,6 +365,22 @@ onMounted(async () => {
     return;
   }
   await initializeApp();
+  
+  // Focus the first focusable element after initialization
+  nextTick(() => {
+    const firstFocusable = document.querySelector('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])');
+    if (firstFocusable) {
+      firstFocusable.focus();
+      // Double focus for older Tizen
+      setTimeout(() => {
+        firstFocusable.focus();
+        // If it's a select, click it to show focus properly
+        if (firstFocusable.tagName === 'SELECT') {
+          firstFocusable.click();
+        }
+      }, 100);
+    }
+  });
 });
 
 onUnmounted(() => {
@@ -293,11 +446,21 @@ watch(() => showTermsInitially.value, (newVal) => {
 }
 
 /* TV focus styles */
-:deep(select:focus),
+:deep(button:focus),
+:deep([href]:focus),
 :deep(input:focus),
-:deep(button:focus) {
+:deep(select:focus),
+:deep(textarea:focus),
+:deep([tabindex]:not([tabindex="-1"]):focus) {
   outline: 4px solid #007bff !important;
   outline-offset: 2px !important;
   box-shadow: 0 0 10px rgba(0, 123, 255, 0.5) !important;
+  background-color: rgba(0, 123, 255, 0.1) !important;
+}
+
+/* Add styles for focused options */
+:deep(.tv-select-option.is-focused) {
+  background-color: rgba(0, 123, 255, 0.2) !important;
+  outline: 2px solid #007bff !important;
 }
 </style>

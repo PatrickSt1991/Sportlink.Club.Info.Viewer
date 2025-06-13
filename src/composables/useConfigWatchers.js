@@ -47,33 +47,54 @@ export function useConfigWatchers(config, {
                 clientId, 
                 fakeCredentials,
                 validClientId
-            }) => {
+            }, oldValue) => {
                 if(handlerTimeout){
                     clearTimeout(handlerTimeout);
                 }
 
+                if (oldValue && 
+                    oldValue.validUsername === validUsername &&
+                    oldValue.validPassword === validPassword &&
+                    oldValue.validClientId === validClientId &&
+                    oldValue.username === username &&
+                    oldValue.password === password &&
+                    oldValue.clientId === clientId &&
+                    oldValue.fakeCredentials === fakeCredentials) {
+                    return;
+                }
+
                 handlerTimeout = setTimeout(async () => {
-                    if (connectionType === 'Sportlink API' && clientId) {
-                        await handleSportlinkApi(clientId, validClientId);
-                    }
+                    try {
+                        if (connectionType === 'Sportlink API' && clientId) {
+                            await handleSportlinkApi(clientId, validClientId);
+                        }
 
-                    if (connectionType === 'Nevobo Proxy') {
-                        await handleNevoboProxy();
-                    }
+                        if (connectionType === 'Nevobo Proxy') {
+                            await handleNevoboProxy();
+                        }
 
-                    if (connectionType === 'Sportlink Proxy' && (username && password || fakeCredentials)) {
-                        await handleSportlinkProxy({ 
-                            gameType, 
-                            username, 
-                            password, 
-                            validUsername, 
-                            validPassword, 
-                            fakeCredentials
-                        });
+                        if (connectionType === 'Sportlink Proxy') {
+                            const shouldAuthenticate = (validUsername && validPassword) || fakeCredentials;
+                            
+                            const forceReauth = oldValue && oldValue.fakeCredentials !== fakeCredentials;
+                            
+                            if (shouldAuthenticate && (forceReauth || !sportlinkAuth.sportlinkTokenInfo.value.access_token)) {
+                                await handleSportlinkProxy({ 
+                                    gameType, 
+                                    username, 
+                                    password, 
+                                    validUsername, 
+                                    validPassword, 
+                                    fakeCredentials
+                                });
+                            }
+                        }
+                    } catch (error) {
+                        console.error('Authentication error:', error);
+                    } finally {
+                        handlerTimeout = null;
                     }
-
-                    handlerTimeout = null;
-                }, 50);
+                }, 300);
             },
             { deep: true, immediate: true }
         );
