@@ -1,587 +1,338 @@
 <template>
-    <div class="config-container" id="configTop">
-      <h2>Instellingen</h2>
-      <!-- (Sport) Game Type -->
-      <div class="form-group">
-        <label class="leftLabel">Sport:</label>
-        <select 
+  <div class="tv-config-container" id="configTop">
+    <h2 class="tv-title">Instellingen</h2>
+    
+    <!-- Sport Type -->
+    <div class="tv-form-group" tabindex="0" @focus="focusSelect('sportSelect')">
+      <label class="tv-label">Sport:</label>
+      <select 
+        ref="sportSelect"
         v-model="localConfig.gameType" 
-        tabindex="0" 
-        id="select-gameType" 
-        @keydown="handleTVKeydown"
-        @focus="onElementFocus('select-gameType')"
-        data-tv-focusable="true"
-        class="tv-focusable">
-          <option
-            v-for="game in availableGameTypes"
-            :key="game.label"
-            :value="game"
-          >
-            {{ game.label }}
-          </option>
-        </select>
-      </div>
-  
-      <!-- Connection Type -->
-      <div class="form-group" v-if="localConfig.gameType">
-        <label class="leftLabel">Type:</label>
-        <select v-model="localConfig.connectionType" 
-        tabindex="0" 
-        id="select-connectionType" 
-        @keydown="handleTVKeydown"
-        @focus="onElementFocus('select-connectionType')"
-        data-tv-focusable="true"
-        class="tv-focusable">
-          <option 
-            v-for="type in localConfig.gameType.types" 
-            :key="type.type"
-            :value="type.type"
-            :disabled="!type.active"
-          >
-            {{ type.type }}
-          </option>
-        </select>
-      </div>
+        class="tv-select"
+        @change="emitUpdate"
+        @keydown="handleSelectKeydown($event, 'sportSelect')">
+        <option v-for="game in availableGameTypes" :key="game.label" :value="game">
+          {{ game.label }}
+        </option>
+      </select>
+    </div>
+    
+    <!-- Connection Type -->
+    <div v-if="localConfig.gameType" class="tv-form-group" tabindex="0" @focus="focusSelect('connectionSelect')">
+      <label class="tv-label">Type:</label>
+      <select 
+        ref="connectionSelect"
+        v-model="localConfig.connectionType" 
+        class="tv-select"
+        @change="emitUpdate"
+        @keydown="handleSelectKeydown($event, 'connectionSelect')">
+        <option v-for="type in localConfig.gameType.types" :key="type.type" 
+                :value="type.type" :disabled="!type.active">
+          {{ type.type }}
+        </option>
+      </select>
+    </div>
+    
+    <!-- Sportlink API ClientId -->
+    <div v-if="localConfig.connectionType === 'Sportlink API'" class="tv-form-group" tabindex="0">
+      <label class="tv-label">Client ID:</label>
+      <input type="text" v-model="localConfig.clientId" class="tv-input" @change="emitUpdate">
+      <input type="checkbox" v-model="localConfig.validClientId" class="tv-checkbox" @change="emitUpdate">
+    </div>
 
-      <!-- Sportlink API ClientId -->
-      <div class="form-group" v-if="localConfig.connectionType === 'Sportlink API'">
-        <label class="leftLabel">Client ID:</label>
-        <input type="text" v-model="localConfig.clientId" 
-               tabindex="0" 
-               id="sportlink-clientid" 
-               @keydown="handleTVKeydown" 
-               @focus="onElementFocus('sportlink-clientid')" 
-               data-tv-focusable="true"
-               class="tv-focusable"
-               placeholder="Voer Client Id in...">
-        <input type="checkbox" v-model="localConfig.validClientId" 
-               tabindex="0" 
-               id="sportlink-clientid-valid" 
-               @keydown="handleTVKeydown" 
-               @focus="onElementFocus('sportlink-clientid-valid')"
-               data-tv-focusable="true"
-               class="tv-focusable">
-      </div>
-  
-      <!-- Nevobo Proxy Identifier -->
-      <div class="form-group" v-if="localConfig.connectionType === 'Nevobo Proxy'">
-        <label class="leftLabel">Identifier:</label>
-        <input type="text" v-model="localConfig.clubIdentifer"
-               tabindex="0" 
-               id="nevobo-identifier" 
-               @keydown="handleTVKeydown" 
-               @focus="onElementFocus('nevobo-identifier')"
-               data-tv-focusable="true"
-               class="tv-focusable">
-      </div>
-  
-      <!-- Sportlink Proxy ClubId -->
-      <div class="form-group" v-if="localConfig.connectionType === 'Sportlink Proxy'">
-        <label class="leftLabel">ClubId:</label>
-        <input type="text" v-model="localConfig.clubId"
-               tabindex="0" 
-               id="sportlink-clubid" 
-               @keydown="handleTVKeydown" 
-               @focus="onElementFocus('sportlink-clubid')"
-               data-tv-focusable="true"
-               class="tv-focusable">
-      </div>
+    <!-- Nevobo Proxy Identifier -->
+    <div v-if="localConfig.connectionType === 'Nevobo Proxy'" class="tv-form-group" tabindex="0">
+      <label class="tv-label">Identifier:</label>
+      <input type="text" v-model="localConfig.clubIdentifer" class="tv-input" @change="emitUpdate">
+    </div>
 
-      <!-- Sportlink Proxy Username -->
-      <div class="form-group" v-if="localConfig.connectionType === 'Sportlink Proxy'">
-        <label class="leftLabel">Gebruikersnaam:</label>
-        <input type="text" :readonly="localConfig.fakeCredentials" v-model="localConfig.username" 
-               tabindex="0" 
-               id="sportlink-username" 
-               @keydown="handleTVKeydown" 
-               @focus="onElementFocus('sportlink-username')"
-               data-tv-focusable="true"
-               class="tv-focusable">
-        <input type="checkbox" :disabled="localConfig.fakeCredentials" v-model="localConfig.validUsername" 
-               tabindex="0" 
-               id="sportlink-username-valid" 
-               @keydown="handleTVKeydown" 
-               @focus="onElementFocus('sportlink-username-valid')"
-               data-tv-focusable="true"
-               class="tv-focusable">
-      </div>
-  
-      <!-- Sportlink Proxy Password -->
-      <div class="form-group" v-if="localConfig.connectionType === 'Sportlink Proxy'">
-        <label class="leftLabel">Wachtwoord:</label>
-        <input type="text" :readonly="localConfig.fakeCredentials" v-model="localConfig.password" 
-               tabindex="0" 
-               id="sportlink-password" 
-               @keydown="handleTVKeydown" 
-               @focus="onElementFocus('sportlink-password')"
-               data-tv-focusable="true"
-               class="tv-focusable">
-        <input type="checkbox" :disabled="localConfig.fakeCredentials" v-model="localConfig.validPassword" 
-               tabindex="0" 
-               id="sportlink-password-valid" 
-               @keydown="handleTVKeydown" 
-               @focus="onElementFocus('sportlink-password-valid')"
-               data-tv-focusable="true"
-               class="tv-focusable">
-      </div>
-  
-      <!-- Sportlink buildin credentials -->
-      <div class="form-group" v-if="localConfig.connectionType === 'Sportlink Proxy'">
-        <label class="leftLabel">Fake credentials:</label>
-        <input type="checkbox" v-model="localConfig.fakeCredentials" 
-               tabindex="0" 
-               id="sportlink-fake-credentials" 
-               @keydown="handleTVKeydown" 
-               @focus="onElementFocus('sportlink-fake-credentials')"
-               data-tv-focusable="true"
-               class="tv-focusable">
-      </div>
-  
-      <!-- User background -->
-      <div class="form-group">
-        <label class="leftLabel">Achtegrond:</label>
-        <select v-model="localConfig.selectedBackground" @change="updateBackground" 
-                tabindex="0" 
-                id="user-background" 
-                @keydown="handleTVKeydown" 
-                @focus="onElementFocus('user-background')"
-                data-tv-focusable="true"
-                class="tv-focusable">
-          <option disabled value="">Kies Achtergrond</option>
-          <option v-for="option in backgroundOptions" :key="option.value" :value="option.value">
-            {{ option.label }}
-          </option>
-          <option value="custom">Andere URL</option>
-        </select>
-      </div>
+    <!-- Sportlink Proxy ClubId -->
+    <div v-if="localConfig.connectionType === 'Sportlink Proxy'" class="tv-form-group" tabindex="0">
+      <label class="tv-label">ClubId:</label>
+      <input type="text" v-model="localConfig.clubId" class="tv-input" @change="emitUpdate">
+    </div>
 
-      <!-- Custom url background -->
-      <div class="form-group" v-if="localConfig.selectedBackground === 'custom'">
-        <label class="leftLabel">URL:</label>
-        <input v-model="localConfig.customBackgroundUrl" @input="updateBackground" placeholder="Geef URL in..." type="text" 
-               tabindex="0" 
-               id="user-background-custom" 
-               @keydown="handleTVKeydown" 
-               @focus="onElementFocus('user-background-custom')"
-               data-tv-focusable="true"
-               class="tv-focusable"/>
-      </div>
-  
-      <!-- Default start screen -->
-      <div class="form-group">
-        <label class="leftLabel">Start scherm:</label>
-        <select v-model="localConfig.homeScreen" 
-                tabindex="0" 
-                id="home-screen" 
-                @keydown="handleTVKeydown" 
-                @focus="onElementFocus('home-screen')"
-                data-tv-focusable="true"
-                class="tv-focusable">
-          <option v-for="(path, label) in homeScreens" :key="label" :value="label">
-            {{ label }}
-          </option>
-        </select>
-      </div>
+    <!-- Sportlink Proxy Username -->
+    <div v-if="localConfig.connectionType === 'Sportlink Proxy'" class="tv-form-group" tabindex="0">
+      <label class="tv-label">Gebruikersnaam:</label>
+      <input type="text" :readonly="localConfig.fakeCredentials" v-model="localConfig.username" class="tv-input" @change="emitUpdate">
+      <input type="checkbox" :disabled="localConfig.fakeCredentials" v-model="localConfig.validUsername" class="tv-checkbox" @change="emitUpdate">
+    </div>
 
-      <!-- Accomondation (disabled)-->
-      <div class="form-group">
-        <label class="leftLabel">Accommodatie:</label>
-        <input type="text" disabled v-model="localConfig.sportLocatie">
-      </div>
-  
-      <!-- Program days ahead -->
-      <div class="form-group">
-        <label class="leftLabel">Programma dagen:</label>
-        <input type="number" v-model.number="localConfig.programmaDagen" 
-               tabindex="0" 
-               id="days-ahead" 
-               @keydown="handleTVKeydown" 
-               @focus="onElementFocus('days-ahead')"
-               data-tv-focusable="true"
-               class="tv-focusable">
-      </div>
-  
-      <!-- Results days past-->
-      <div class="form-group">
-        <label class="leftLabel">Uitslagen dagen:</label>
-        <input type="number" v-model.number="localConfig.uitslagDagen" 
-               tabindex="0" 
-               id="days-past" 
-               @keydown="handleTVKeydown" 
-               @focus="onElementFocus('days-past')"
-               data-tv-focusable="true"
-               class="tv-focusable">
-      </div>
-  
-      <!-- Refresh interval-->
-      <div class="form-group">
-        <label class="leftLabel">Informatie verversen na x seconden:</label>
-        <input type="number" v-model.number="localConfig.prematchRefresh" 
-               tabindex="0" 
-               id="refresh-interval" 
-               @keydown="handleTVKeydown" 
-               @focus="onElementFocus('refresh-interval')"
-               data-tv-focusable="true"
-               class="tv-focusable">
-      </div>
-  
-      <!-- Allow screen rotation -->
-      <div class="form-group">
-        <label class="leftLabel">Weergave automatisch laten schakelen:</label>
-        <input type="checkbox" v-model="localConfig.enableScreenSwitch" 
-               tabindex="0" 
-               id="screen-switch" 
-               @keydown="handleTVKeydown" 
-               @focus="onElementFocus('screen-switch')"
-               data-tv-focusable="true"
-               class="tv-focusable">
-      </div>
-  
-      <!-- Show sponsors -->
-      <div class="form-group">
-        <label class="leftLabel">Sponsoren weergeven:</label>
-        <input type="checkbox" v-model="localConfig.activeSponsors" 
-               tabindex="0" 
-               id="show-sponsors" 
-               @keydown="handleTVKeydown" 
-               @focus="onElementFocus('show-sponsors')"
-               data-tv-focusable="true"
-               class="tv-focusable">
-      </div>
-  
-      <!-- Proxy status (informational) -->
-      <div class="form-group" v-if="corsStatus">
-        <div>
-          <label class="leftLabel">Proxy Status:</label><br/>
-          <small>Cloudflare</small>
-        </div>
-        
-        <div class="cors-status space-y-1">
-          <span>{{ corsStatus.requestsToday }} / {{ corsStatus.limit }}</span><br/>
-          <progress :value="corsStatus.requestsToday" :max="corsStatus.limit" :class="progressBarClass"></progress><br/>
-          <div>Status: {{ corsStatus.status }}</div>
-        </div>
+    <!-- Sportlink Proxy Password -->
+    <div v-if="localConfig.connectionType === 'Sportlink Proxy'" class="tv-form-group" tabindex="0">
+      <label class="tv-label">Wachtwoord:</label>
+      <input type="text" :readonly="localConfig.fakeCredentials" v-model="localConfig.password" class="tv-input" @change="emitUpdate">
+      <input type="checkbox" :disabled="localConfig.fakeCredentials" v-model="localConfig.validPassword" class="tv-checkbox" @change="emitUpdate">
+    </div>
+
+    <!-- Sportlink buildin credentials -->
+    <div v-if="localConfig.connectionType === 'Sportlink Proxy'" class="tv-form-group" tabindex="0">
+      <label class="tv-label">Fake credentials:</label>
+      <input type="checkbox" v-model="localConfig.fakeCredentials" class="tv-checkbox" @change="emitUpdate">
+    </div>
+
+    <!-- User background -->
+    <div class="tv-form-group" tabindex="0" @focus="focusSelect('backgroundSelect')">
+      <label class="tv-label">Achtergrond:</label>
+      <select 
+        ref="backgroundSelect"
+        v-model="localConfig.selectedBackground" 
+        class="tv-select"
+        @change="updateBackground"
+        @keydown="handleSelectKeydown($event, 'backgroundSelect')">
+        <option disabled value="">Kies Achtergrond</option>
+        <option v-for="option in backgroundOptions" :key="option.value" :value="option.value">
+          {{ option.label }}
+        </option>
+        <option value="custom">Andere URL</option>
+      </select>
+    </div>
+
+    <!-- Custom url background -->
+    <div v-if="localConfig.selectedBackground === 'custom'" class="tv-form-group" tabindex="0">
+      <label class="tv-label">URL:</label>
+      <input v-model="localConfig.customBackgroundUrl" @input="updateBackground" placeholder="Geef URL in..." type="text" class="tv-input">
+    </div>
+
+    <!-- Default start screen -->
+    <div class="tv-form-group" tabindex="0" @focus="focusSelect('homeScreenSelect')">
+      <label class="tv-label">Start scherm:</label>
+      <select 
+        ref="homeScreenSelect"
+        v-model="localConfig.homeScreen" 
+        class="tv-select"
+        @change="emitUpdate"
+        @keydown="handleSelectKeydown($event, 'homeScreenSelect')">
+        <option v-for="(path, label) in homeScreens" :key="label" :value="label">
+          {{ label }}
+        </option>
+      </select>
+    </div>
+
+    <!-- Accomondation (disabled)-->
+    <div class="tv-form-group">
+      <label class="tv-label">Accommodatie:</label>
+      <input type="text" disabled v-model="localConfig.sportLocatie" class="tv-input">
+    </div>
+
+    <!-- Program days ahead -->
+    <div class="tv-form-group" tabindex="0">
+      <label class="tv-label">Programma dagen:</label>
+      <input type="number" v-model.number="localConfig.programmaDagen" class="tv-input" @change="emitUpdate">
+    </div>
+
+    <!-- Results days past-->
+    <div class="tv-form-group" tabindex="0">
+      <label class="tv-label">Uitslagen dagen:</label>
+      <input type="number" v-model.number="localConfig.uitslagDagen" class="tv-input" @change="emitUpdate">
+    </div>
+
+    <!-- Refresh interval-->
+    <div class="tv-form-group" tabindex="0">
+      <label class="tv-label">Verversen na (seconden):</label>
+      <input type="number" v-model.number="localConfig.prematchRefresh" class="tv-input" @change="emitUpdate">
+    </div>
+
+    <!-- Allow screen rotation -->
+    <div class="tv-form-group" tabindex="0">
+      <label class="tv-label">Automatisch schakelen:</label>
+      <input type="checkbox" v-model="localConfig.enableScreenSwitch" class="tv-checkbox" @change="emitUpdate">
+    </div>
+
+    <!-- Show sponsors -->
+    <div class="tv-form-group" tabindex="0">
+      <label class="tv-label">Sponsoren weergeven:</label>
+      <input type="checkbox" v-model="localConfig.activeSponsors" class="tv-checkbox" @change="emitUpdate">
+    </div>
+
+    <!-- Proxy status -->
+    <div v-if="corsStatus" class="tv-form-group">
+      <label class="tv-label">Proxy Status:</label>
+      <div class="tv-status">
+        <span>{{ corsStatus.requestsToday }} / {{ corsStatus.limit }}</span>
+        <progress :value="corsStatus.requestsToday" :max="corsStatus.limit" :class="progressBarClass"></progress>
+        <div>Status: {{ corsStatus.status }}</div>
       </div>
     </div>
+  </div>
 </template>
-  
+
 <script setup>
-  import { nextTick, ref, computed, watch } from 'vue';
+import { ref, computed, onMounted } from 'vue';
 
-  const props = defineProps({
-    config: Object,
-    availableGameTypes: Array,
-    backgroundOptions: Array,
-    homeScreens: Object,
-    corsStatus: {
-      type: Object,
-      default: null
-    },
-    fakeCredentials: {
-      type: Array,
-      default: () => []
-    },
-    handleKeydown: Function,
-    currentFocusIndex: {
-      type: Number,
-      default: 0
-    },
-    focusOrder: {
-      type: Array,
-      default: () => []
-    }
-  });
+const props = defineProps({
+  config: Object,
+  availableGameTypes: Array,
+  backgroundOptions: Array,
+  homeScreens: Object,
+  corsStatus: Object,
+  fakeCredentials: Array
+});
 
-  const emit = defineEmits(['update:config', 'updateBackground']);
+const emit = defineEmits(['update:config', 'updateBackground']);
 
-  const localConfig = ref(JSON.parse(JSON.stringify(props.config)));
+const localConfig = ref({...props.config});
+const sportSelect = ref(null);
+const connectionSelect = ref(null);
+const backgroundSelect = ref(null);
+const homeScreenSelect = ref(null);
 
-  watch(() => props.config, (newValue) => {
-    if (JSON.stringify(localConfig.value) !== JSON.stringify(newValue)) {
-      localConfig.value = JSON.parse(JSON.stringify(newValue));
-    }
-  }, { immediate: true, deep: true });
+const progressBarClass = computed(() => {
+  const percentage = (props.corsStatus?.requestsToday ?? 0) / (props.corsStatus?.limit ?? 1);
+  if (percentage >= 0.9) return 'danger';
+  if (percentage >= 0.75) return 'warning';
+  return 'success';
+});
 
-  watch(localConfig, (newVal) => {
-    if (JSON.stringify(props.config) !== JSON.stringify(newVal)) {
-      emit('update:config', { ...newVal });
-    }
-  }, { deep: true });
+function emitUpdate() {
+  emit('update:config', {...localConfig.value});
+}
 
-  watch(() => localConfig.value.gameType, (newGameType, oldGameType) => {
-    if(!newGameType || JSON.stringify(newGameType) === JSON.stringify(oldGameType)) return;
-    
-    if(newGameType.label !== oldGameType?.label){
+function updateBackground() {
+  emit('updateBackground');
+  emitUpdate();
+}
 
-      props.config.clientId = null;
-      props.config.clubIdentifer = null;
-      props.config.clubId = null;
-      props.config.username = null;
-      props.config.password = null;
-      props.config.validUsername = false;
-      props.config.validPassword = false;
-      props.config.validClientId = false;
-      props.config.fakeCredentials = false;
-      props.config.sportLocatie = null;
-      console.log(`Sport aangepast naar ${newGameType.label}, resetting...`)
-    }
-  }, { deep: true});
-
-  watch(
-    () => ({
-      selectedGameLabel: localConfig.value.gameType?.label || null,
-      nevoboIdentifier: localConfig.value.clubIdentifer || null
-    }),
-    async ({ selectedGameLabel, nevoboIdentifier }, prev = { selectedGameLabel: null, nevoboIdentifier: null }) => {
-      if(!selectedGameLabel || !nevoboIdentifier) return;
-      
-      if(localConfig.value.connectionType !== 'Nevobo Proxy') return;
-      
-      if(selectedGameLabel === prev.selectedGameLabel &&
-          nevoboIdentifier === prev.nevoboIdentifier){
-          return;
-        }
-      
-        try{
-          const changes = {};
-          changes.clubIdentifer = localConfig.value.clubIdentifer
-
-          if (Object.keys(changes).length > 0) {
-            Object.assign(localConfig.value, changes);
-            await nextTick();
-            emit('update:config', { ...localConfig.value });
-          } 
-        }catch(error){
-          console.error('Error in fake credentials watch:', error)
-        }
-    },
-    { deep: true, immediate: true, flush: 'post'}
-  );
-
-  watch(
-    () => ({
-      selectedGameLabel: localConfig.value.gameType?.label || null,
-      sportlinkClientId: localConfig.value.clientId || null,
-      sportlinkClientIdValid: localConfig.value.validClientId || false,
-    }),
-    async ({ selectedGameLabel, sportlinkClientId, sportlinkClientIdValid }, prev = { 
-      selectedGameLabel: null, 
-      sportlinkClientId: null,
-      sportlinkClientIdValid: false
-    }) => {
-      if(!selectedGameLabel || !sportlinkClientId || !sportlinkClientIdValid) return;
-
-      if(localConfig.value.connectionType !== 'Sportlink API') return;
-
-      if(selectedGameLabel === prev.selectedGameLabel &&
-          sportlinkClientId === prev.sportlinkClientId){
-        return;
-      }
-
-      try{
-        const changes = {};
-        changes.clientId = localConfig.value.clientId
-
-        if (Object.keys(changes).length > 0) {
-          Object.assign(localConfig.value, changes);
-          await nextTick();
-          emit('update:config', { ...localConfig.value });
-        }
-      } catch(error) {
-        console.error('Error in sportlink api watch:', error)
-      }
-    },
-    { deep: true, immediate: true, flush: 'post' }
-  );
-
-  watch(
-    () => ({
-      fakeCredentialsEnabled: localConfig.value.fakeCredentials,
-      selectedGameLabel: localConfig.value.gameType?.label || null,
-      selectedGameType: localConfig.value.connectionType || null
-      
-    }),
-    async ({ fakeCredentialsEnabled, selectedGameLabel, selectedGameType }, prev = { 
-      fakeCredentialsEnabled: null, 
-      selectedGameLabel: null,
-      selectedGameType: null
-    }) => {
-
-      if (!selectedGameLabel || !Array.isArray(props.fakeCredentials)) {
-        return;
-      }
-
-      if(selectedGameType !== 'Sportlink Proxy') return;
-    
-      if (fakeCredentialsEnabled === prev.fakeCredentialsEnabled &&
-          selectedGameLabel === prev.selectedGameLabel &&
-          selectedGameType === prev.selectedGameType
-        ) {
-        return;
-      }
-
-      try{
-        const selectedSport = selectedGameLabel.toLowerCase();
-        const fakeCredential = props.fakeCredentials.find(credential =>
-          credential.sports.some(sport => 
-            sport.sport.toLowerCase() === selectedSport.toLowerCase()
-          )
-        );
-
-        if(fakeCredentialsEnabled && !fakeCredential){
-          return;
-        }
-
-        const changes = {};
-
-        if (fakeCredentialsEnabled) {
-          changes.username = fakeCredential.username;
-          changes.password = fakeCredential.password;
-          changes.validUsername = true;
-          changes.validPassword = true;
-        } else if (
-          localConfig.value.username === fakeCredential?.username &&
-          localConfig.value.password === fakeCredential?.password
-        ) {
-          changes.username = '';
-          changes.password = '';
-          changes.validUsername = false;
-          changes.validPassword = false;
-        }
-
-        if (Object.keys(changes).length > 0) {
-          Object.assign(localConfig.value, changes);
-          await nextTick();
-          emit('update:config', { ...localConfig.value });
-        }
-      } catch(error) {
-        console.error('Error in fake credentials watch:', error)
-      }
-    },
-    { deep: true, immediate: true, flush: 'post' }
-  );
-
-  // FIXED: Properly handle TV keydown events
-  function handleTVKeydown(event) {
-    // Don't let the event bubble up - let the parent handle it completely
-    //event.preventDefault();
-    //event.stopPropagation();
-    
-    if (props.handleKeydown) {
-      // Call the parent's keydown handler
-      props.handleKeydown(event);
-    }
-  }
-
-  function onElementFocus(elementId) {
-    console.log(`ConfigSettings: Focus on ${elementId}`);
-  }
+function focusSelect(refName) {
+  const select = {
+    sportSelect: sportSelect,
+    connectionSelect: connectionSelect,
+    backgroundSelect: backgroundSelect,
+    homeScreenSelect: homeScreenSelect
+  }[refName]?.value;
   
-  function updateBackground() {
-    emit('updateBackground');
+  if (select) {
+    select.focus();
+    // Samsung TV needs this to properly show focus
+    setTimeout(() => {
+      select.click();
+    }, 50);
   }
+}
 
-  const progressBarClass = computed(() => {
-    const percentage = (props.corsStatus?.requestsToday ?? 0) / (props.corsStatus?.limit ?? 1);
-    if (percentage >= 0.9) return 'danger';
-    if (percentage >= 0.75) return 'warning';
-    return 'success';
-  });
+function handleSelectKeydown(event, refName) {
+  if (['Enter', 'OK'].includes(event.key)) {
+    event.preventDefault();
+    const select = {
+      sportSelect: sportSelect,
+      connectionSelect: connectionSelect,
+      backgroundSelect: backgroundSelect,
+      homeScreenSelect: homeScreenSelect
+    }[refName]?.value;
+    
+    if (select) {
+      // Toggle dropdown for Samsung TV
+      if (select.size > 0) {
+        select.size = 0;
+      } else {
+        select.size = select.options.length;
+        setTimeout(() => {
+          select.size = 0;
+        }, 3000);
+      }
+    }
+  }
+}
+
+onMounted(() => {
+  // Initialize with first select focused
+  setTimeout(() => {
+    sportSelect.value?.focus();
+    sportSelect.value?.click();
+  }, 300);
+});
 </script>
-  
+
 <style scoped>
-select.tv-focused {
-    outline: 4px solid #007bff !important;
-    outline-offset: 2px !important;
-    box-shadow: 0 0 10px rgba(0, 123, 255, 0.5) !important;
-    transform: scale(1.02);
-    transition: all 0.2s ease;
-    z-index: 10;
-    position: relative;
+.tv-config-container {
+  padding: 30px;
+  width: 100%;
+  max-width: 600px;
+  background-color: rgba(255, 255, 255, 0.9);
+  color: #333;
+  border-radius: 8px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
 }
 
-select.tv-focusable,
-input.tv-focusable {
-    -webkit-appearance: none;
-    -moz-appearance: none;
-    appearance: none;
-    background-repeat: no-repeat;
-    background-position: right 10px center;
-    background-size: 12px;
-    padding-right: 30px;
+.tv-title {
+  font-size: 28px;
+  margin-bottom: 30px;
+  text-align: center;
+  color: #222;
 }
 
-select.tv-focusable {
-    background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='black'%3e%3cpath d='M7 10l5 5 5-5z'/%3e%3c/svg%3e");
+.tv-form-group {
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
 }
 
-/* Enhanced focus styles for TV navigation */
-.tv-focusable:focus {
-    outline: 4px solid #007bff !important;
-    outline-offset: 2px !important;
-    box-shadow: 0 0 10px rgba(0, 123, 255, 0.5) !important;
-    transform: scale(1.02);
-    transition: all 0.2s ease;
-    z-index: 10;
-    position: relative;
+.tv-form-group:focus-within {
+  background-color: rgba(0, 123, 255, 0.1);
 }
 
-.config-container {
-    padding: 20px;
-    width: 100%;
-    max-width: 450px;
-    background-color: white;
-    opacity: 80%;
-    color: black;
-    border-radius: 8px;
-    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+.tv-label {
+  font-weight: bold;
+  min-width: 200px;
+  color: #444;
 }
 
-.form-group {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    margin-bottom: 12px;
+.tv-select, .tv-input {
+  flex: 1;
+  padding: 12px 15px;
+  border: 2px solid #ccc;
+  border-radius: 4px;
 }
 
-.leftLabel {
-    font-weight: bold;
-    width: 150px;
-    flex-shrink: 0;
+.tv-select:focus, .tv-input:focus {
+  outline: 4px solid #007bff !important;
+  outline-offset: 2px !important;
+  box-shadow: 0 0 10px rgba(0, 123, 255, 0.5) !important;
 }
 
-input[type="text"],
-input[type="number"],
-select {
-    flex: 1;
-    padding: 8px;
-    border: 1px solid #ccc;
-    border-radius: 4px;
+.tv-checkbox {
+  width: 30px;
+  height: 30px;
+  accent-color: #007bff;
 }
 
-input[type="checkbox"] {
-    width: 20px;
-    height: 20px;
-    accent-color: #007bff;
+.tv-status {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
 }
 
 progress {
-    inline-size: 16em;
-}
-
-progress.danger {
-    accent-color: #ff4d4d;
-}
-
-progress.warning {
-    accent-color: #ffcc00;
+  width: 100%;
+  height: 20px;
+  border-radius: 10px;
 }
 
 progress.success {
-    accent-color: #44cc44;
+  accent-color: #28a745;
 }
 
-.cors-status {
-    flex: 1.5;
-} 
+progress.warning {
+  accent-color: #ffc107;
+}
+
+progress.danger {
+  accent-color: #dc3545;
+}
+
+.tv-config-container::-webkit-scrollbar {
+  width: 8px;
+}
+
+.tv-config-container::-webkit-scrollbar-thumb {
+  background-color: rgba(0, 123, 255, 0.5);
+  border-radius: 4px;
+}
+
+.tv-config-container::-webkit-scrollbar-track {
+  background-color: rgba(0, 0, 0, 0.1);
+}
 </style>
