@@ -1,11 +1,11 @@
 <template>
   <div class="button-group">
     <router-link to="/prematch-info" custom v-slot="{ navigate }">
-      <button @click="navigate">Snel naar Wedstrijd Informatie</button>
+      <button @click="navigate">Ga naar Wedstrijd Informatie</button>
     </router-link>
       
     <router-link to="/match-results" custom v-slot="{ navigate }">
-      <button @click="navigate">Snel naar Wedstrijd Uitslagen</button>
+      <button @click="navigate">Ga naar Wedstrijd Uitslagen</button>
     </router-link>
       
     <router-link to="/match-info" custom v-slot="{ navigate }">
