@@ -254,7 +254,7 @@ const defaultConfig = {
   enableScreenSwitch: true,
   homeScreen: AVAILABLE_HOME_SCREENS[0] || '/match-info',
   gameType: null,
-  onPrem: true,
+  onPrem: false,
   activeSponsors: false,
   leftBoxColor: "#b40808",
   leftBoxText: "#ffffff",

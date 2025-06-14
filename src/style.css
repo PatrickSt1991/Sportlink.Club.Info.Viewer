@@ -304,10 +304,3 @@ button:focus-visible {
   background-color: rgba(245, 245, 245, 0.8);
   border-radius: 25px;
 }
-
-button:focus,
-input[type="checkbox"]:focus,
-select:focus {
-    outline: 3px solid #00f; /* or any style you like */
-    outline-offset: 2px;
-}
