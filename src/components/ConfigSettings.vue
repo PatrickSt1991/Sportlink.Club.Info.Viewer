@@ -128,13 +128,14 @@
     <!-- Sportlink buildin credentials -->
     <div v-if="localConfig.connectionType === 'Sportlink Proxy'" class="tv-form-group">
       <label class="tv-label">Fake credentials:</label>
-      <input 
-        type="checkbox" 
-        v-model="localConfig.fakeCredentials" 
-        class="tv-checkbox" 
-        @change="handleFakeCredentialsChange"
+      <button 
+        class="tv-toggle-button" 
+        :class="{ 'is-active': localConfig.fakeCredentials }"
+        @click="handleFakeCredentialsChange(!localConfig.fakeCredentials)"
         tabindex="0"
       >
+        {{ localConfig.fakeCredentials ? 'Aan' : 'Uit' }}
+      </button>
     </div>
 
     <!-- User background -->
@@ -179,33 +180,33 @@
     </div>
 
     <!-- Program days ahead -->
-    <div class="tv-form-group" tabindex="0">
+    <div class="tv-form-group">
       <label class="tv-label">Programma dagen:</label>
-      <input type="number" v-model.number="localConfig.programmaDagen" class="tv-input" @change="emitUpdate">
+      <input type="number" v-model.number="localConfig.programmaDagen" class="tv-input" @change="emitUpdate" tabindex="0">
     </div>
 
     <!-- Results days past-->
-    <div class="tv-form-group" tabindex="0">
+    <div class="tv-form-group">
       <label class="tv-label">Uitslagen dagen:</label>
-      <input type="number" v-model.number="localConfig.uitslagDagen" class="tv-input" @change="emitUpdate">
+      <input type="number" v-model.number="localConfig.uitslagDagen" class="tv-input" @change="emitUpdate" tabindex="0">
     </div>
 
     <!-- Refresh interval-->
-    <div class="tv-form-group" tabindex="0">
+    <div class="tv-form-group">
       <label class="tv-label">Verversen na (seconden):</label>
-      <input type="number" v-model.number="localConfig.prematchRefresh" class="tv-input" @change="emitUpdate">
+      <input type="number" v-model.number="localConfig.prematchRefresh" class="tv-input" @change="emitUpdate" tabindex="0">
     </div>
 
     <!-- Allow screen rotation -->
-    <div class="tv-form-group" tabindex="0">
+    <div class="tv-form-group">
       <label class="tv-label">Automatisch schakelen:</label>
-      <input type="checkbox" v-model="localConfig.enableScreenSwitch" class="tv-checkbox" @change="emitUpdate">
+      <input type="checkbox" v-model="localConfig.enableScreenSwitch" class="tv-checkbox" @change="emitUpdate" tabindex="0">
     </div>
 
     <!-- Show sponsors -->
-    <div class="tv-form-group" tabindex="0">
+    <div class="tv-form-group">
       <label class="tv-label">Sponsoren weergeven:</label>
-      <input type="checkbox" v-model="localConfig.activeSponsors" class="tv-checkbox" @change="emitUpdate">
+      <input type="checkbox" v-model="localConfig.activeSponsors" class="tv-checkbox" @change="emitUpdate"  tabindex="0">
     </div>
 
     <!-- Proxy status -->
@@ -866,5 +867,41 @@ input[type="checkbox"].tv-checkbox:disabled {
   cursor: not-allowed;
   background-color: #f5f5f5;
   border-color: #ccc;
+}
+
+.tv-toggle-button {
+  width: 80px;
+  height: 40px;
+  border: 2px solid #ccc;
+  border-radius: 20px;
+  background-color: #f5f5f5;
+  color: #666;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.tv-toggle-button.is-active {
+  background-color: #007bff;
+  border-color: #007bff;
+  color: white;
+}
+
+.tv-toggle-button:focus {
+  outline: 4px solid #007bff !important;
+  outline-offset: 2px !important;
+  box-shadow: 0 0 10px rgba(0, 123, 255, 0.5) !important;
+}
+
+.tv-toggle-button:hover {
+  background-color: #e0e0e0;
+}
+
+.tv-toggle-button.is-active:hover {
+  background-color: #0056b3;
 }
 </style>
