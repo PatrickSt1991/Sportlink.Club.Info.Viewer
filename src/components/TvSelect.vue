@@ -29,7 +29,7 @@
 </template>
 
 <script setup>
-import { ref, computed, watch, onMounted } from 'vue';
+import { ref, computed, watch, onMounted, nextTick } from 'vue';
 
 const props = defineProps({
   modelValue: {
@@ -83,6 +83,13 @@ function toggleDropdown() {
     focusedIndex.value = selectedIndex.value >= 0 ? selectedIndex.value : 0;
     // Ensure focus stays on container
     selectContainer.value?.focus();
+    // Scroll focused option into view
+    nextTick(() => {
+      const focusedOption = selectContainer.value?.querySelector('.tv-select-option.is-focused');
+      if (focusedOption) {
+        focusedOption.scrollIntoView({ block: 'nearest' });
+      }
+    });
   }
 }
 
@@ -110,6 +117,13 @@ function handleKeydown(e) {
         focusedIndex.value = 0;
         // Ensure focus stays on container
         selectContainer.value?.focus();
+        // Scroll focused option into view
+        nextTick(() => {
+          const focusedOption = selectContainer.value?.querySelector('.tv-select-option.is-focused');
+          if (focusedOption) {
+            focusedOption.scrollIntoView({ block: 'nearest' });
+          }
+        });
       } else {
         // Select current option if dropdown is open
         const option = props.options[focusedIndex.value];
@@ -124,6 +138,13 @@ function handleKeydown(e) {
       if (isOpen.value) {
         // Navigate options when open
         focusedIndex.value = Math.max(0, focusedIndex.value - 1);
+        // Scroll focused option into view
+        nextTick(() => {
+          const focusedOption = selectContainer.value?.querySelector('.tv-select-option.is-focused');
+          if (focusedOption) {
+            focusedOption.scrollIntoView({ block: 'nearest' });
+          }
+        });
       }
       break;
     case 'ArrowDown':
@@ -132,6 +153,13 @@ function handleKeydown(e) {
       if (isOpen.value) {
         // Navigate options when open
         focusedIndex.value = Math.min(props.options.length - 1, focusedIndex.value + 1);
+        // Scroll focused option into view
+        nextTick(() => {
+          const focusedOption = selectContainer.value?.querySelector('.tv-select-option.is-focused');
+          if (focusedOption) {
+            focusedOption.scrollIntoView({ block: 'nearest' });
+          }
+        });
       }
       break;
     case 'ArrowLeft':
@@ -228,7 +256,7 @@ defineExpose({
   border: 2px solid #007bff;
   border-top: none;
   border-radius: 0 0 4px 4px;
-  max-height: 200px;
+  max-height: 300px;
   overflow-y: auto;
   z-index: 1000;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
@@ -255,15 +283,21 @@ defineExpose({
 
 /* Scrollbar styles for Tizen */
 .tv-select-options::-webkit-scrollbar {
-  width: 8px;
+  width: 12px;
 }
 
 .tv-select-options::-webkit-scrollbar-thumb {
   background-color: rgba(0, 123, 255, 0.5);
-  border-radius: 4px;
+  border-radius: 6px;
 }
 
 .tv-select-options::-webkit-scrollbar-track {
   background-color: rgba(0, 0, 0, 0.1);
+  border-radius: 6px;
+}
+
+/* Ensure the focused option is always visible */
+.tv-select-option.is-focused {
+  scroll-margin: 12px;
 }
 </style> 

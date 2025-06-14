@@ -3,9 +3,10 @@
     <ClubSelectPopup
       :visible="showClubSelectPopup"
       :clubs="clubs"
-      :focusAfterClose="backgroundSelect"
-      @close="showClubSelectPopup = false"
+      :focusAfterClose="backgroundSelectRef"
+      @close="handlePopupClose"
       @save="handleClubSelected"
+      @focus-background="focusBackgroundSelect"
     />
     
     <h2 class="tv-title">Instellingen</h2>
@@ -140,13 +141,14 @@
     <div class="tv-form-group">
       <label class="tv-label">Achtergrond:</label>
       <TvSelect
-        ref="backgroundSelect"
+        ref="backgroundSelectRef"
         v-model="localConfig.selectedBackground"
         :options="backgroundOptions"
         option-label="label"
         option-value="value"
         @update:modelValue="updateBackground"
         tabindex="0"
+        data-test="background-select"
       />
     </div>
 
@@ -219,10 +221,11 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, watch } from 'vue';
+import { ref, computed, onMounted, watch, nextTick } from 'vue';
 import TvSelect from './TvSelect.vue';
 import { updateUserConfig } from '@/config';
 import ClubSelectPopup from './ClubSelectPopup.vue';
+import { useConfigWatchers } from '@/composables/useConfigWatchers';
 
 const props = defineProps({
   config: Object,
@@ -240,9 +243,12 @@ const localConfig = ref({...props.config});
 const isUpdatingFakeCredentials = ref(false);
 const sportSelect = ref(null);
 const connectionSelect = ref(null);
-const backgroundSelect = ref(null);
+const backgroundSelectRef = ref(null);
+const backgroundSelectContainer = ref(null);
 const homeScreenSelect = ref(null);
 const showClubSelectPopup = ref(false);
+const shouldFocusBackground = ref(false);
+const lastFocusedElement = ref(null);
 
 const progressBarClass = computed(() => {
   const percentage = (props.corsStatus?.requestsToday ?? 0) / (props.corsStatus?.limit ?? 1);
@@ -343,12 +349,22 @@ function handleFakeCredentialsChange(newValue) {
     updatedConfig.validPassword = false;
   }
   
-  // Update local config
+  // Update local config first
   localConfig.value = updatedConfig;
   
-  // Force an immediate update
+  // Force an immediate update to localStorage
   updateUserConfig(updatedConfig);
+  
+  // Emit update to parent
   emit('update:config', updatedConfig);
+  
+  // Force a re-render of the checkbox
+  nextTick(() => {
+    const checkbox = document.querySelector('input[type="checkbox"][v-model="localConfig.fakeCredentials"]');
+    if (checkbox) {
+      checkbox.checked = newValue;
+    }
+  });
   
   // Reset the flag after a short delay
   setTimeout(() => {
@@ -360,7 +376,7 @@ function focusSelect(refName) {
   const select = {
     sportSelect: sportSelect,
     connectionSelect: connectionSelect,
-    backgroundSelect: backgroundSelect,
+    backgroundSelect: backgroundSelectRef,
     homeScreenSelect: homeScreenSelect
   }[refName]?.value;
   
@@ -373,6 +389,17 @@ function handleKeyDown(e) {
   const activeElement = document.activeElement;
   const isSelectOpen = activeElement?.classList?.contains('is-open');
   
+  // If we need to focus the background select, do it first
+  if (shouldFocusBackground.value) {
+    shouldFocusBackground.value = false;
+    const backgroundSelectContainer = document.querySelector('.tv-form-group:nth-child(7) .tv-select-container');
+    if (backgroundSelectContainer) {
+      backgroundSelectContainer.focus();
+      backgroundSelectContainer.classList.add('has-focus');
+      return;
+    }
+  }
+
   // If a select is open, handle arrow keys for option selection
   if (isSelectOpen) {
     switch (e.key) {
@@ -512,6 +539,84 @@ function handleClubSelected(club) {
   localConfig.value.clubId = club.id;
   updateBackground();
 }
+
+function handlePopupClose() {
+  showClubSelectPopup.value = false;
+  nextTick(() => {
+    const backgroundSelect = document.querySelector('[data-test="background-select"]');
+    if (backgroundSelect) {
+      backgroundSelect.focus();
+      backgroundSelect.click();
+    }
+  });
+}
+
+function focusBackgroundSelect() {
+  console.log('Attempting to focus background select...');
+  
+  // Try to focus using the ref directly
+  if (backgroundSelectRef.value) {
+    console.log('Found background select ref, attempting to focus...');
+    const select = backgroundSelectRef.value;
+    
+    // First try focusing the component
+    select.focus();
+    console.log('Called focus() on component');
+    
+    // Then try focusing the element
+    select.$el.focus();
+    console.log('Called focus() on element');
+    
+    // Force click for older Tizen TVs
+    select.$el.click();
+    console.log('Called click() on element');
+    
+    // Force focus styles
+    select.$el.classList.add('has-focus');
+    console.log('Added has-focus class');
+    
+    // Try to force the focus state with a custom event
+    const focusEvent = new FocusEvent('focus', {
+      bubbles: true,
+      cancelable: true
+    });
+    select.$el.dispatchEvent(focusEvent);
+    console.log('Dispatched focus event');
+    
+    // Try one more time after a small delay
+    setTimeout(() => {
+      console.log('Trying delayed focus...');
+      select.focus();
+      select.$el.focus();
+      select.$el.click();
+      select.$el.classList.add('has-focus');
+      select.$el.dispatchEvent(focusEvent);
+    }, 50);
+  } else {
+    console.log('backgroundSelectRef.value is null');
+  }
+}
+
+// Add a watcher for the popup visibility
+watch(showClubSelectPopup, (newValue) => {
+  if (!newValue) {
+    nextTick(() => {
+      const backgroundSelect = document.querySelector('[data-test="background-select"]');
+      if (backgroundSelect) {
+        backgroundSelect.focus();
+        backgroundSelect.click();
+      }
+    });
+  }
+});
+
+const { setupWatchers, cleanup } = useConfigWatchers(props.config, { 
+  sportlinkAuth: props.fakeCredentials, 
+  clubData: { clubs: props.clubs, corsStatus: props.corsStatus, fetchSportlinkClubs: () => Promise.resolve([]), fetchNevoboClubs: () => Promise.resolve([]), fetchCorsStatus: () => Promise.resolve({}) },
+  showClubSelectPopup,
+  updateUserConfig,
+  backgroundSelectRef
+});
 </script>
 
 <style scoped>
@@ -568,6 +673,43 @@ function handleClubSelected(club) {
   width: 30px;
   height: 30px;
   accent-color: #007bff;
+  cursor: pointer;
+  position: relative;
+  appearance: none;
+  -webkit-appearance: none;
+  background-color: #f5f5f5;
+  border: 2px solid #ccc;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+}
+
+.tv-checkbox:checked {
+  background-color: #007bff;
+  border-color: #007bff;
+}
+
+.tv-checkbox:checked::after {
+  content: '✓';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: white;
+  font-size: 20px;
+  font-weight: bold;
+}
+
+.tv-checkbox:focus {
+  outline: 4px solid #007bff !important;
+  outline-offset: 2px !important;
+  box-shadow: 0 0 10px rgba(0, 123, 255, 0.5) !important;
+}
+
+.tv-checkbox:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  background-color: #f5f5f5;
+  border-color: #ccc;
 }
 
 .tv-status {
@@ -662,5 +804,67 @@ progress.danger {
 :deep(.tv-checkbox:disabled) {
   opacity: 0.5;
   cursor: not-allowed;
+}
+
+/* Add focus styles for TvSelect container */
+:deep(.tv-select-container.has-focus) {
+  outline: 4px solid #007bff !important;
+  outline-offset: 2px !important;
+  box-shadow: 0 0 10px rgba(0, 123, 255, 0.5) !important;
+  background-color: rgba(0, 123, 255, 0.1) !important;
+}
+
+/* Ensure the focus styles are visible even after clicking */
+:deep(.tv-select-container.has-focus:focus) {
+  outline: 4px solid #007bff !important;
+  outline-offset: 2px !important;
+  box-shadow: 0 0 10px rgba(0, 123, 255, 0.5) !important;
+  background-color: rgba(0, 123, 255, 0.1) !important;
+}
+
+/* Update checkbox styles */
+input[type="checkbox"].tv-checkbox {
+  width: 30px;
+  height: 30px;
+  cursor: pointer;
+  position: relative;
+  appearance: none;
+  -webkit-appearance: none;
+  background-color: #f5f5f5;
+  border: 2px solid #ccc;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+  margin: 0;
+  padding: 0;
+}
+
+input[type="checkbox"].tv-checkbox:checked {
+  background-color: #007bff !important;
+  border-color: #007bff !important;
+}
+
+input[type="checkbox"].tv-checkbox:checked::after {
+  content: '✓';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: white;
+  font-size: 20px;
+  font-weight: bold;
+  pointer-events: none;
+}
+
+input[type="checkbox"].tv-checkbox:focus {
+  outline: 4px solid #007bff !important;
+  outline-offset: 2px !important;
+  box-shadow: 0 0 10px rgba(0, 123, 255, 0.5) !important;
+}
+
+input[type="checkbox"].tv-checkbox:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  background-color: #f5f5f5;
+  border-color: #ccc;
 }
 </style>

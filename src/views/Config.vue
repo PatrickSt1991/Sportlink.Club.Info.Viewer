@@ -18,7 +18,7 @@
       <ClubSelectPopup
         :visible="showClubSelectPopup"
         :clubs="clubs"
-        @close="showClubSelectPopup = false"
+        @close="handlePopupClose"
         @save="handleClubSelected"
       />
 
@@ -91,7 +91,8 @@ const { setupWatchers, cleanup } = useConfigWatchers(config, {
   sportlinkAuth, 
   clubData: { clubs, corsStatus, fetchSportlinkClubs, fetchNevoboClubs, fetchCorsStatus },
   showClubSelectPopup,
-  updateUserConfig 
+  updateUserConfig,
+  backgroundSelectRef: ref(null)
 });
 
 const styleConfig = computed(() => {
@@ -357,6 +358,39 @@ function handleKeyDown(e) {
       }
       break;
   }
+}
+
+function handlePopupClose() {
+  showClubSelectPopup.value = false;
+  nextTick(() => {
+    const backgroundSelect = document.querySelector('[data-test="background-select"]');
+    if (backgroundSelect) {
+      console.log('Found background select, focusing...');
+      backgroundSelect.focus();
+      backgroundSelect.click();
+      
+      // Force focus styles
+      backgroundSelect.classList.add('has-focus');
+      
+      // Try to force the focus state
+      const focusEvent = new FocusEvent('focus', {
+        bubbles: true,
+        cancelable: true
+      });
+      backgroundSelect.dispatchEvent(focusEvent);
+      
+      // Try one more time after a small delay
+      setTimeout(() => {
+        console.log('Trying delayed focus...');
+        backgroundSelect.focus();
+        backgroundSelect.click();
+        backgroundSelect.classList.add('has-focus');
+        backgroundSelect.dispatchEvent(focusEvent);
+      }, 100);
+    } else {
+      console.log('Could not find background select');
+    }
+  });
 }
 
 onMounted(async () => {

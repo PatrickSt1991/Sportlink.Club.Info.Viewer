@@ -60,7 +60,7 @@
       default: null
     }
   });
-  const emit = defineEmits(['close', 'save']);
+  const emit = defineEmits(['close', 'save', 'focus-background']);
   
   const search = ref('');
   const selectedClubId = ref(null);
@@ -79,14 +79,16 @@
   );
   
   function selectClub(club) {
+    console.log('Selecting club, preparing to focus background...');
+    // First emit focus event
+    emit('focus-background');
+    // Then save and close
     emit('save', club);
-    emit('close');
-    // Focus the background select after closing
-    if (props.focusAfterClose) {
-      setTimeout(() => {
-        props.focusAfterClose.focus();
-      }, 100);
-    }
+    // Close after a delay to ensure focus is set
+    setTimeout(() => {
+      console.log('Closing popup after club selection...');
+      emit('close');
+    }, 200);
   }
   
   function handleKeyDown(e) {
@@ -108,13 +110,14 @@
         focusedIndex.value = 0;
       } else if (e.key === 'Escape') {
         e.preventDefault();
-        emit('close');
-        // Focus the background select after closing
-        if (props.focusAfterClose) {
-          setTimeout(() => {
-            props.focusAfterClose.focus();
-          }, 100);
-        }
+        console.log('Escape pressed, preparing to focus background...');
+        // First emit focus event
+        emit('focus-background');
+        // Then close after a delay
+        setTimeout(() => {
+          console.log('Closing popup after escape...');
+          emit('close');
+        }, 200);
       }
     } else if (isClubList) {
       switch (e.key) {
@@ -142,13 +145,14 @@
           break;
         case 'Escape':
           e.preventDefault();
-          emit('close');
-          // Focus the background select after closing
-          if (props.focusAfterClose) {
-            setTimeout(() => {
-              props.focusAfterClose.focus();
-            }, 100);
-          }
+          console.log('Escape pressed in club list, preparing to focus background...');
+          // First emit focus event
+          emit('focus-background');
+          // Then close after a delay
+          setTimeout(() => {
+            console.log('Closing popup after escape in club list...');
+            emit('close');
+          }, 200);
           break;
       }
     }

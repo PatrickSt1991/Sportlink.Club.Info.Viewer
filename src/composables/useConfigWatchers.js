@@ -1,4 +1,4 @@
-import { watch, ref } from 'vue';
+import { watch, ref, nextTick } from 'vue';
 import { APP_CREDENTIALS} from '@/config';
 import { useToast } from "vue-toastification";
 
@@ -6,7 +6,8 @@ export function useConfigWatchers(config, {
     sportlinkAuth, 
     clubData,
     showClubSelectPopup,
-    updateUserConfig 
+    updateUserConfig,
+    backgroundSelectRef 
 }) {
     let refreshInterval;
     let saveTimeout;
@@ -110,6 +111,16 @@ export function useConfigWatchers(config, {
                 }
             }
         );
+
+        // Add a watcher for the popup visibility
+        watch(showClubSelectPopup, (newValue) => {
+            if (!newValue && backgroundSelectRef?.value) {
+                nextTick(() => {
+                    backgroundSelectRef.value.focus();
+                    backgroundSelectRef.value.$el.click();
+                });
+            }
+        });
     }
 
     async function handleSportlinkApi(clientId, validClientId) {
