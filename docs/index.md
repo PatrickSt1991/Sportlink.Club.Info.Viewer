@@ -53,9 +53,9 @@ Host de applicatie zelf op je eigen server of Raspberry Pi.
 ❌ Geen automatische updates beschikbaar  
 
 
-### 📺 Tizen (Samsung Smart TV-app) *(in ontwikkeling)*  
-De [Tizen-app](https://github.com/PatrickSt1991/Sportlink.Club.Info.Viewer.Tizen) kan direct op een Smart TV worden geïnstalleerd.  
-⚠️ Let op: de huidige versie is verouderd en bevat nog een oude build.  
+### 📺 Tizen (Samsung Smart TV-app) 
+De Tizen-app kan direct op een Smart TV worden geïnstalleerd.  
+📦 [Download de meest recente versie](https://github.com/PatrickSt1991/Sportlink.Club.Info.Viewer/releases/latest)  
 ✅ Eenmalige installatie  
 ❌ Geen automatische updates
 
