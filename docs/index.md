@@ -71,9 +71,11 @@ Iedereen kan de software gebruiken en aanpassen naar eigen wensen.
 
 De applicatie ondersteunt meerdere methoden om sportgegevens op te halen:
 
-- **Sportlink API**  
-- **Sportlink Proxy**  
-- **Nevobo Proxy**
+| Methode             | Beschrijving                                                                 | Toegang         |
+|---------------------|------------------------------------------------------------------------------|-----------------|
+| **Sportlink API**   | Koppeling via Sportlink Club.DataService                                     | **Betaald**     |
+| **Sportlink Proxy** | Inloggen met gebruikersnaam en wachtwoord, zoals bij de Voetbal.nl app       | **Gratis**      |
+| **Nevobo Proxy**    | Publieke data, geen inlog vereist                                            | **Gratis**      |
 
 Meer uitleg over het instellen van deze gegevensbronnen vindt u op de [instellingenpagina](./settings.md),  
 of neem een kijkje bij de [voorbeelden](./preview.md) voor een visuele indruk van de mogelijkheden.
