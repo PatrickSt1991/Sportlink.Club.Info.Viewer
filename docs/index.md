@@ -48,7 +48,6 @@ De [online versie](https://patrickst1991.github.io/Sportlink.Club.Info.Viewer/) 
 ### 🖥️ On-premise (eigen hosting)  
 Host de applicatie zelf op je eigen server of Raspberry Pi.  
 📦 [Download de meest recente versie](https://github.com/PatrickSt1991/Sportlink.Club.Info.Viewer/releases/latest)  
-
 ✅ Volledige controle over hosting en configuratie  
 ❌ Geen automatische updates beschikbaar  
 
