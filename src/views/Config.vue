@@ -1,12 +1,4 @@
 <template>
-  <div v-if="showVisualDebug" class="debug-overlay">
-    <div class="debug-info">
-      <h4>Debug Info:</h4>
-      <p>Last Key: {{ debugInfo.lastKey }}</p>
-      <p>Current Element: {{ debugInfo.currentElement }}</p>
-    </div>
-  </div>
-
   <TermsModal 
     v-if="showTermsInitially"
     :show="showTermsInitially" 
@@ -77,12 +69,6 @@ const config = ref({...USER_CONFIG.value});
 const isLoading = ref(true);
 const showClubSelectPopup = ref(false);
 const availableGameTypes = ref(GAME_TYPES);
-const showVisualDebug = ref(true);
-
-const debugInfo = ref({
-  lastKey: '',
-  currentElement: ''
-});
 
 // Initialize composables
 const sportlinkAuth = useSportlinkAuth();
@@ -248,11 +234,6 @@ function handleClubSelected(club) {
 }
 
 function handleKeyDown(e) {
-  debugInfo.value = {
-    lastKey: e.key || 'EMPTY',
-    currentElement: document.activeElement?.id || 'none'
-  };
-
   const activeElement = document.activeElement;
   const isSelectOpen = activeElement?.classList?.contains('is-open');
   
