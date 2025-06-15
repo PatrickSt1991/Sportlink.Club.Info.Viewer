@@ -100,7 +100,7 @@ export const GAME_TYPES = [
       },
       {
         type: 'Sportlink Proxy',
-        active: false
+        active: true
       }
     ] 
   },
@@ -114,7 +114,7 @@ export const GAME_TYPES = [
       },
       {
         type: 'Sportlink Proxy',
-        active: false
+        active: true
       }
     ]
   },
@@ -128,7 +128,7 @@ export const GAME_TYPES = [
       },
       {
         type: 'Sportlink Proxy',
-        active: false
+        active: true
       }
     ]
   },
@@ -170,7 +170,7 @@ export const GAME_TYPES = [
       },
       {
         type: 'Sportlink Proxy',
-        active: false
+        active: true
       }
     ]
   },
@@ -184,7 +184,7 @@ export const GAME_TYPES = [
       },
       {
         type: 'Sportlink Proxy',
-        active: false
+        active: true
       }
     ]
   }
