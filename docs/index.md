@@ -1,7 +1,7 @@
 # 🏟️ ClubInfoBoard
 
 Welkom bij **ClubInfoBoard** – dé oplossing voor sportverenigingen om wedstrijdinformatie real-time en overzichtelijk te tonen op schermen binnen de club, zoals in de kantine of op een Smart TV.
-
+Neem een kijkje in de [online versie](https://patrickst1991.github.io/Sportlink.Club.Info.Viewer/#/settings)
 ---
 
 ## ⚙️ Wat is ClubInfoBoard?
@@ -38,25 +38,45 @@ De app is geoptimaliseerd voor gebruik op Smart TV's, tablets én computers of l
 
 ## 🔓 Beschikbare versies
 
-**ClubInfoBoard** is op drie manieren te gebruiken:
+**ClubInfoBoard** is beschikbaar in vier vormen, afhankelijk van jouw voorkeur:
+
+---
 
 ### 🌐 Online (gehoste versie)
-De [online versie](https://patrickst1991.github.io/Sportlink.Club.Info.Viewer/) is direct beschikbaar in de browser.  
-✅ Automatische updates  
-✅ Werkt zonder installatie  
 
-### 🖥️ On-premise (eigen hosting)  
-Host de applicatie zelf op je eigen server of Raspberry Pi.  
-📦 [Download de meest recente versie](https://github.com/PatrickSt1991/Sportlink.Club.Info.Viewer/releases/latest)  
+Gebruik de [online versie](https://patrickst1991.github.io/Sportlink.Club.Info.Viewer/) direct in je browser.  
+✅ Altijd up-to-date  
+✅ Geen installatie nodig  
+❌ Geen offline ondersteuning  
+
+---
+
+### 🖥️ On-premise (eigen hosting)
+
+Host de applicatie zelf op je server of Raspberry Pi.  
+📦 [Download de nieuwste versie (.zip)](https://github.com/PatrickSt1991/Sportlink.Club.Info.Viewer/releases/latest)  
+🛠️ Pak het zip-bestand uit en plaats `index.html` en de `assets`-map op je webserver.  
 ✅ Volledige controle over hosting en configuratie  
-❌ Geen automatische updates beschikbaar  
+❌ Geen automatische updates  
+🚧 Beperkte offline ondersteuning  
 
+### 📺 Samsung Smart TV-app (Tizen)
 
-### 📺 Tizen (Samsung Smart TV-app) 
-De Tizen-app kan direct op een Smart TV worden geïnstalleerd.  
-📦 [Download de meest recente versie](https://github.com/PatrickSt1991/Sportlink.Club.Info.Viewer/releases/latest)  
-✅ Eenmalige installatie  
-❌ Geen automatische updates
+Installeer de app rechtstreeks op een Samsung Smart TV.  
+📦 [Download de nieuwste versie (.wgt)](https://github.com/PatrickSt1991/Sportlink.Club.Info.Viewer/releases/latest)  
+📖 [Bekijk de installatiehandleiding](https://github.com/PatrickSt1991/Sportlink.Club.Info.Viewer/blob/main/docs/tizen_install.md)  
+✅ Native ervaring op TV  
+❌ Geen automatische updates  
+🚧 Beperkte offline ondersteuning  
+
+### 🧱 Zelf bouwen (ontwikkelaarsoptie)
+
+Kloon de repository en bouw je eigen versie van de app.  
+🔗 [Bekijk de broncode op GitHub](https://github.com/PatrickSt1991/Sportlink.Club.Info.Viewer)  
+🛠️ Benodigdheden: Node.js, npm, en een build tool Vite
+📦 Bouw de app met het build-commando (`npm run build`)  
+✅ Volledige controle over de code en features  
+❌ Technische kennis vereist  
 
 ---
 
