@@ -8,7 +8,7 @@
 - **Type verbinding**  
   Kies het type verbinding:
     - **Sportlink API** – Vereist een *Client ID* van Sportlink. Deze is beschikbaar via een [Club.Dataservice-abonnement](https://www.sportlink.nl/ons-aanbod/prijslijst-en-bestellen/).
-    - **Sportlink Proxy** – Vereist een gebruikersnaam en wachtwoord zoals gebruikt in de Sportlink-app, of kies voor *Fake Credentials* voor testdoeleinden.
+    - **Sportlink Proxy** – Vereist een gebruikersnaam en wachtwoord zoals gebruikt in de Sportlink-app, of kies voor *Fake Credentials* om gebruik te maken van de ingebouwde credentials.
     - **Nevobo Proxy** – Alleen beschikbaar voor volleybal. Vereist geen verdere authenticatie.
 
 - **Sportlink API-instellingen**  
