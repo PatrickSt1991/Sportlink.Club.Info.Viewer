@@ -1,6 +1,6 @@
 # 🏟️ ClubInfoBoard
 
-Welkom bij **ClubInfoBoard** – dé oplossing voor sportverenigingen om wedstrijdinformatie real-time en overzichtelijk te tonen op schermen binnen de club, zoals in de kantine of op een Smart TV.
+Welkom bij **ClubInfoBoard** – dé oplossing voor sportverenigingen om wedstrijdinformatie real-time en overzichtelijk te tonen op schermen binnen de club, zoals in de kantine of op een Smart TV.   
 Neem een kijkje in de [online versie](https://patrickst1991.github.io/Sportlink.Club.Info.Viewer/#/settings)
 ---
 
