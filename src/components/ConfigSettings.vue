@@ -164,11 +164,11 @@
       <label class="tv-label">Start scherm:</label>
       <TvSelect
         ref="homeScreenSelect"
-        v-model="localConfig.homeScreen"
-        :options="Object.entries(homeScreens).map(([value, label]) => ({ value, label }))"
+        v-model="homeScreenValue"
+        :options="Object.entries(homeScreens).map(([key, path]) => ({ value: key, label: key }))"
         option-label="label"
         option-value="value"
-        @update:modelValue="emitUpdate"
+        @update:modelValue="handleHomeScreenChange"
         tabindex="0"
       />
     </div>
@@ -265,6 +265,25 @@ const connectionTypeOptions = computed(() => {
     type: type.type,
     active: type.active
   }));
+});
+
+// Home screen value for TvSelect
+const homeScreenValue = computed({
+  get: () => {
+    const value = localConfig.value.homeScreen;
+    // If it's already an object, return it
+    if (typeof value === 'object' && value !== null) {
+      return value;
+    }
+    // If it's a string, find the corresponding object
+    const entry = Object.entries(props.homeScreens).find(([key, path]) => key === value);
+    return entry ? { value: entry[0], label: entry[0] } : { value: '', label: '' };
+  },
+  set: (value) => {
+    // This setter won't be used since we're using the custom handler
+    localConfig.value.homeScreen = value;
+    emitUpdate();
+  }
 });
 
 // Watch for prop changes
@@ -618,6 +637,13 @@ const { setupWatchers, cleanup } = useConfigWatchers(props.config, {
   updateUserConfig,
   backgroundSelectRef
 });
+
+function handleHomeScreenChange(value) {
+  // Extract the value from the object if it's an object
+  const homeScreenValue = typeof value === 'object' && value !== null ? value.value : value;
+  localConfig.value.homeScreen = homeScreenValue;
+  emitUpdate();
+}
 </script>
 
 <style scoped>

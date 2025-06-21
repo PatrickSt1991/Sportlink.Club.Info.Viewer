@@ -7,6 +7,10 @@ import { HOME_SCREENS, USER_CONFIG, BASE_URL } from '@/config';
 
 const routes = [
   {
+    path: '/',
+    redirect: () => HOME_SCREENS[USER_CONFIG.value.homeScreen] || '/match-info',
+  },
+  {
     path: '/settings',
     name: 'Settings',
     component: Config,
@@ -30,10 +34,10 @@ const routes = [
   },
   {
     path: '/:pathMatch(.*)*',
-    redirect: () => HOME_SCREENS[USER_CONFIG.homeScreen] || '/match-info',
+    redirect: () => HOME_SCREENS[USER_CONFIG.value.homeScreen] || '/match-info',
   },
 ];
-
+console.log(HOME_SCREENS[USER_CONFIG.value.homeScreen]);
 const router = createRouter({
   history: createWebHashHistory(BASE_URL),
   routes,

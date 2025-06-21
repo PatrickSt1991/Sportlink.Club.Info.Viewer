@@ -128,9 +128,17 @@ watch(() => USER_CONFIG.value, (newConfig) => {
   }
 }, { immediate: true, deep: true });
 
+function handleKeyDown(event) {
+  if (event.keyCode === 10182) {
+    router.push('/settings')
+  }
+}
+
 onMounted(() => {
   calculateScrollingContainerHeight();
   window.addEventListener('resize', calculateScrollingContainerHeight);
+  window.addEventListener('keydown', handleKeyDown)
+
   startPeriodicRefresh();
 });
 
@@ -138,5 +146,6 @@ onUnmounted(() => {
   stopScrolling();
   stopPeriodicRefresh();
   window.removeEventListener('resize', calculateScrollingContainerHeight);
+  window.removeEventListener('keydown', handleKeyDown)
 });
 </script>

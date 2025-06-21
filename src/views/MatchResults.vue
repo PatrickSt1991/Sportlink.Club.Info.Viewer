@@ -93,10 +93,16 @@ watch(() => USER_CONFIG.value, (newConfig) => {
   }
 }, { immediate: true, deep: true });
 
+function handleKeyDown(event) {
+  if (event.keyCode === 10182) {
+    router.push('/settings')
+  }
+}
+
 onMounted(() => {
   calculateScrollingContainerHeight();
   window.addEventListener('resize', calculateScrollingContainerHeight);
-  
+  window.addEventListener('keydown', handleKeyDown)
   if(matches.value.length > 0){
     nextTick().then(startScrolling);
   }
@@ -105,5 +111,6 @@ onMounted(() => {
 onUnmounted(() => {
   stopScrolling();
   window.removeEventListener('resize', calculateScrollingContainerHeight);
+  window.removeEventListener('keydown', handleKeyDown)
 });
 </script>
