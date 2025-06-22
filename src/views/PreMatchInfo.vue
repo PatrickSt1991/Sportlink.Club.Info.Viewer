@@ -72,6 +72,15 @@ const {
     stopScrolling
 } = useScrollHelper(router, config);
 
+const handleKeyDown = (event) => {
+  const arrowKeyCodes = [37, 38, 39, 40]; // Left, Up, Right, Down
+  if (arrowKeyCodes.includes(event.keyCode)) {
+    event.preventDefault();
+    event.stopPropagation();
+    router.push('/settings');
+  }
+};
+
 const dateRangeText = computed(() => {
   return `Er zijn geen wedstrijden gepland tussen ${now.value} en ${threeHoursLater.value}`;
 });
@@ -128,16 +137,10 @@ watch(() => USER_CONFIG.value, (newConfig) => {
   }
 }, { immediate: true, deep: true });
 
-function handleKeyDown(event) {
-  if (event.keyCode === 10182) {
-    router.push('/settings')
-  }
-}
-
 onMounted(() => {
   calculateScrollingContainerHeight();
   window.addEventListener('resize', calculateScrollingContainerHeight);
-  window.addEventListener('keydown', handleKeyDown)
+  window.addEventListener('keydown', handleKeyDown);
 
   startPeriodicRefresh();
 });
@@ -145,7 +148,7 @@ onMounted(() => {
 onUnmounted(() => {
   stopScrolling();
   stopPeriodicRefresh();
+  window.removeEventListener('keydown', handleKeyDown);
   window.removeEventListener('resize', calculateScrollingContainerHeight);
-  window.removeEventListener('keydown', handleKeyDown)
 });
 </script>

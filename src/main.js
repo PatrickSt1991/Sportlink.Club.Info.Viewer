@@ -38,3 +38,8 @@ app.use(Toast, toastOptions);
 
 // Mount only once
 app.mount('#app');
+
+// Add global key listener after app is mounted
+setTimeout(() => {
+  window.addEventListener('keydown', handleGlobalKeyDown);
+}, 100);

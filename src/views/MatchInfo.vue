@@ -59,6 +59,15 @@ const {
     stopScrolling
 } = useScrollHelper(router, config);
 
+const handleKeyDown = (event) => {
+  const arrowKeyCodes = [37, 38, 39, 40]; // Left, Up, Right, Down
+  if (arrowKeyCodes.includes(event.keyCode)) {
+    event.preventDefault();
+    event.stopPropagation();
+    router.push('/settings');
+  }
+};
+
 // Simplified fetch function using our helpers
 const fetchMatchInfo = async () => {
   await fetchMatches(
@@ -94,16 +103,10 @@ watch(() => USER_CONFIG.value, (newConfig) => {
   }
 }, { immediate: true, deep: true });
 
-function handleKeyDown(event) {
-  if (event.keyCode === 10182) {
-    router.push('/settings')
-  }
-}
-
 onMounted(() => {
   calculateScrollingContainerHeight();
   window.addEventListener('resize', calculateScrollingContainerHeight);
-  window.addEventListener('keydown', handleKeyDown)
+  window.addEventListener('keydown', handleKeyDown);
 
   if(matches.value.length > 0){
     nextTick().then(startScrolling);
@@ -113,6 +116,6 @@ onMounted(() => {
 onUnmounted(() => {
   stopScrolling();
   window.removeEventListener('resize', calculateScrollingContainerHeight);
-  window.removeEventListener('keydown', handleKeyDown)
+  window.removeEventListener('keydown', handleKeyDown);
 });
 </script>
