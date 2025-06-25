@@ -82,3 +82,8 @@ Er kunnen maximaal 13 sponsoren worden toegevoegd. Deze worden weergegeven in de
 - **Snel naar Wedstrijdinformatie** – Gaat direct naar de pagina met veld- en kleedkamerindeling.
 - **Snel naar Uitslagen** – Gaat direct naar de pagina met recente uitslagen.
 - **Snel naar Programma** – Gaat direct naar de pagina met aankomende wedstrijden.
+- Terug naar de Instellingen pagina doet u gemakkelijk door een van de onderstaande knoppen op de afstandsbediening te klikken
+  - ⬆️ Pijltje omhoog
+  - ➡️ Pijltje naar rechts
+  - ⬇️ Pijltje naar beneden
+  - ⬅️ Pijltje naar links
