@@ -30,7 +30,7 @@ const routes = [
   },
   {
     path: '/:pathMatch(.*)*',
-    redirect: () => USER_CONFIG.value.homeScreen || '/match-info',
+    redirect: () => HOME_SCREENS[USER_CONFIG.value.homeScreen] || '/match-info',
   },
 ];
 
