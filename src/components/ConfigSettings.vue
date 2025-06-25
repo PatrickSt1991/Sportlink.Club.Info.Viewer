@@ -85,7 +85,7 @@
       <div class="form-group">
         <label class="leftLabel">Start scherm:</label>
         <select v-model="localConfig.homeScreen">
-          <option v-for="(path, label) in homeScreens" :key="label" :value="path">
+          <option v-for="(path, label) in homeScreens" :key="label" :value="label">
             {{ label }}
           </option>
         </select>
