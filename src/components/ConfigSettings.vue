@@ -62,7 +62,7 @@
       </div>
   
       <div class="form-group">
-        <label class="leftLabel">Achtegrond:</label>
+        <label class="leftLabel">Achtergrond:</label>
         <select v-model="localConfig.selectedBackground" @change="updateBackground">
           <option disabled value="">Kies Achtergrond</option>
           <option v-for="option in backgroundOptions" :key="option.value" :value="option.value">
