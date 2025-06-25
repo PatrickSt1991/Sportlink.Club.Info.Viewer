@@ -226,8 +226,8 @@ export const backgroundOptions = [
 ];
 
 export const HOME_SCREENS = {
-  'Wedstrijd Informatie': '/match-info',
-  'Wedstrijd Programma': '/prematch-info',
+  'Wedstrijd Informatie': '/prematch-info',
+  'Wedstrijd Programma': '/match-info',
   'Wedstrijd Uitslagen': '/match-results'
 };
 
