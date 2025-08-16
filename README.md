@@ -101,8 +101,8 @@ De applicatie ondersteunt meerdere methoden om sportgegevens op te halen:
 | **Sportlink Proxy** | Inloggen met gebruikersnaam en wachtwoord, zoals bij de Voetbal.nl app       | **Gratis**      |
 | **Nevobo Proxy**    | Publieke data, geen inlog vereist                                            | **Gratis**      |
 
-Meer uitleg over het instellen van deze gegevensbronnen vindt u op de [instellingenpagina](./settings.md),  
-of neem een kijkje bij de [voorbeelden](./preview.md) voor een visuele indruk van de mogelijkheden.
+Meer uitleg over het instellen van deze gegevensbronnen vindt u op de [instellingenpagina]([./settings.md](https://github.com/PatrickSt1991/Sportlink.Club.Info.Viewer/wiki#-instellingen)),  
+of neem een kijkje bij de [voorbeelden](https://github.com/PatrickSt1991/Sportlink.Club.Info.Viewer/wiki/Voorbeelden) voor een visuele indruk van de mogelijkheden.
 
 ---
 
