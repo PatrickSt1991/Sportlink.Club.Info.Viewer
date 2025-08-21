@@ -2,6 +2,8 @@
 
 ![Support Ukraine](https://img.shields.io/badge/Support-Ukraine-FFD500?style=flat&labelColor=005BBB)
 
+<img src="https://github.com/PatrickSt1991/Sportlink.Club.Info.Viewer/blob/main/.screenshots/sport-team-manager-logo.svg" width="250" height="250" />
+
 Welkom bij **ClubInfoBoard** – dé oplossing voor sportverenigingen om wedstrijdinformatie real-time en overzichtelijk te tonen op schermen binnen de club, zoals in de kantine of op een Smart TV.   
 Neem een kijkje in de [online versie](https://clubinfoboard.madebypatrick.nl/)
 ---
