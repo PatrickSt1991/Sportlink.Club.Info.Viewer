@@ -59,119 +59,140 @@
   </script> 
   
   <style scoped>
-  h3 {
-    color:#000000;
-    float: left;
-  }
   .popup-overlay {
     position: fixed;
     top: 0;
     left: 0;
     width: 100vw;
     height: 100vh;
-    background: rgba(0, 0, 0, 0.5);
+    background: rgba(15, 23, 42, 0.55);
     display: flex;
     justify-content: center;
     align-items: center;
     z-index: 1000;
     opacity: 0;
-    animation: fadeIn 0.2s ease-out forwards;
+    animation: fadeIn 0.20s ease-out forwards;
   }
-  
+
   .popup {
-    background: white;
-    padding: 1.5em;
-    border-radius: 10px;
+    background: #fff;
+    padding: 28px 24px 22px;
+    border-radius: 16px;
     width: 90%;
-    max-width: 400px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-    transform: scale(0.95);
-    animation: scaleIn 0.15s ease-out forwards;
+    max-width: 420px;
+    box-shadow: 0 8px 48px rgba(0, 0, 0, 0.22);
+    transform: scale(0.94) translateY(8px);
+    animation: slideIn 0.18s ease-out forwards;
   }
-  
+
+  h3 {
+    margin: 0 0 18px;
+    font-size: 1.1em;
+    font-weight: 700;
+    color: #0f172a;
+    float: none;
+  }
+
   .search-input {
-    width: 95%;
-    padding: 0.75em;
-    margin-bottom: 1em;
-    border: 1px solid #ddd;
-    border-radius: 5px;
-    font-size: 1em;
+    width: 100%;
+    box-sizing: border-box;
+    padding: 9px 12px;
+    margin-bottom: 12px;
+    border: 1.5px solid #e2e8f0;
+    border-radius: 8px;
+    font-size: 0.92em;
+    font-family: inherit;
+    background: #f8fafc;
+    color: #0f172a;
+    outline: none;
+    transition: border-color 0.18s ease, box-shadow 0.18s ease;
   }
-  
+
+  .search-input:focus {
+    border-color: #2563eb;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+    background: #fff;
+  }
+
   .club-select {
     width: 100%;
-    height: 200px;
-    border: 1px solid #ddd;
-    border-radius: 5px;
-    padding: 0.5em;
-    overflow-y: auto;
+    height: 210px;
+    border: 1.5px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 4px;
+    font-size: 0.9em;
+    font-family: inherit;
+    background: #f8fafc;
+    color: #1e293b;
+    outline: none;
+    cursor: pointer;
   }
-  
-  .club-select::-webkit-scrollbar {
-    width: 8px;
+
+  .club-select:focus {
+    border-color: #2563eb;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
   }
-  
-  .club-select::-webkit-scrollbar-track {
-    background: #f1f1f1;
-    border-radius: 4px;
-  }
-  
-  .club-select::-webkit-scrollbar-thumb {
-    background: #888;
-    border-radius: 4px;
-  }
-  
-  .club-select::-webkit-scrollbar-thumb:hover {
-    background: #555;
-  }
-  
+
+  .club-select::-webkit-scrollbar       { width: 6px; }
+  .club-select::-webkit-scrollbar-track { background: #f1f5f9; border-radius: 4px; }
+  .club-select::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+  .club-select::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+
   .buttons {
     display: flex;
-    justify-content: space-between;
-    margin-top: 1em;
-    gap: 1em;
+    gap: 10px;
+    margin-top: 16px;
   }
-  
+
   .buttons button {
-    padding: 0.75em 1.5em;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    font-weight: bold;
-    transition: background 0.2s;
     flex: 1;
+    padding: 10px 0;
+    border: none;
+    border-radius: 8px;
+    font-size: 0.92em;
+    font-weight: 600;
+    font-family: inherit;
+    cursor: pointer;
+    transition: background 0.18s ease, box-shadow 0.18s ease, transform 0.14s ease;
   }
-  
+
+  /* Cancel — ghost */
   .buttons button:first-child {
-    background: #2196F3;
-    color: #f0f0f0;
+    background: #f1f5f9;
+    color: #475569;
+    border: 1.5px solid #e2e8f0;
   }
-  
+
   .buttons button:first-child:hover {
-    background: #2196F3;
+    background: #e2e8f0;
   }
-  
+
+  /* Save — primary */
   .buttons button:last-child {
-    background: #2196F3;
-    color: white;
+    background: #2563eb;
+    color: #fff;
+    box-shadow: 0 2px 8px rgba(37, 99, 235, 0.25);
   }
-  
+
+  .buttons button:last-child:hover:not(:disabled) {
+    background: #1d4ed8;
+    box-shadow: 0 4px 14px rgba(37, 99, 235, 0.35);
+    transform: translateY(-1px);
+  }
+
   .buttons button:last-child:disabled {
-    background: #2196F3;
+    background: #93c5fd;
     cursor: not-allowed;
+    box-shadow: none;
   }
-  
-  .buttons button:last-child:not(:disabled):hover {
-    background: #2196F3;
-  }
-  
+
   @keyframes fadeIn {
     from { opacity: 0; }
-    to { opacity: 1; }
+    to   { opacity: 1; }
   }
-  
-  @keyframes scaleIn {
-    from { transform: scale(0.95); }
-    to { transform: scale(1); }
+
+  @keyframes slideIn {
+    from { transform: scale(0.94) translateY(8px); opacity: 0; }
+    to   { transform: scale(1)    translateY(0);   opacity: 1; }
   }
   </style>

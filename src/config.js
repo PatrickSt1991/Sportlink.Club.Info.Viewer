@@ -236,7 +236,6 @@ export const AVAILABLE_HOME_SCREENS = Object.keys(HOME_SCREENS).filter(
 );
 
 const defaultConfig = {
-  showTerms: true,
   clientId: null,
   clubIdentifer: null,
   clubId: null,
@@ -254,7 +253,7 @@ const defaultConfig = {
   enableScreenSwitch: true,
   homeScreen: AVAILABLE_HOME_SCREENS[0] || '/match-info',
   gameType: null,
-  onPrem: false,
+  onPrem: true,
   activeSponsors: false,
   leftBoxColor: "#b40808",
   leftBoxText: "#ffffff",

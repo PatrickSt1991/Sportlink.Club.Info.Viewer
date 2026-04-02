@@ -1,10 +1,7 @@
 <template>
   <main role="main" class="container-fluid" id="contentBox">
-    <div id="rcorners">
-      <p id="topbar">Wedstrijd Informatie</p>
-    </div>
-    <div id="rcornders">
-      <div class="matchEntry">
+    <div id="rcorners_matchinfo_fixed">
+      <div class="matchEntry match-header">
         <div :style="{ background: config.leftBoxColor, color: config.leftBoxText }" id="datumUitslag_fixed">Aanvang</div>
         <div :style="{ background: config.leftMidBoxColor, color: config.leftMidBoxText }" id="thuisteam_fixed">Thuis</div>
         <div :style="{ background: config.midBoxColor, color: config.midBoxText }" id="kleedkamer_fixed">Kleedkamer</div>
@@ -12,8 +9,6 @@
         <div :style="{ background: config.rightBoxColor, color: config.rightBoxText }" id="kleedkamer_fixed">Kleedkamer</div>
         <div :style="{ background: config.leftBoxColor, color: config.leftBoxText }" id="wedstrijdveld_fixed">Veld</div>
       </div>
-    </div>
-    <div id="rcorners_matchinfo_fixed">
       <div v-if="loading" id="noMatchMessage">
         <h1>Wedstrijd Informatie worden geladen...</h1>
       </div>
@@ -140,3 +135,14 @@ onUnmounted(() => {
   window.removeEventListener('resize', calculateScrollingContainerHeight);
 });
 </script>
+
+<style scoped>
+/* PreMatchInfo has 6 columns (no logos); override the global widths
+   that were sized for the 7-column results/programme layout.
+   10 + 27 + 13 + 27 + 13 + 10 = 100% */
+#datumUitslag_fixed  { width: 10%; }
+#thuisteam_fixed     { width: 27%; }
+#kleedkamer_fixed    { width: 13%; }
+#uitteam_fixed       { width: 27%; }
+#wedstrijdveld_fixed { width: 10%; }
+</style>

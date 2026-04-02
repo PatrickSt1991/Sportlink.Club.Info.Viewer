@@ -349,26 +349,36 @@
   
 <style scoped>
   .config-container {
-    padding: 20px;
+    padding: 24px 20px;
     width: 100%;
-    max-width: 450px;
-    background-color: white;
-    opacity: 80%;
-    color: black;
-    border-radius: 8px;
-    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+    max-width: 460px;
+    background: rgba(255, 255, 255, 0.94);
+    color: #1e293b;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.22);
   }
-  
+
+  h2 {
+    margin: 0 0 20px;
+    font-size: 1.2em;
+    font-weight: 700;
+    color: #0f172a;
+    letter-spacing: 0.01em;
+    padding-bottom: 12px;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+  }
+
   .form-group {
     display: flex;
     align-items: center;
     gap: 10px;
-    margin-bottom: 12px;
+    margin-bottom: 10px;
   }
 
   .leftLabel {
-    font-weight: bold;
-    width: 150px;
+    font-weight: 600;
+    font-size: 0.88em;
+    color: #475569;
+    width: 160px;
     flex-shrink: 0;
   }
 
@@ -376,34 +386,53 @@
   input[type="number"],
   select {
     flex: 1;
-    padding: 8px;
-    border: 1px solid #ccc;
-    border-radius: 4px;
+    padding: 7px 10px;
+    border: 1.5px solid #e2e8f0;
+    border-radius: 8px;
+    font-size: 0.9em;
+    font-family: inherit;
+    background: #f8fafc;
+    color: #0f172a;
+    transition: border-color 0.18s ease, box-shadow 0.18s ease;
+    outline: none;
+  }
+
+  input[type="text"]:focus,
+  input[type="number"]:focus,
+  select:focus {
+    border-color: #2563eb;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+    background: #fff;
+  }
+
+  input[type="text"]:disabled,
+  input[type="number"]:disabled {
+    background: #f1f5f9;
+    color: #94a3b8;
+    cursor: not-allowed;
   }
 
   input[type="checkbox"] {
-    width: 20px;
-    height: 20px;
-    accent-color: #007bff;
+    width: 18px;
+    height: 18px;
+    accent-color: #2563eb;
+    cursor: pointer;
   }
 
   progress {
-    inline-size: 16em;
+    inline-size: 15em;
+    height: 6px;
+    border-radius: 9999px;
+    overflow: hidden;
   }
-  
-  progress.danger {
-    accent-color: #ff4d4d;
-  }
-  
-  progress.warning {
-    accent-color: #ffcc00;
-  }
-  
-  progress.success {
-    accent-color: #44cc44;
-  }
-  
+
+  progress.danger  { accent-color: #ef4444; }
+  progress.warning { accent-color: #f59e0b; }
+  progress.success { accent-color: #22c55e; }
+
   .cors-status {
     flex: 1.5;
-  } 
+    font-size: 0.85em;
+    color: #475569;
+  }
 </style>

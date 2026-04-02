@@ -1,25 +1,33 @@
+/* ─── Design tokens ───────────────────────────────────────── */
 :root {
-  font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
+  --font-sans: 'Inter', system-ui, -apple-system, Helvetica, Arial, sans-serif;
+
+  --c-primary:      #2563eb;
+  --c-primary-dark: #1d4ed8;
+  --c-primary-glow: rgba(37, 99, 235, 0.30);
+
+  --surface:     rgba(255, 255, 255, 0.93);
+  --surface-dim: rgba(255, 255, 255, 0.80);
+
+  --ease: cubic-bezier(0.4, 0, 0.2, 1);
+  --dur:  0.22s;
+
+  font-family: var(--font-sans);
   line-height: 1.5;
   font-weight: 400;
-
   color-scheme: light dark;
-  color: rgba(255, 255, 255, 0.87);
-  
-  /* Safe background implementation */
+  color: rgba(255, 255, 255, 0.92);
   background-size: cover;
-  
   min-height: 100vh;
   width: 100%;
-  overflow-x: hidden; /* Prevents horizontal scrollbar */
-  
+  overflow-x: hidden;
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* Optional: Add these rules to ensure no horizontal overflow */
+/* ─── Reset ───────────────────────────────────────────────── */
 html, body {
   margin: 0;
   padding: 0;
@@ -28,173 +36,235 @@ html, body {
   overflow-x: hidden;
 }
 
-a {
-  color: #000000;
-  text-decoration: inherit;
-}
-a:hover {
-  color: #000000;
-}
-
 body {
-  margin: 0;
   display: flex;
   place-items: center;
   min-width: 320px;
   min-height: 100vh;
 }
 
-h1 {
-  font-size: 3.2em;
-  line-height: 1.1;
+a {
+  color: inherit;
+  text-decoration: none;
 }
 
+/* ─── Base button ─────────────────────────────────────────── */
 button {
   border-radius: 8px;
   border: 1px solid transparent;
-  padding: 0.6em 1.2em;
+  padding: 0.55em 1.2em;
   font-size: 1em;
   font-weight: 500;
   font-family: inherit;
-  background-color: #1a1a1a;
+  background-color: var(--c-primary);
+  color: #fff;
   cursor: pointer;
-  transition: border-color 0.25s;
+  transition:
+    background  var(--dur) var(--ease),
+    box-shadow  var(--dur) var(--ease),
+    transform   var(--dur) var(--ease);
 }
+
 button:hover {
-  border-color: #646cff;
+  background-color: var(--c-primary-dark);
+  box-shadow: 0 4px 14px var(--c-primary-glow);
 }
-button:focus,
+
+button:active  { transform: translateY(1px); }
+
 button:focus-visible {
-  outline: 4px auto -webkit-focus-ring-color;
+  outline: 3px solid var(--c-primary-glow);
+  outline-offset: 2px;
 }
 
-.card {
-  padding: 2em;
-}
-
+/* ─── App root ────────────────────────────────────────────── */
 #app {
   max-width: 1600px;
   margin: 0 auto;
   text-align: center;
 }
 
-@media (prefers-color-scheme: light) {
-  :root {
-    color: #213547;
-    background-color: #ffffff;
-  }
-  a:hover {
-    color: #747bff;
-  }
-  button {
-    background-color: #f9f9f9;
-  }
-}
-
+/* ─── Top bar ─────────────────────────────────────────────── */
 #topbar {
-  background-color: rgba(245, 245, 245, 0.8); 
-  width: inherit;
-  border-radius: 25px;
+  margin: 0;
+  padding: 15px 32px;
   text-align: center;
-  font-weight: bold;
-  font-size: 30px;
-  color:#000000;
+  font-weight: 700;
+  font-size: 26px;
+  color: #0f172a;
+  background: rgba(255, 255, 255, 0.94);
+  box-shadow: 0 3px 16px rgba(0, 0, 0, 0.22);
 }
 
+/* ─── Match container ─────────────────────────────────────── */
 #rcorners_matchinfo_fixed {
   width: 100%;
-  border-radius: 25px;
-  font-size: 20px;
-  font-weight: bold;
+  font-size: 18px;
+  font-weight: 600;
   position: relative;
 }
 
-#placeholderDiv_fixed {
-  width: 100%;
-  display: flex;
-  padding: 10px; /* Add padding inside the boxes */
+/* Header row — fixed size so it never scales with the container */
+.match-header {
+  font-weight: 500;
+  letter-spacing: 0.07em;
+  margin-bottom: 0;
+  position: relative;
+  border-bottom: 2px solid rgba(255, 255, 255, 0.18);
 }
 
+/* White tint overlay so header reads as a distinct label strip */
+.match-header::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: rgba(255, 255, 255, 0.14);
+  pointer-events: none;
+}
+
+/* ─── Match entry rows ────────────────────────────────────── */
+.matchEntry {
+  display: flex;
+  align-items: stretch;
+  border-bottom: 3px solid rgba(0, 0, 0, 0.35);
+  box-shadow: 0 3px 18px rgba(0, 0, 0, 0.55);
+}
+
+/* All box columns — no font-size here so each context (header/data)
+   inherits cleanly: header gets 13px/500, data gets 18px/600 */
 #datumUitslag_fixed,
+#datumProgramma_fixed,
 #thuisteam_fixed,
-#kleedkamer_fixed, /* Updated to use class instead of id */
+#kleedkamer_fixed,
 #uitteam_fixed,
 #wedstrijdveld_fixed {
-  font-weight: bold;
-  color: #ffffff; /* White text */
+  font-size: inherit;
+  font-weight: inherit;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.50);
+  box-shadow: inset -1px 0 0 rgba(0, 0, 0, 0.20);
 }
 
 #datumUitslag_fixed {
   width: 10%;
-  padding: 18px 15px;
-  border-top-left-radius: 25px;
-  border-bottom-left-radius: 25px;
-  text-align: center;
+  padding: 18px 10px;
+  letter-spacing: 0.03em;
 }
 
 #datumProgramma_fixed {
   width: 10%;
-  padding: 5px 15px;
-  border-top-left-radius: 25px;
-  border-bottom-left-radius: 25px;
-  text-align: center;
+  padding: 10px 10px;
+  letter-spacing: 0.03em;
 }
 
-#thuisteam_fixed,
+#thuisteam_fixed {
+  width: 45%;
+  padding: 18px 16px;
+}
+
 #uitteam_fixed {
-  width: 45%; /* Fixed width for team names */
-  padding: 18px 15px;
+  width: 45%;
+  padding: 18px 16px;
 }
 
 #kleedkamer_fixed {
-  width: 20%; /* Fixed width for dressing rooms */
-  padding: 18px 15px;
+  width: 20%;
+  padding: 18px 10px;
 }
 
 #wedstrijdveld_fixed {
-  width: 15%; /* Fixed width for field info */
-  padding: 18px 15px;
-  border-top-right-radius: 25px;
-  border-bottom-right-radius: 25px;
+  width: 15%;
+  padding: 18px 10px;
+  letter-spacing: 0.04em;
+  /* Last column — remove the right separator */
+  box-shadow: none;
 }
 
+/* ─── Club logo ───────────────────────────────────────────── */
+/* Wrapper div owns the background colour and the fixed slot size */
+.clublogo-wrap {
+  flex: 0 0 64px;
+  width: 64px;
+  align-self: stretch;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* The actual <img> sits inside the wrapper */
+.clublogo {
+  width: 56px;
+  height: 56px;
+  display: block;
+  object-fit: contain;
+  object-position: center;
+}
+
+/* ─── Scrolling container ─────────────────────────────────── */
+#scrollingContainer {
+  overflow-y: hidden;
+  position: relative;
+}
+
+/* ─── Fade transition ─────────────────────────────────────── */
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.4s var(--ease);
+}
+
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
+}
+
+/* ─── Loading / error state ───────────────────────────────── */
 #noMatchMessage {
-  text-align: center; /* Center the message and image */
-  margin-top: 20px; /* Add some space above the message */
-  background-color: white;
-  border-radius: 25px;
-  color: #000000;
-  padding-top: 10px;
-  min-width: 97%;
-  margin-bottom: 10px;
+  text-align: center;
+  background: rgba(255, 255, 255, 0.92);
+  color: #1e293b;
+  padding: 32px 20px;
+  box-sizing: border-box;
+  width: 100%;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.18);
 }
 
+#noMatchMessage h1 {
+  font-size: 1.3em;
+  font-weight: 600;
+  margin: 0;
+  color: #0f172a;
+}
+
+/* ─── Empty state ─────────────────────────────────────────── */
 .no-matches-container {
   text-align: center;
-  padding: 3rem 1rem;
-  max-width: 400px;
-  margin: 0 auto;
-  color: #666;
+  padding: 2.5rem 1rem 2rem;
+  color: #334155;
 }
 
 .calendar-icon {
-  width: 120px;
-  height: 120px;
+  width: 100px;
+  height: 100px;
   position: relative;
-  margin: 0 auto 2rem;
-  perspective: 1000px;
-  margin-top: 10px;
+  margin: 0 auto 1.5rem;
+  animation: gentleFloat 3s ease-in-out infinite;
+}
+
+@keyframes gentleFloat {
+  0%, 100% { transform: translateY(0); }
+  50%       { transform: translateY(-10px); }
 }
 
 .calendar-page {
   width: 100%;
   height: 100%;
-  background: white;
-  border-radius: 5px;
-  box-shadow: 0 3px 10px rgba(0,0,0,0.1);
-  padding: 15px;
+  background: rgba(0, 0, 0, 0.05);
+  border: 1px solid rgba(0, 0, 0, 0.10);
+  padding: 14px;
+  box-sizing: border-box;
   position: relative;
-  transform-style: preserve-3d;
 }
 
 .empty-grid {
@@ -205,102 +275,75 @@ button:focus-visible {
 }
 
 .grid-cell {
-  background: #f5f5f5;
-  border-radius: 2px;
+  background: rgba(0, 0, 0, 0.08);
 }
 
 .calendar-spine {
   position: absolute;
   left: -8px;
-  top: 5px;
-  bottom: 5px;
+  top: 6px;
+  bottom: 6px;
   width: 8px;
-  background: #e0e0e0;
-  border-radius: 3px 0 0 3px;
+  background: rgba(0, 0, 0, 0.12);
 }
 
 .calh2 {
   margin: 0 0 0.5rem;
-  font-weight: 500;
+  font-size: 1.1em;
+  font-weight: 700;
+  color: #0f172a;
 }
 
 .calp {
   margin: 0;
-  color: #999;
-}
-.calendar-icon {
-  animation: gentleFloat 3s ease-in-out infinite;
-}
-
-@keyframes gentleFloat {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-8px); }
+  font-size: 0.88em;
+  color: #64748b;
+  line-height: 1.65;
 }
 
-#scrollingContainer {
-  overflow-y: hidden; /* Disable vertical scrolling since we handle it manually */
-  position: relative;
-}
-
-.matchEntry {
-  display: flex; /* Align matches horizontally */
-  color: white; /* Text color */
-  padding: 10px; /* Padding inside the match entry */
-  border-radius: 5px; /* Rounded corners */
-}
-
-.fade-enter-active, .fade-leave-active {
-  transition: opacity 0.5s;
-}
-.fade-enter, .fade-leave-to {
-  opacity: 0;
-}
-
-#clublogo {
-  width: 10%; /* or set a specific pixel size if necessary */
-  max-width: 75px; /* Set the maximum width */
-  max-height: 75px; /* Set the maximum height */
-  object-fit: contain; /* Ensure image scales to fit within the bounds */
-  background-color: #000000;
-  display: block; /* Ensure no unexpected margin/padding */
-}
-
+/* ─── Sponsor bar ─────────────────────────────────────────── */
 .sponsor-bar-container {
   overflow: hidden;
   width: 100%;
-  background-color: transparent;
   display: flex;
-  flex-direction: column; /* Stack elements vertically */
+  flex-direction: column;
+  background: rgba(255, 255, 255, 0.94);
+  box-shadow: 0 -3px 16px rgba(0, 0, 0, 0.22);
 }
 
 .sponsor-bar {
   display: flex;
   justify-content: center;
   align-items: center;
-  flex-wrap: wrap; /* Allow items to wrap to the next line */
+  flex-wrap: wrap;
 }
 
 .sponsor-images {
   display: flex;
-  flex-wrap: wrap; /* Allow images to wrap to the next line */
-  justify-content: space-between; /* Evenly space images */
-  width: 100%; /* Ensure full width */
+  flex-wrap: wrap;
+  justify-content: space-between;
+  width: 100%;
 }
 
 .sponsor-image {
-  height: 40px; /* Set height of images to 40px */
-  margin: 5px; /* Space between images */
-  flex: 1 1 calc(14.2857% - 10px); /* 7 images per row, adjust for margin */
-  max-width: calc(14.2857% - 10px); /* Set max-width for 7 images */
-  background-color: rgba(245, 245, 245, 0.8); ;
+  height: 40px;
+  margin: 4px;
+  flex: 1 1 calc(14.2857% - 8px);
+  max-width: calc(14.2857% - 8px);
+  background-color: transparent;
+  object-fit: contain;
 }
 
 .copyright {
-  font-size: 14px;
-  color: #000;
+  font-size: 12px;
+  font-weight: 400;
+  color: #94a3b8;
   text-align: center;
-  padding: 10px;
-  margin-top: 5px;
-  background-color: rgba(245, 245, 245, 0.8);
-  border-radius: 25px;
+  padding: 6px 20px 8px;
+  margin: 0;
+  border-top: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+.copyright a {
+  color: inherit;
 }

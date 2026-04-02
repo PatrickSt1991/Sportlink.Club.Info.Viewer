@@ -8,7 +8,7 @@
         <div :style="{ background: localStyles.rightBoxColor, color: localStyles.rightBoxText }" id="wedstrijdveld_fixed">Rechts</div>
       </div>
       <hr/>
-      <label>Links:</label>
+      <p class="section-label">Links</p>
       <div class="form-group">
         <label>Kolom:</label>
         <div class="color-input-wrapper">
@@ -22,7 +22,7 @@
         </div>
       </div>
       <hr/>
-      <label>Links-midden:</label>
+      <p class="section-label">Links-midden</p>
       <div class="form-group">
         <label>Kolom:</label>
         <div class="color-input-wrapper">
@@ -36,7 +36,7 @@
         </div>
       </div>
       <hr/>
-      <label>Midden:</label>
+      <p class="section-label">Midden</p>
       <div class="form-group">
         <label>Kolom:</label>
         <div class="color-input-wrapper">
@@ -50,7 +50,7 @@
         </div>
       </div>
       <hr/>
-      <label>Rechts-midden:</label>
+      <p class="section-label">Rechts-midden</p>
       <div class="form-group">
         <label>Kolom:</label>
         <div class="color-input-wrapper">
@@ -64,7 +64,7 @@
         </div>
       </div>
       <hr/>
-      <label>Rechts:</label>
+      <p class="section-label">Rechts</p>
       <div class="form-group">
         <label>Kolom:</label>
         <div class="color-input-wrapper">
@@ -138,58 +138,102 @@ watch(() => ({ ...localStyles.value }), (newStyles) => {
   
   <style scoped>
   .styling-container {
-    padding: 20px;
+    padding: 24px 20px;
     width: 100%;
-    max-width: 450px;
-    background-color: white;
-    opacity: 80%;
-    color: black;
-    border-radius: 8px;
-    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+    max-width: 460px;
+    background: rgba(255, 255, 255, 0.94);
+    color: #1e293b;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.22);
   }
-  
+
+  h2 {
+    margin: 0 0 20px;
+    font-size: 1.2em;
+    font-weight: 700;
+    color: #0f172a;
+    padding-bottom: 12px;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+  }
+
+  hr {
+    border: none;
+    border-top: 1px solid rgba(0, 0, 0, 0.07);
+    margin: 14px 0 10px;
+  }
+
   .matchEntry {
     display: flex;
+    gap: 2px;
     margin-bottom: 20px;
   }
-  
+
   .matchEntry div {
     flex: 1;
-    padding: 10px;
+    padding: 10px 6px;
     text-align: center;
-    font-weight: bold;
+    font-weight: 700;
+    font-size: 0.82em;
+    letter-spacing: 0.02em;
   }
-  
+
+  .section-label {
+    font-size: 0.78em;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: #64748b;
+    margin-bottom: 8px;
+    margin-top: 2px;
+  }
+
   .form-group {
     display: flex;
     align-items: center;
-    justify-content: space-between;
-    margin-bottom: 12px;
-    gap: 10px;
+    gap: 12px;
+    margin-bottom: 10px;
   }
-  
+
   label {
-    font-weight: bold;
+    font-weight: 600;
+    font-size: 0.85em;
+    color: #475569;
     flex: 1;
+    min-width: 48px;
   }
-  
+
   .color-input-wrapper {
     display: flex;
     gap: 8px;
     align-items: center;
   }
-  
+
   .color-input-wrapper input[type="color"] {
-    width: 40px;
-    height: 40px;
+    width: 36px;
+    height: 36px;
     padding: 2px;
-    border: 1px solid #ccc;
+    border: 1.5px solid #e2e8f0;
+    border-radius: 6px;
     cursor: pointer;
+    background: transparent;
   }
-  
+
   .color-input-wrapper input[type="text"] {
-    width: 80px;
-    padding: 8px;
+    width: 76px;
+    padding: 6px 8px;
+    border: 1.5px solid #e2e8f0;
+    border-radius: 6px;
+    font-size: 0.85em;
+    font-family: 'Courier New', monospace;
     text-transform: uppercase;
+    background: #f8fafc;
+    color: #0f172a;
+    transition: border-color 0.18s ease, box-shadow 0.18s ease;
+    outline: none;
+  }
+
+  .color-input-wrapper input[type="text"]:focus {
+    border-color: #2563eb;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+    background: #fff;
   }
   </style>

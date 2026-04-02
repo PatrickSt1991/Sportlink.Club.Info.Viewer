@@ -1,9 +1,15 @@
 <template>
   <main role="main" class="container-fluid" id="contentBox">
-    <div id="rcorners">
-      <p id="topbar">Wedstrijduitslagen afgelopen {{ config.uitslagDagen }} dagen</p>
-    </div>
     <div id="rcorners_matchinfo_fixed">
+      <div class="matchEntry match-header">
+        <div :style="{ background: config.leftBoxColor, color: config.leftBoxText }" id="datumUitslag_fixed">Datum</div>
+        <div :style="{ background: config.leftMidBoxColor }" class="clublogo-wrap"></div>
+        <div :style="{ background: config.leftMidBoxColor, color: config.leftMidBoxText }" id="thuisteam_fixed">Thuis</div>
+        <div :style="{ background: config.midBoxColor, color: config.midBoxText }" id="kleedkamer_fixed">Uitslag</div>
+        <div :style="{ background: config.rightMidBoxColor, color: config.rightMidBoxText }" id="uitteam_fixed">Gasten</div>
+        <div :style="{ background: config.rightMidBoxColor }" class="clublogo-wrap"></div>
+        <div :style="{ background: config.rightBoxColor, color: config.rightBoxText }" id="wedstrijdveld_fixed">Competitie</div>
+      </div>
       <div v-if="loading" id="noMatchMessage">
         <h1>Wedstrijd uitslagen worden geladen...</h1>
       </div>
@@ -20,11 +26,11 @@
         <transition-group name="fade" tag="div">
           <div v-for="match in matches" :key="match.id" class="matchEntry">
             <div :style="{ background: config.leftBoxColor, color: config.leftBoxText }" id="datumUitslag_fixed">{{ match.datumopgemaakt }}</div>
-            <img :style="{ background: config.leftMidBoxColor, color: config.leftMidBoxText }" id="clublogo" :src="match.thuisteamlogo">
+            <div :style="{ background: config.leftMidBoxColor }" class="clublogo-wrap"><img class="clublogo" :src="match.thuisteamlogo"></div>
             <div :style="{ background: config.leftMidBoxColor, color: config.leftMidBoxText }" id="thuisteam_fixed">{{ match.thuisteam }}</div>
             <div :style="{ background: config.midBoxColor, color: config.midBoxText }" id="kleedkamer_fixed">{{ match.uitslag }}</div>
             <div :style="{ background: config.rightMidBoxColor, color: config.rightMidBoxText }" id="uitteam_fixed">{{ match.uitteam }}</div>
-            <img :style="{ background: config.rightMidBoxColor, color: config.rightMidBoxText }" id="clublogo" :src="match.uitteamlogo">
+            <div :style="{ background: config.rightMidBoxColor }" class="clublogo-wrap"><img class="clublogo" :src="match.uitteamlogo"></div>
             <div :style="{ background: config.rightBoxColor, color: config.rightBoxText }" id="wedstrijdveld_fixed">{{ match.competitiesoort }}</div>
           </div>
         </transition-group>
@@ -34,7 +40,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, watch, nextTick, onUnmounted } from 'vue';
+import { ref, computed, onMounted, watch, nextTick, onUnmounted } from 'vue';
 import { USER_CONFIG } from '@/config';
 import { useRouter } from 'vue-router';
 import { formatCompType } from '@/utils/formatCompType.js';
@@ -49,6 +55,10 @@ const matches = ref([]);
 const error = ref(null);
 const loading = ref(false);
 const config = ref({});
+
+const dateRangeText = computed(() =>
+  `Er zijn geen uitslagen in de afgelopen ${config.value.uitslagDagen ?? ''} dagen`
+);
 
 const {
   scrollingContainerHeight,

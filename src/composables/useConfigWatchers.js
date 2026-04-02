@@ -11,7 +11,6 @@ export function useConfigWatchers(config, {
     let refreshInterval;
     let saveTimeout;
     let handlerTimeout = null;
-    const showClientIdModal = ref(false);
     const toast = useToast();
 
     function setupWatchers() {
@@ -79,18 +78,6 @@ export function useConfigWatchers(config, {
             { deep: true, immediate: true }
         );
 
-        watch(() => [config.value.clientId, config.value.clubIdentifer, config.value.clubId], 
-            ([newClientVal, newIdentifierVal, newClubVal]) => {
-                if ((!newIdentifierVal || newIdentifierVal.trim() === '') && 
-                    (!newClientVal || newClientVal.trim() === '') && 
-                    (!newClubVal || newClubVal.trim() === '')) {
-                    if(config.value.showTerms){
-                        showClientIdModal.value = true;
-                        config.value.showTerms = false;
-                    }
-                }
-            }
-        );
     }
 
     async function handleSportlinkApi(clientId, validClientId) {
@@ -113,7 +100,7 @@ export function useConfigWatchers(config, {
                     rtl: false
                 });
 
-                localConfig.value.validClientId = false;
+                config.value.validClientId = false;
             }
             if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
             
@@ -250,7 +237,6 @@ export function useConfigWatchers(config, {
 
     return {
         setupWatchers,
-        cleanup,
-        showClientIdModal
+        cleanup
     };
 }
