@@ -73,6 +73,14 @@ Installeer de app rechtstreeks op een Samsung Smart TV.
 ❌ Geen automatische updates  
 🚧 Beperkte offline ondersteuning  
 
+### 📺 WordPress Plugin
+
+Installeer de app rechtstreeks in je WordPress site 
+📦 [Download de nieuwste versie (.zip)](https://github.com/PatrickSt1991/Sportlink.Club.Info.Viewer.WordPress/releases/latest)  
+✅ Native ervaring op je site  
+❌ Geen automatische updates  
+🚧 Geen offline ondersteuning  
+
 ### 🧱 Zelf bouwen (ontwikkelaarsoptie)
 
 Kloon de repository en bouw je eigen versie van de app.  
