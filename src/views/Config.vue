@@ -1,9 +1,4 @@
 <template>
-  <TermsModal 
-    :show="showClientIdModal" 
-    @agree="showClientIdModal = false" 
-  />
-
   <div class="wrapper" v-if="!isLoading">
     <div class="containers-row">
       <ClubSelectPopup
@@ -29,10 +24,15 @@
         @update:styles="updateStyles" 
       />
       
-      <SponsorManager 
-        :sponsor-images="userSponsorImages" 
-        @add-sponsor="addSponsor" 
-        @remove-sponsor="removeSponsor" 
+      <SponsorManager
+        :sponsor-images="sponsorStore.userImages"
+        @add-sponsor="sponsorStore.add"
+        @remove-sponsor="sponsorStore.remove"
+      />
+
+      <StandingsSettings
+        :config="config"
+        @update:config="updateConfig"
       />
     </div>
 
@@ -46,7 +46,7 @@
 <script setup>
 import { ref, computed, onMounted, onUnmounted } from 'vue';
 import { USER_CONFIG, updateUserConfig, HOME_SCREENS, GAME_TYPES, backgroundOptions, FAKE_CREDENTIALS } from '@/config';
-import { userSponsorImages, loadSponsorImages, saveSponsorImages } from '@/stores/sponsorStore';
+import { useSponsorStore } from '@/stores/sponsorStore';
 import defaultImg from '@/assets/voetbal.jpg';
 
 // Composables
@@ -55,23 +55,24 @@ import { useClubData } from '@/composables/useClubData';
 import { useConfigWatchers } from '@/composables/useConfigWatchers';
 
 // Components
-import TermsModal from '@/components/TermsModal.vue';
 import ConfigSettings from '@/components/ConfigSettings.vue';
 import StyleCustomization from '@/components/StyleCustomization.vue';
 import SponsorManager from '@/components/SponsorManager.vue';
 import NavigationButtons from '@/components/NavigationButtons.vue';
 import ClubSelectPopup from '@/components/ClubSelectPopup.vue';
+import StandingsSettings from '@/components/StandingsSettings.vue';
 
 // State
 const config = ref({});
 const isLoading = ref(true);
 const showClubSelectPopup = ref(false);
 const availableGameTypes = ref(GAME_TYPES);
+const sponsorStore = useSponsorStore();
 
 // Initialize composables
 const sportlinkAuth = useSportlinkAuth();
 const { clubs, corsStatus, fetchSportlinkClubs, fetchNevoboClubs, fetchCorsStatus } = useClubData(sportlinkAuth.sportlinkTokenInfo);
-const { showClientIdModal, setupWatchers, cleanup } = useConfigWatchers(config, { 
+const { setupWatchers, cleanup } = useConfigWatchers(config, {
     sportlinkAuth, 
     clubData: { clubs, corsStatus, fetchSportlinkClubs, fetchNevoboClubs, fetchCorsStatus },
     showClubSelectPopup,
@@ -85,13 +86,12 @@ const styleConfig = computed(() => {
         'midBoxColor', 'midBoxText', 'rightMidBoxColor', 'rightMidBoxText',
         'rightBoxColor', 'rightBoxText'
     ];
-    
     styleProps.forEach(prop => {
-        if (config.value[prop]) {
-            styles[prop] = config.value[prop];
-        }
+        if (config.value[prop]) styles[prop] = config.value[prop];
     });
-    
+    styles.columnWidths  = config.value.columnWidths  ?? { left: 2, leftMid: 9, mid: 4, rightMid: 9, right: 3 };
+    styles.columnVisible = config.value.columnVisible ?? { left: true, leftMid: true, mid: true, rightMid: true, right: true };
+    styles.showLogos     = config.value.showLogos     ?? true;
     return styles;
 });
 
@@ -128,15 +128,6 @@ function updateBackground() {
     localStorage.setItem('appBackground', backgroundStyle);
 }
 
-function addSponsor(imageUrl) {
-    userSponsorImages.value.push(imageUrl);
-    saveSponsorImages();
-}
-
-function removeSponsor(index) {
-    userSponsorImages.value.splice(index, 1);
-    saveSponsorImages();
-}
 
 function handleClubSelected(club) {
     config.value.clubName = club.ClubName;
@@ -164,7 +155,7 @@ onMounted(async () => {
         config.value.customBackgroundUrl = '';
     }
   
-    loadSponsorImages();
+    sponsorStore.load();
     updateBackground();
     sportlinkAuth.loadSavedToken();
     

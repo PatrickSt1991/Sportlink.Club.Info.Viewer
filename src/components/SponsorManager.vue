@@ -3,7 +3,7 @@
       <h2>Sponsoren</h2>
       <p>{{ sponsorHint }}</p>
       <div class="input-container">
-        <input v-model="newImageUrl" placeholder="Voer de URL van de afbeelding in" style="height: 25px; width: 200px;" />
+        <input v-model="newImageUrl" placeholder="Voer de URL van de afbeelding in" />
         <button @click="addImage">Toevoegen</button>
       </div>
       <div class="form-group">
@@ -67,69 +67,112 @@
   
   <style scoped>
   .sponsor-container {
-    padding: 20px;
+    padding: 24px 20px;
     width: 100%;
     max-width: 700px;
-    background-color: white;
-    opacity: 80%;
-    color: black;
-    border-radius: 8px;
-    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+    background: rgba(255, 255, 255, 0.94);
+    color: #1e293b;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.22);
   }
-  
+
+  h2 {
+    margin: 0 0 6px;
+    font-size: 1.2em;
+    font-weight: 700;
+    color: #0f172a;
+  }
+
+  p {
+    margin: 0 0 14px;
+    font-size: 0.85em;
+    color: #64748b;
+  }
+
   .input-container {
-    padding: 5px;
-    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 16px;
   }
-  
+
   .input-container input {
-    padding: 8px;
-    border: 1px solid #ccc;
-    border-radius: 4px;
+    flex: 1;
+    height: 38px;
+    padding: 0 12px;
+    border: 1.5px solid #e2e8f0;
+    font-size: 0.9em;
+    font-family: inherit;
+    background: #f8fafc;
+    color: #0f172a;
+    outline: none;
+    transition: border-color 0.18s ease, box-shadow 0.18s ease;
   }
-  
+
+  .input-container input:focus {
+    border-color: #2563eb;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+    background: #fff;
+  }
+
   .input-container button {
-    padding: 8px 16px;
-    background-color: #2196F3;
-    color: white;
+    padding: 0 18px;
+    height: 38px;
     border: none;
-    border-radius: 4px;
+    background: #2563eb;
+    color: #fff;
+    font-size: 0.9em;
+    font-weight: 600;
     cursor: pointer;
-    margin-left: 8px;
+    transition: background 0.18s ease, box-shadow 0.18s ease;
+    white-space: nowrap;
   }
-  
+
+  .input-container button:hover {
+    background: #1d4ed8;
+    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.30);
+  }
+
   .image-grid {
     display: flex;
     flex-wrap: wrap;
     gap: 10px;
-    justify-content: center;
+    justify-content: flex-start;
   }
-  
+
   .image-item {
     position: relative;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.10);
   }
-  
+
   .preview {
-    width: 376px;
-    height: 55px;
+    width: 220px;
+    height: 52px;
     object-fit: cover;
-    border-radius: 8px;
+    display: block;
   }
-  
+
   .remove-button {
     position: absolute;
-    top: 5px;
-    right: 5px;
-    background: red;
+    top: 4px;
+    right: 4px;
+    width: 22px;
+    height: 22px;
+    padding: 0;
+    background: rgba(220, 38, 38, 0.90);
     color: white;
     border: none;
-    padding: 5px;
+    font-size: 12px;
+    font-weight: 700;
+    line-height: 22px;
     cursor: pointer;
+    transition: background 0.15s ease;
   }
-  
+
+  .remove-button:hover {
+    background: #dc2626;
+  }
+
   .form-group {
     margin-bottom: 12px;
   }

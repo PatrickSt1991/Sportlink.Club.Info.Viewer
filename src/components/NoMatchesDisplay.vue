@@ -25,3 +25,12 @@
     }
   });
   </script>
+
+  <style scoped>
+  .no-matches-container {
+    text-align: center;
+    padding: 2.5rem 1.5rem 2rem;
+    box-sizing: border-box;
+    width: 100%;
+  }
+  </style>

@@ -35,7 +35,7 @@ export function useSportlinkAuth() {
             });
 
             if(response.status === 401){
-                toast.error(`Inloggen bij Sportlink is mislukt met gebruikersnaam: ${username} en wachtwoord ${password}`, {
+                toast.error(`Inloggen bij Sportlink is mislukt met gebruikersnaam: ${username}`, {
                     position: "top-right",
                     timeout: 5000,
                     closeOnClick: true,
@@ -49,7 +49,6 @@ export function useSportlinkAuth() {
                     icon: true,
                     rtl: false
                 });
-                localConfig.value.validClientId = false;
             }
 
             if (!response.ok) {

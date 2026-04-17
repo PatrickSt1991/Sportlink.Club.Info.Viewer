@@ -92,7 +92,7 @@ export const fetchTeamLogo = async (
 
   const cacheKey = `teamLogo:${bucket}:${hash}`;
   const cachedUrl = localStorage.getItem(cacheKey);
-  if (cachedUrl) return cachedUrl;
+  if (cachedUrl?.startsWith('data:')) return cachedUrl;
 
   const url = `https://binaries.sportlink.com/${bucket}/${hash}`;
   const proxyUrl = `https://cors-proxy.clubinfoproxy.workers.dev/proxy?url=${encodeURIComponent(url)}`;
@@ -117,22 +117,27 @@ export const fetchTeamLogo = async (
 
       if (!response.ok) {
         if (response.status >= 500 && response.status < 600 && attempt < retries) {
-          await new Promise(res => setTimeout(res, delay));
+          await new Promise(res => setTimeout(res, delay * attempt));
           continue;
         }
         throw new Error(`HTTP error ${response.status}`);
       }
 
       const blob = await response.blob();
-      const objectUrl = URL.createObjectURL(blob);
-      localStorage.setItem(cacheKey, objectUrl);
-      return objectUrl;
+      const dataUrl = await new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onloadend = () => resolve(reader.result);
+        reader.onerror = reject;
+        reader.readAsDataURL(blob);
+      });
+      localStorage.setItem(cacheKey, dataUrl);
+      return dataUrl;
     } catch (err) {
       if (attempt === retries) {
         console.error(`Failed to fetch logo after ${retries} attempts:`, err);
         return noImage;
       }
-      await new Promise(res => setTimeout(res, delay));
+      await new Promise(res => setTimeout(res, delay * attempt));
     }
   }
 };
