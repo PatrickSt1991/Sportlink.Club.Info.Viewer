@@ -29,6 +29,11 @@
         @add-sponsor="sponsorStore.add"
         @remove-sponsor="sponsorStore.remove"
       />
+
+      <StandingsSettings
+        :config="config"
+        @update:config="updateConfig"
+      />
     </div>
 
     <NavigationButtons />
@@ -55,6 +60,7 @@ import StyleCustomization from '@/components/StyleCustomization.vue';
 import SponsorManager from '@/components/SponsorManager.vue';
 import NavigationButtons from '@/components/NavigationButtons.vue';
 import ClubSelectPopup from '@/components/ClubSelectPopup.vue';
+import StandingsSettings from '@/components/StandingsSettings.vue';
 
 // State
 const config = ref({});
@@ -80,13 +86,12 @@ const styleConfig = computed(() => {
         'midBoxColor', 'midBoxText', 'rightMidBoxColor', 'rightMidBoxText',
         'rightBoxColor', 'rightBoxText'
     ];
-    
     styleProps.forEach(prop => {
-        if (config.value[prop]) {
-            styles[prop] = config.value[prop];
-        }
+        if (config.value[prop]) styles[prop] = config.value[prop];
     });
-    
+    styles.columnWidths  = config.value.columnWidths  ?? { left: 2, leftMid: 9, mid: 4, rightMid: 9, right: 3 };
+    styles.columnVisible = config.value.columnVisible ?? { left: true, leftMid: true, mid: true, rightMid: true, right: true };
+    styles.showLogos     = config.value.showLogos     ?? true;
     return styles;
 });
 

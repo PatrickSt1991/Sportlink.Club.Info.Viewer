@@ -228,7 +228,8 @@ export const backgroundOptions = [
 export const HOME_SCREENS = {
   'Wedstrijd Informatie': '/prematch-info',
   'Wedstrijd Programma': '/match-info',
-  'Wedstrijd Uitslagen': '/match-results'
+  'Wedstrijd Uitslagen': '/match-results',
+  'Team Standen': '/standings',
 };
 
 export const AVAILABLE_HOME_SCREENS = Object.keys(HOME_SCREENS).filter(
@@ -265,7 +266,22 @@ const defaultConfig = {
   rightMidBoxText: "#ffffff",
   rightBoxColor: "#b40808",
   rightBoxText: "#ffffff",
+  columnWidths:  { left: 2, leftMid: 9, mid: 4, rightMid: 9, right: 3 },
+  columnVisible: { left: true, leftMid: true, mid: true, rightMid: true, right: true },
+  showLogos: true,
   selectedBackground: backgroundOptions[0].value,
+  // Standings
+  standingPoolId: null,
+  standingTeamId: null,
+  standingColumns: {
+    totalMatches: true, won: true, draw: true, lost: true,
+    goalsFor: true, goalsAgainst: true, goalsDiff: true, points: true,
+  },
+  ownTeamBg: '#1a5c1a',
+  ownTeamText: '#ffffff',
+  displayHeight: 0,
+  scrollSpeed: 2,
+  standingColWidths: { pos: 52, stat: 44, goal: 44, pts: 52 },
 };
 
 export const BASE_URL = defaultConfig.onPrem ? './' : '/Sportlink.Club.Info.Viewer/';

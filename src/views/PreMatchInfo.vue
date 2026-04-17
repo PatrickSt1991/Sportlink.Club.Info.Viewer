@@ -2,12 +2,12 @@
   <main role="main" class="container-fluid" id="contentBox">
     <div id="rcorners_matchinfo_fixed">
       <div class="matchEntry match-header">
-        <div :style="{ background: config.leftBoxColor, color: config.leftBoxText }" id="datumUitslag_fixed">Aanvang</div>
-        <div :style="{ background: config.leftMidBoxColor, color: config.leftMidBoxText }" id="thuisteam_fixed">Thuis</div>
-        <div :style="{ background: config.midBoxColor, color: config.midBoxText }" id="kleedkamer_fixed">Kleedkamer</div>
-        <div :style="{ background: config.rightMidBoxColor, color: config.rightMidBoxText }" id="uitteam_fixed">Gasten</div>
-        <div :style="{ background: config.rightBoxColor, color: config.rightBoxText }" id="kleedkamer_fixed">Kleedkamer</div>
-        <div :style="{ background: config.leftBoxColor, color: config.leftBoxText }" id="wedstrijdveld_fixed">Veld</div>
+        <div v-if="config.columnVisible?.left !== false" :style="{ background: config.leftBoxColor, color: config.leftBoxText, flex: config.columnWidths?.left ?? 2 }" id="datumUitslag_fixed">Aanvang</div>
+        <div v-if="config.columnVisible?.leftMid !== false" :style="{ background: config.leftMidBoxColor, color: config.leftMidBoxText, flex: config.columnWidths?.leftMid ?? 9 }" id="thuisteam_fixed">Thuis</div>
+        <div v-if="config.columnVisible?.mid !== false" :style="{ background: config.midBoxColor, color: config.midBoxText, flex: config.columnWidths?.mid ?? 4 }" id="kleedkamer_fixed">Kleedkamer</div>
+        <div v-if="config.columnVisible?.rightMid !== false" :style="{ background: config.rightMidBoxColor, color: config.rightMidBoxText, flex: config.columnWidths?.rightMid ?? 9 }" id="uitteam_fixed">Gasten</div>
+        <div v-if="config.columnVisible?.right !== false" :style="{ background: config.rightBoxColor, color: config.rightBoxText, flex: config.columnWidths?.right ?? 4 }" id="kleedkamer_fixed">Kleedkamer</div>
+        <div :style="{ background: config.leftBoxColor, color: config.leftBoxText, flex: config.columnWidths?.left ?? 2 }" id="wedstrijdveld_fixed">Veld</div>
       </div>
       <div v-if="loading" id="noMatchMessage">
         <h1>Wedstrijd Informatie worden geladen...</h1>
@@ -25,12 +25,12 @@
       <div v-else id="scrollingContainer" ref="scrollingContainer" :style="{ height: scrollingContainerHeight }">
         <transition-group name="fade" tag="div">
           <div v-for="match in matches" :key="match.id" class="matchEntry">
-            <div :style="{ background: config.leftBoxColor, color: config.leftBoxText }" id="datumUitslag_fixed">{{ match.wedstrijddatum }}</div>
-            <div :style="{ background: config.leftMidBoxColor, color: config.leftMidBoxText }" id="thuisteam_fixed">{{ match.thuisteam }}</div>
-            <div :style="{ background: config.midBoxColor, color: config.midBoxText }" id="kleedkamer_fixed">{{ match.kleedkamerthuisteam }}</div>
-            <div :style="{ background: config.rightMidBoxColor, color: config.rightMidBoxText }" id="uitteam_fixed">{{ match.uitteam }}</div>
-            <div :style="{ background: config.rightBoxColor, color: config.rightBoxText }" id="kleedkamer_fixed">{{ match.kleedkameruitteam }}</div>
-            <div :style="{ background: config.leftBoxColor, color: config.leftBoxText }" id="wedstrijdveld_fixed">{{ match.veld }}</div>
+            <div v-if="config.columnVisible?.left !== false" :style="{ background: config.leftBoxColor, color: config.leftBoxText, flex: config.columnWidths?.left ?? 2 }" id="datumUitslag_fixed">{{ match.wedstrijddatum }}</div>
+            <div v-if="config.columnVisible?.leftMid !== false" :style="{ background: config.leftMidBoxColor, color: config.leftMidBoxText, flex: config.columnWidths?.leftMid ?? 9 }" id="thuisteam_fixed">{{ match.thuisteam }}</div>
+            <div v-if="config.columnVisible?.mid !== false" :style="{ background: config.midBoxColor, color: config.midBoxText, flex: config.columnWidths?.mid ?? 4 }" id="kleedkamer_fixed">{{ match.kleedkamerthuisteam }}</div>
+            <div v-if="config.columnVisible?.rightMid !== false" :style="{ background: config.rightMidBoxColor, color: config.rightMidBoxText, flex: config.columnWidths?.rightMid ?? 9 }" id="uitteam_fixed">{{ match.uitteam }}</div>
+            <div v-if="config.columnVisible?.right !== false" :style="{ background: config.rightBoxColor, color: config.rightBoxText, flex: config.columnWidths?.right ?? 4 }" id="kleedkamer_fixed">{{ match.kleedkameruitteam }}</div>
+            <div :style="{ background: config.leftBoxColor, color: config.leftBoxText, flex: config.columnWidths?.left ?? 2 }" id="wedstrijdveld_fixed">{{ match.veld }}</div>
           </div>
         </transition-group>
       </div>
@@ -136,13 +136,3 @@ onUnmounted(() => {
 });
 </script>
 
-<style scoped>
-/* PreMatchInfo has 6 columns (no logos); override the global widths
-   that were sized for the 7-column results/programme layout.
-   10 + 27 + 13 + 27 + 13 + 10 = 100% */
-#datumUitslag_fixed  { width: 10%; }
-#thuisteam_fixed     { width: 27%; }
-#kleedkamer_fixed    { width: 13%; }
-#uitteam_fixed       { width: 27%; }
-#wedstrijdveld_fixed { width: 10%; }
-</style>
