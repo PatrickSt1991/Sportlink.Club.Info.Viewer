@@ -154,14 +154,9 @@ jobs:
           "$TIZEN_CLI" cli-config \
             "profiles.path=${GITHUB_WORKSPACE}/tizen-studio-data/profile/profiles.xml"
 
-      - name: Build Tizen web package
-        run: |
-          cd "${GITHUB_WORKSPACE}/tizen-app"
-          "$TIZEN_CLI" build-web -e ".*"
-
       - name: Inject Tizen cursor navigation
         run: |
-          cat > tizen-app/.buildResult/tizen-cursor.js << 'CURSOREOF'
+          cat > tizen-app/tizen-cursor.js << 'CURSOREOF'
           (function () {
             var cursor = document.createElement('div');
             cursor.style.cssText = 'position:fixed;width:24px;height:24px;border-radius:50%;background:rgba(255,255,255,0.9);border:2px solid rgba(0,0,0,0.5);box-shadow:0 2px 6px rgba(0,0,0,0.4);pointer-events:none;z-index:99999;margin-left:-12px;margin-top:-12px';
@@ -185,7 +180,12 @@ jobs:
             });
           })();
           CURSOREOF
-          sed -i 's|</body>|<script src="./tizen-cursor.js"></script></body>|' tizen-app/.buildResult/index.html
+          sed -i 's|</body>|<script src="./tizen-cursor.js"></script></body>|' tizen-app/index.html
+
+      - name: Build Tizen web package
+        run: |
+          cd "${GITHUB_WORKSPACE}/tizen-app"
+          "$TIZEN_CLI" build-web -e ".*"
 
       - name: Patch profiles.xml with signing passwords
         run: |
