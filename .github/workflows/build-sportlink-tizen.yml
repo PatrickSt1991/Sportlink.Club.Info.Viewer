@@ -169,18 +169,29 @@ jobs:
 
             var keys = {};
             var holdStart = 0;
-            var BASE = 10;
-            var MAX = 35;
+            var BASE = 1;
+            var MAX = 40;
 
             function getSpd() {
               var held = holdStart ? Date.now() - holdStart : 0;
-              if (held < 300) return BASE;
-              return Math.min(BASE + Math.floor((held - 300) / 30), MAX);
+              if (held < 400) return BASE;
+              return Math.min(BASE + Math.floor((held - 400) / 25), MAX);
             }
 
             function inputFocused() {
               var a = document.activeElement;
               return a && (a.tagName === 'INPUT' || a.tagName === 'TEXTAREA' || a.contentEditable === 'true');
+            }
+
+            function getTarget(cx, cy) {
+              var els = document.elementsFromPoint ? document.elementsFromPoint(cx, cy) : [];
+              for (var i = 0; i < els.length; i++) {
+                var el = els[i];
+                if (el === cursor || el === document.body || el === document.documentElement) continue;
+                if (window.getComputedStyle(el).pointerEvents === 'none') continue;
+                return el;
+              }
+              return document.elementFromPoint(cx, cy);
             }
 
             window.addEventListener('keydown', function (e) {
@@ -191,7 +202,7 @@ jobs:
               }
               if (e.keyCode === 13) {
                 if (inputFocused()) { document.activeElement.blur(); return; }
-                var el = document.elementFromPoint(x, y);
+                var el = getTarget(x, y);
                 if (!el) return;
                 ['mousedown', 'mouseup', 'click'].forEach(function (t) {
                   el.dispatchEvent(new MouseEvent(t, {
