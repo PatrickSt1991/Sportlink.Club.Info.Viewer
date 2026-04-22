@@ -16,15 +16,16 @@
       </div>
 
       <div class="status-bar">
-        <div class="position">{{ focusedIndex + 1 }} / {{ sortedClubs.length }}</div>
+        <div class="current-letter">{{ currentLetter }}</div>
         <div class="scroll-track">
           <div class="scroll-thumb" :style="scrollThumbStyle"></div>
         </div>
+        <div class="position">{{ focusedIndex + 1 }} / {{ sortedClubs.length }}</div>
       </div>
 
       <div class="hints">
         <span>↑↓ Navigeer</span>
-        <span>◄► Snel scrollen</span>
+        <span>◄► Volgende letter</span>
         <span>OK Kiezen</span>
         <span>Terug Annuleren</span>
       </div>
@@ -64,16 +65,42 @@ const scrollThumbStyle = computed(() => {
   };
 });
 
+const currentLetter = computed(() => {
+  const club = sortedClubs.value[focusedIndex.value];
+  return club ? club.ClubName[0].toUpperCase() : '';
+});
+
 const KC = { ENTER: 13, BACK: 10009, ESC: 27, LEFT: 37, UP: 38, RIGHT: 39, DOWN: 40 };
 
-function moveFocus(delta) {
+function setFocus(index) {
   const total = sortedClubs.value.length;
-  if (total === 0) return;
-  focusedIndex.value = Math.max(0, Math.min(total - 1, focusedIndex.value + delta));
+  focusedIndex.value = Math.max(0, Math.min(total - 1, index));
   if (focusedIndex.value < startIndex.value) {
     startIndex.value = focusedIndex.value;
   } else if (focusedIndex.value >= startIndex.value + itemsPerPage) {
     startIndex.value = focusedIndex.value - itemsPerPage + 1;
+  }
+}
+
+function jumpByLetter(direction) {
+  const clubs = sortedClubs.value;
+  if (clubs.length === 0) return;
+  const currentLtr = clubs[focusedIndex.value].ClubName[0].toUpperCase();
+
+  if (direction > 0) {
+    // First club whose name starts with a letter after currentLtr
+    const next = clubs.findIndex((c, i) => i > focusedIndex.value && c.ClubName[0].toUpperCase() !== currentLtr);
+    setFocus(next !== -1 ? next : clubs.length - 1);
+  } else {
+    // Find the letter before currentLtr, then jump to the first club of that letter
+    let prevLetter = null;
+    for (let i = focusedIndex.value - 1; i >= 0; i--) {
+      const l = clubs[i].ClubName[0].toUpperCase();
+      if (l !== currentLtr) { prevLetter = l; break; }
+    }
+    if (prevLetter === null) { setFocus(0); return; }
+    const first = clubs.findIndex(c => c.ClubName[0].toUpperCase() === prevLetter);
+    setFocus(first !== -1 ? first : 0);
   }
 }
 
@@ -82,11 +109,11 @@ const onKeydown = (e) => {
   const isNav = [KC.UP, KC.DOWN, KC.LEFT, KC.RIGHT, KC.ENTER, KC.BACK, KC.ESC].indexOf(code) !== -1;
   if (isNav) e.preventDefault();
 
-  if      (code === KC.UP)               moveFocus(-1);
-  else if (code === KC.DOWN)             moveFocus(1);
-  else if (code === KC.LEFT)             moveFocus(-itemsPerPage);
-  else if (code === KC.RIGHT)            moveFocus(itemsPerPage);
-  else if (code === KC.BACK || code === KC.ESC) emit('close');
+  if      (code === KC.UP)                       setFocus(focusedIndex.value - 1);
+  else if (code === KC.DOWN)                     setFocus(focusedIndex.value + 1);
+  else if (code === KC.LEFT)                     jumpByLetter(-1);
+  else if (code === KC.RIGHT)                    jumpByLetter(1);
+  else if (code === KC.BACK || code === KC.ESC)  emit('close');
   else if (code === KC.ENTER) {
     const club = sortedClubs.value[focusedIndex.value];
     if (club) emit('save', club);
@@ -195,6 +222,20 @@ h3 {
   display: flex;
   align-items: center;
   gap: 1rem;
+}
+
+.current-letter {
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: #fff;
+  background: #0066cc;
+  width: 2.2rem;
+  height: 2.2rem;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
 }
 
 .position {
