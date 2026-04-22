@@ -168,11 +168,29 @@ jobs:
             cursor.style.top = y + 'px';
 
             var keys = {};
-            var spd = 5;
+            var holdStart = 0;
+            var BASE = 10;
+            var MAX = 35;
+
+            function getSpd() {
+              var held = holdStart ? Date.now() - holdStart : 0;
+              if (held < 300) return BASE;
+              return Math.min(BASE + Math.floor((held - 300) / 30), MAX);
+            }
+
+            function inputFocused() {
+              var a = document.activeElement;
+              return a && (a.tagName === 'INPUT' || a.tagName === 'TEXTAREA' || a.contentEditable === 'true');
+            }
 
             window.addEventListener('keydown', function (e) {
+              var wasMoving = keys[37] || keys[38] || keys[39] || keys[40];
               keys[e.keyCode] = true;
+              if (!wasMoving && (keys[37] || keys[38] || keys[39] || keys[40])) {
+                holdStart = Date.now();
+              }
               if (e.keyCode === 13) {
+                if (inputFocused()) { document.activeElement.blur(); return; }
                 var el = document.elementFromPoint(x, y);
                 if (!el) return;
                 ['mousedown', 'mouseup', 'click'].forEach(function (t) {
@@ -183,20 +201,23 @@ jobs:
                 });
                 if (el.focus) el.focus();
               }
+              if (e.keyCode === 10009 || e.keyCode === 27) {
+                if (inputFocused()) document.activeElement.blur();
+              }
             });
 
             window.addEventListener('keyup', function (e) {
               delete keys[e.keyCode];
+              if (!keys[37] && !keys[38] && !keys[39] && !keys[40]) holdStart = 0;
             });
 
             setInterval(function () {
-              var moving = keys[37] || keys[38] || keys[39] || keys[40];
-              if (!moving) { spd = 5; return; }
-              spd = Math.min(spd + 2, 40);
-              if (keys[37]) x = Math.max(0, x - spd);
-              if (keys[38]) y = Math.max(0, y - spd);
-              if (keys[39]) x = Math.min(window.innerWidth, x + spd);
-              if (keys[40]) y = Math.min(window.innerHeight, y + spd);
+              if (!keys[37] && !keys[38] && !keys[39] && !keys[40]) return;
+              var s = getSpd();
+              if (keys[37]) x = Math.max(0, x - s);
+              if (keys[38]) y = Math.max(0, y - s);
+              if (keys[39]) x = Math.min(window.innerWidth, x + s);
+              if (keys[40]) y = Math.min(window.innerHeight, y + s);
               cursor.style.left = x + 'px';
               cursor.style.top = y + 'px';
             }, 16);
