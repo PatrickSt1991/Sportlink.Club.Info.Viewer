@@ -80,6 +80,12 @@ jobs:
           });
           VITEEOF
 
+      - name: Apply Tizen-specific source patches
+        run: |
+          mkdir -p src/composables
+          cp .github/tizen-patches/ClubSelectPopup.vue src/components/ClubSelectPopup.vue
+          cp .github/tizen-patches/useRemoteControl.js src/composables/useRemoteControl.js
+
       - name: Build app for Tizen
         run: npm run build
 
