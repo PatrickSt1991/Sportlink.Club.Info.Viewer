@@ -42,6 +42,9 @@ jobs:
           cd dist
           zip -r "../release/Sportlink-Club-Viewer-v${{ steps.version.outputs.version }}-web.zip" .
 
+      - name: Install Tizen build dependencies
+        run: npm install --no-save regenerator-runtime
+
       - name: Override vite.config.js for Tizen
         run: |
           cat > vite.config.js << 'VITEEOF'
@@ -55,12 +58,12 @@ jobs:
             plugins: [
               vue(),
               legacy({
-                targets: ['> 0.5%', 'last 2 versions', 'not dead'],
-                additionalLegacyPolyfills: ['whatwg-fetch'],
+                targets: ['Chrome >= 56', 'Safari >= 10', 'Android >= 5'],
+                additionalLegacyPolyfills: ['regenerator-runtime/runtime', 'whatwg-fetch'],
               }),
             ],
             build: {
-              target: ['chrome69'],
+              target: 'es5',
               outDir: 'dist',
               assetsDir: 'assets',
               rollupOptions: {
