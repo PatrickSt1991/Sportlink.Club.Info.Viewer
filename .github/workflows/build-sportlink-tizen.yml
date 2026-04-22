@@ -1,0 +1,250 @@
+name: Build Tizen WGT & Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+env:
+  TIZEN_STUDIO_VER: 5.5
+  TIZEN_CLI: ${{ github.workspace }}/tizen-studio/tools/ide/bin/tizen
+
+jobs:
+  build-and-release:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout main
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Read version from package.json
+        id: version
+        run: echo "version=$(jq -r '.version' package.json)" >> $GITHUB_OUTPUT
+
+      - name: Install npm dependencies
+        run: npm ci --no-audit
+
+      - name: Build web app (normal config)
+        run: npm run build
+
+      - name: Zip web build output
+        run: |
+          mkdir -p release
+          cd dist
+          zip -r "../release/ClubInfoBoard-v${{ steps.version.outputs.version }}-web.zip" .
+
+      - name: Override vite.config.js for Tizen
+        run: |
+          cat > vite.config.js << 'VITEEOF'
+          import { defineConfig } from 'vite';
+          import vue from '@vitejs/plugin-vue';
+          import legacy from '@vitejs/plugin-legacy';
+          import { fileURLToPath, URL } from 'url';
+
+          export default defineConfig({
+            base: './',
+            plugins: [
+              vue(),
+              legacy({
+                targets: ['> 0.5%', 'last 2 versions', 'not dead'],
+                additionalLegacyPolyfills: ['whatwg-fetch'],
+                modernPolyfills: true,
+              }),
+            ],
+            build: {
+              outDir: 'dist',
+              assetsDir: 'assets',
+              rollupOptions: {
+                output: {
+                  manualChunks: undefined,
+                },
+              },
+            },
+            resolve: {
+              alias: {
+                '@': fileURLToPath(new URL('./src', import.meta.url)),
+              },
+            },
+          });
+          VITEEOF
+
+      - name: Build app for Tizen
+        run: npm run build
+
+      - name: Assemble tizen-app/
+        run: |
+          mkdir -p tizen-app
+          cp -r dist/* tizen-app/
+
+          # Locate app icon – try common paths, skip silently if missing
+          for icon in src/assets/logo.png public/logo.png logo.png src/assets/icon.png; do
+            if [ -f "$icon" ]; then
+              cp "$icon" tizen-app/logo.png
+              echo "Using icon: $icon"
+              break
+            fi
+          done
+
+      - name: Generate config.xml
+        run: |
+          VERSION=${{ steps.version.outputs.version }}
+          cat > tizen-app/config.xml << EOF
+          <?xml version="1.0" encoding="UTF-8"?>
+          <widget xmlns:tizen="http://tizen.org/ns/widgets" xmlns="http://www.w3.org/ns/widgets"
+                  id="https://github.com/PatrickSt1991/Sportlink.Club.Info.Viewer"
+                  version="${VERSION}" viewmodes="fullscreen">
+            <access origin="*" subdomains="true"/>
+            <tizen:application id="Lt8KPyCeb1.ClubInfoBoard" package="Lt8KPyCeb1" required_version="2.3"/>
+            <author href="https://github.com/PatrickSt1991/Sportlink.Club.Info.Viewer"
+                    email="patrick.stel@kpnmail.nl">Patrick Stel</author>
+            <content src="index.html"/>
+            <tizen:content-security-policy>default-src * data: blob: filesystem:; script-src * 'unsafe-inline' 'unsafe-eval' data: blob:; connect-src * data: blob:; img-src * data: blob:; style-src * 'unsafe-inline';</tizen:content-security-policy>
+            <description>Kleedkamer/veld indeling, wedstrijd programma &amp; uitslagen weergaven op Samsung Smart TV</description>
+            <feature name="http://tizen.org/feature/screen.size.normal.1080.1920"/>
+            <icon src="logo.png"/>
+            <license href="https://github.com/PatrickSt1991/Sportlink.Club.Info.Viewer/blob/main/LICENSE">MIT</license>
+            <tizen:metadata key="http://samsung.com/tv/metadata/prelaunch.support" value="true"/>
+            <name>ClubInfoBoard</name>
+            <tizen:privilege name="http://tizen.org/privilege/internet"/>
+            <tizen:privilege name="http://tizen.org/privilege/application.launch"/>
+            <tizen:privilege name="http://tizen.org/privilege/tv.inputdevice"/>
+            <tizen:profile name="tv-samsung"/>
+            <tizen:setting screen-orientation="landscape" context-menu="enable"
+                           background-support="disable" encryption="disable"
+                           install-location="auto" hwkey-event="enable"/>
+          </widget>
+          EOF
+
+      - name: Install system dependencies
+        run: sudo apt-get install -y expect
+
+      - name: Download Tizen Studio
+        run: |
+          curl -o tizen-installer \
+            "https://download.tizen.org/sdk/Installer/tizen-studio_${TIZEN_STUDIO_VER}/web-cli_Tizen_Studio_${TIZEN_STUDIO_VER}_ubuntu-64.bin"
+
+      - name: Install Tizen Studio
+        run: |
+          chmod +x tizen-installer
+          ./tizen-installer --accept-license "${GITHUB_WORKSPACE}/tizen-studio"
+          rm ./tizen-installer
+
+      - name: Create Tizen signing certificate
+        run: |
+          "$TIZEN_CLI" certificate \
+            -a SportlinkClub \
+            -p "${{ secrets.TIZEN_CERT_PASS }}" \
+            -c NL -s Noord-Holland -ct Amsterdam \
+            -o SportlinkClub -n SportlinkClub \
+            -e patrick.stel@kpnmail.nl \
+            -f SportlinkClub
+
+          "$TIZEN_CLI" security-profiles add \
+            -n SportlinkClub \
+            -a "${GITHUB_WORKSPACE}/tizen-studio-data/keystore/author/SportlinkClub.p12" \
+            -p "${{ secrets.TIZEN_CERT_PASS }}"
+
+          "$TIZEN_CLI" cli-config \
+            "profiles.path=${GITHUB_WORKSPACE}/tizen-studio-data/profile/profiles.xml"
+
+      - name: Build Tizen web package
+        run: |
+          cd "${GITHUB_WORKSPACE}/tizen-app"
+          "$TIZEN_CLI" build-web -e ".*"
+
+      - name: Patch profiles.xml with signing passwords
+        run: |
+          PROFILES="${GITHUB_WORKSPACE}/tizen-studio-data/profile/profiles.xml"
+          sed -i "s|${GITHUB_WORKSPACE}/tizen-studio-data/keystore/author/SportlinkClub.pwd|${{ secrets.TIZEN_CERT_PASS }}|g" "$PROFILES"
+          sed -i "s|${GITHUB_WORKSPACE}/tizen-studio-data/tools/certificate-generator/certificates/distributor/tizen-distributor-signer.pwd|tizenpkcs12passfordsigner|g" "$PROFILES"
+          sed -i 's|password=""|password="tizenpkcs12passfordsigner"|g' "$PROFILES"
+
+      - name: Create expect script for WGT packaging
+        run: |
+          cat > package.exp << 'EXPEOF'
+          #!/usr/bin/expect -f
+          set timeout 300
+          spawn $env(TIZEN_CLI) package -t wgt -s SportlinkClub -- $env(BUILD_RESULT)
+          expect {
+            "Author password:" {
+              send "$env(TIZEN_CERT_PASS)\r"
+              exp_continue
+            }
+            "Save author password" {
+              send "n\r"
+              exp_continue
+            }
+            "Distributor1 password:" {
+              send "tizenpkcs12passfordsigner\r"
+              exp_continue
+            }
+            "Save distributor1 password" {
+              send "n\r"
+              exp_continue
+            }
+            eof
+          }
+          EXPEOF
+          chmod +x package.exp
+
+      - name: Package WGT
+        env:
+          BUILD_RESULT: ${{ github.workspace }}/tizen-app/.buildResult
+          TIZEN_CERT_PASS: ${{ secrets.TIZEN_CERT_PASS }}
+        run: |
+          ./package.exp
+          WGT=$(find tizen-app/.buildResult -name "*.wgt" | head -1)
+          cp "$WGT" "release/ClubInfoBoard-v${{ steps.version.outputs.version }}.wgt"
+          echo "Packaged: $WGT"
+
+      - name: Create release on viewer repo
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v${{ steps.version.outputs.version }}
+          name: Sportlink Club Info Viewer v${{ steps.version.outputs.version }}
+          files: |
+            release/ClubInfoBoard-v${{ steps.version.outputs.version }}.wgt
+            release/ClubInfoBoard-v${{ steps.version.outputs.version }}-web.zip
+          body: |
+            ## Sportlink Club Info Viewer v${{ steps.version.outputs.version }}
+
+            Samsung Smart TV application – Tizen `.wgt` package
+
+            ### Installation
+            1. Enable **Developer Mode** on your Samsung TV
+            2. Install the `.wgt` file using Tizen Studio or `sdb install`
+
+            See the [README](https://github.com/${{ github.repository }}) for full setup instructions.
+          draft: false
+          prerelease: false
+
+      - name: Upload WGT to WordPress plugin release
+        env:
+          GH_TOKEN: ${{ secrets.WP_REPO_PAT }}
+        run: |
+          VERSION=${{ steps.version.outputs.version }}
+          WP_REPO="PatrickSt1991/Sportlink.Club.Info.Viewer.WordPress"
+          WGT_FILE="release/ClubInfoBoard-v${VERSION}.wgt"
+
+          if gh release view "v${VERSION}" --repo "$WP_REPO" > /dev/null 2>&1; then
+            TARGET_TAG="v${VERSION}"
+            echo "Found matching release v${VERSION} in WP repo"
+          else
+            TARGET_TAG=$(gh release view --repo "$WP_REPO" --json tagName --jq '.tagName')
+            echo "No matching release; attaching to latest: ${TARGET_TAG}"
+          fi
+
+          gh release upload "$TARGET_TAG" \
+            "$WGT_FILE" \
+            "release/ClubInfoBoard-v${VERSION}-web.zip" \
+            --repo "$WP_REPO" \
+            --clobber
