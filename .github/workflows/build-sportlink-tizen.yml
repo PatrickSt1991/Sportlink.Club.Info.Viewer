@@ -180,7 +180,7 @@ jobs:
 
             function inputFocused() {
               var a = document.activeElement;
-              return a && (a.tagName === 'INPUT' || a.tagName === 'TEXTAREA' || a.contentEditable === 'true');
+              return a && (a.tagName === 'INPUT' || a.tagName === 'TEXTAREA' || a.tagName === 'SELECT' || a.contentEditable === 'true');
             }
 
             function getTarget(cx, cy) {
@@ -204,6 +204,11 @@ jobs:
                 if (inputFocused()) { document.activeElement.blur(); return; }
                 var el = getTarget(x, y);
                 if (!el) return;
+                if (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA' || el.tagName === 'SELECT') {
+                  el.focus();
+                  el.click();
+                  return;
+                }
                 ['mousedown', 'mouseup', 'click'].forEach(function (t) {
                   el.dispatchEvent(new MouseEvent(t, {
                     bubbles: true, cancelable: true, view: window,
