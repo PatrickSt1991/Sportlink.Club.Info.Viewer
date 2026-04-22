@@ -105,7 +105,7 @@ jobs:
             <access origin="*" subdomains="true"/>
             <tizen:application id="Lt8KPyCeb1.ClubInfoBoard" package="Lt8KPyCeb1" required_version="2.3"/>
             <author href="https://github.com/PatrickSt1991/Sportlink.Club.Info.Viewer"
-                    email="patrick.stel@kpnmail.nl">Patrick Stel</author>
+                    email="patrick@madebypatrick.nl">Patrick Stel</author>
             <content src="index.html"/>
             <tizen:content-security-policy>default-src * data: blob: filesystem:; script-src * 'unsafe-inline' 'unsafe-eval' data: blob:; connect-src * data: blob:; img-src * data: blob:; style-src * 'unsafe-inline';</tizen:content-security-policy>
             <description>Kleedkamer/veld indeling, wedstrijd programma &amp; uitslagen weergaven op Samsung Smart TV</description>
@@ -143,9 +143,9 @@ jobs:
           "$TIZEN_CLI" certificate \
             -a SportlinkClub \
             -p "${{ secrets.TIZEN_CERT_PASS }}" \
-            -c NL -s Noord-Holland -ct Amsterdam \
+            -c NL -s Groningen -ct Groningen \
             -o SportlinkClub -n SportlinkClub \
-            -e patrick.stel@kpnmail.nl \
+            -e patrick@madebypatrick.nl \
             -f SportlinkClub
 
           "$TIZEN_CLI" security-profiles add \
