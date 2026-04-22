@@ -161,23 +161,45 @@ jobs:
             var cursor = document.createElement('div');
             cursor.style.cssText = 'position:fixed;width:24px;height:24px;border-radius:50%;background:rgba(255,255,255,0.9);border:2px solid rgba(0,0,0,0.5);box-shadow:0 2px 6px rgba(0,0,0,0.4);pointer-events:none;z-index:99999;margin-left:-12px;margin-top:-12px';
             document.body.appendChild(cursor);
+
             var x = window.innerWidth / 2;
             var y = window.innerHeight / 2;
-            var spd = 20;
             cursor.style.left = x + 'px';
             cursor.style.top = y + 'px';
+
+            var keys = {};
+            var spd = 5;
+
             window.addEventListener('keydown', function (e) {
-              if (e.keyCode === 37) x = Math.max(0, x - spd);
-              else if (e.keyCode === 38) y = Math.max(0, y - spd);
-              else if (e.keyCode === 39) x = Math.min(window.innerWidth, x + spd);
-              else if (e.keyCode === 40) y = Math.min(window.innerHeight, y + spd);
-              else if (e.keyCode === 13) {
+              keys[e.keyCode] = true;
+              if (e.keyCode === 13) {
                 var el = document.elementFromPoint(x, y);
-                if (el) el.click();
+                if (!el) return;
+                ['mousedown', 'mouseup', 'click'].forEach(function (t) {
+                  el.dispatchEvent(new MouseEvent(t, {
+                    bubbles: true, cancelable: true, view: window,
+                    clientX: x, clientY: y, button: 0
+                  }));
+                });
+                if (el.focus) el.focus();
               }
+            });
+
+            window.addEventListener('keyup', function (e) {
+              delete keys[e.keyCode];
+            });
+
+            setInterval(function () {
+              var moving = keys[37] || keys[38] || keys[39] || keys[40];
+              if (!moving) { spd = 5; return; }
+              spd = Math.min(spd + 2, 40);
+              if (keys[37]) x = Math.max(0, x - spd);
+              if (keys[38]) y = Math.max(0, y - spd);
+              if (keys[39]) x = Math.min(window.innerWidth, x + spd);
+              if (keys[40]) y = Math.min(window.innerHeight, y + spd);
               cursor.style.left = x + 'px';
               cursor.style.top = y + 'px';
-            });
+            }, 16);
           })();
           CURSOREOF
           sed -i 's|</body>|<script src="./tizen-cursor.js"></script></body>|' tizen-app/index.html
