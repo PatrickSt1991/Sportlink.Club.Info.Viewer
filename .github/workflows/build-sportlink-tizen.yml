@@ -60,6 +60,7 @@ jobs:
               }),
             ],
             build: {
+              target: ['chrome69'],
               outDir: 'dist',
               assetsDir: 'assets',
               rollupOptions: {
