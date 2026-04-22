@@ -98,28 +98,23 @@ jobs:
           VERSION=${{ steps.version.outputs.version }}
           cat > tizen-app/config.xml << EOF
           <?xml version="1.0" encoding="UTF-8"?>
-          <widget xmlns:tizen="http://tizen.org/ns/widgets" xmlns="http://www.w3.org/ns/widgets"
-                  id="https://github.com/PatrickSt1991/Sportlink.Club.Info.Viewer"
-                  version="${VERSION}" viewmodes="fullscreen">
-            <access origin="*" subdomains="true"/>
-            <tizen:application id="Lt8KPyCeb1.SportlinkClubViewer" package="Lt8KPyCeb1" required_version="2.3"/>
-            <author href="https://github.com/PatrickSt1991/Sportlink.Club.Info.Viewer"
-                    email="patrick@madebypatrick.nl">Patrick Stel</author>
-            <content src="index.html"/>
-            <tizen:content-security-policy>default-src * data: blob: filesystem:; script-src * 'unsafe-inline' 'unsafe-eval' data: blob:; connect-src * data: blob:; img-src * data: blob:; style-src * 'unsafe-inline';</tizen:content-security-policy>
-            <description>Kleedkamer/veld indeling, wedstrijd programma &amp; uitslagen weergaven op Samsung Smart TV</description>
-            <feature name="http://tizen.org/feature/screen.size.normal.1080.1920"/>
-            <icon src="logo.png"/>
-            <license href="https://github.com/PatrickSt1991/Sportlink.Club.Info.Viewer/blob/main/LICENSE">MIT</license>
-            <tizen:metadata key="http://samsung.com/tv/metadata/prelaunch.support" value="true"/>
-            <name>SportlinkClubViewer</name>
-            <tizen:privilege name="http://tizen.org/privilege/internet"/>
-            <tizen:privilege name="http://tizen.org/privilege/application.launch"/>
-            <tizen:privilege name="http://tizen.org/privilege/tv.inputdevice"/>
-            <tizen:profile name="tv-samsung"/>
-            <tizen:setting screen-orientation="landscape" context-menu="enable"
-                           background-support="disable" encryption="disable"
-                           install-location="auto" hwkey-event="enable"/>
+          <widget xmlns:tizen="http://tizen.org/ns/widgets" xmlns="http://www.w3.org/ns/widgets" id="https://github.com/PatrickSt1991/Sportlink.Club.Info.Viewer" version="${VERSION}" viewmodes="fullscreen">
+              <access origin="*" subdomains="true"/>
+              <tizen:application id="Lt8KPyCeb1.SportlinkClubViewer" package="Lt8KPyCeb1" required_version="2.3"/>
+              <author href="https://github.com/PatrickSt1991/Sportlink.Club.Info.Viewer" email="patrick@madebypatrick.nl">Patrick Stel</author>
+              <content src="index.html"/>
+              <tizen:content-security-policy>default-src * data: blob: filesystem:; script-src * 'unsafe-inline' 'unsafe-eval' data: blob:; connect-src * data: blob:; img-src * data: blob:; style-src * 'unsafe-inline';</tizen:content-security-policy>
+              <description>Kleedkamer/veld indeling, wedstrijd programma &amp; uitslagen weergaven op Samsung Smart TV</description>
+              <feature name="http://tizen.org/feature/screen.size.normal.1080.1920"/>
+              <icon src="logo.png"/>
+              <license href="https://github.com/PatrickSt1991/Sportlink.Club.Info.Viewer/blob/main/LICENSE">MIT</license>
+              <tizen:metadata key="http://samsung.com/tv/metadata/prelaunch.support" value="true"/>
+              <name>SportlinkClubViewer</name>
+              <tizen:privilege name="http://tizen.org/privilege/internet"/>
+              <tizen:privilege name="http://tizen.org/privilege/application.launch"/>
+              <tizen:privilege name="http://tizen.org/privilege/tv.inputdevice"/>
+              <tizen:profile name="tv-samsung"/>
+              <tizen:setting screen-orientation="landscape" context-menu="enable" background-support="disable" encryption="disable" install-location="auto" hwkey-event="enable"/>
           </widget>
           EOF
 
