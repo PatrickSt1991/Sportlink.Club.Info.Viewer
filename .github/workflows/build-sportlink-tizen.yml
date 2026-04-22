@@ -201,7 +201,7 @@ jobs:
             }
 
             function popupOpen() {
-              return !!document.querySelector('.popup-overlay');
+              return !!window.__tizenPopupOpen;
             }
 
             window.addEventListener('keydown', function (e) {

@@ -176,11 +176,13 @@ const onKeydown = (e) => {
 // Watchers — onKeydown is already defined above
 watch(() => props.visible, (newVal) => {
   if (newVal) {
+    window.__tizenPopupOpen = true;
     document.addEventListener('keydown', onKeydown, true);
     emit('opened');
     resetState();
     nextTick(() => { if (popupOverlay.value) popupOverlay.value.focus(); });
   } else {
+    window.__tizenPopupOpen = false;
     document.removeEventListener('keydown', onKeydown, true);
     emit('closed');
   }
@@ -225,12 +227,14 @@ const selectClub = (club) => {
 
 onMounted(() => {
   if (props.visible) {
+    window.__tizenPopupOpen = true;
     document.addEventListener('keydown', onKeydown, true);
     nextTick(() => { if (popupOverlay.value) popupOverlay.value.focus(); });
   }
 });
 
 onUnmounted(() => {
+  window.__tizenPopupOpen = false;
   document.removeEventListener('keydown', onKeydown, true);
 });
 </script>
