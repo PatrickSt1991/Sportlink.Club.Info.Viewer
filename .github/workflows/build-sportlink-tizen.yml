@@ -204,7 +204,7 @@ jobs:
               return !!document.querySelector('.popup-overlay');
             }
 
-            document.addEventListener('keydown', function (e) {
+            window.addEventListener('keydown', function (e) {
               if (popupOpen()) return;
               var wasMoving = keys[37] || keys[38] || keys[39] || keys[40];
               keys[e.keyCode] = true;
@@ -231,7 +231,7 @@ jobs:
               if (e.keyCode === 10009 || e.keyCode === 27) {
                 if (inputFocused()) document.activeElement.blur();
               }
-            }, true);
+            });
 
             window.addEventListener('keyup', function (e) {
               delete keys[e.keyCode];

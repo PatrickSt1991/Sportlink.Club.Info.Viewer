@@ -1,5 +1,5 @@
 <template>
-  <div v-if="visible" class="popup-overlay" tabindex="-1" ref="popupOverlay">
+  <div v-if="visible" class="popup-overlay" tabindex="-1" ref="popupOverlay" @keydown.stop>
     <div class="popup" role="dialog" aria-modal="true" aria-labelledby="popup-title">
       <h3 id="popup-title">Selecteer je club</h3>
 
@@ -143,7 +143,7 @@ const KC = { ENTER: 13, BACK: 10009, ESC: 27, LEFT: 37, UP: 38, RIGHT: 39, DOWN:
 const onKeydown = (e) => {
   const code = e.keyCode || e.which;
   const isNav = [KC.UP, KC.DOWN, KC.LEFT, KC.RIGHT, KC.ENTER, KC.BACK, KC.ESC].indexOf(code) !== -1;
-  if (isNav) { e.preventDefault(); e.stopPropagation(); }
+  if (isNav) { e.preventDefault(); }
 
   if (code === KC.BACK || code === KC.ESC) {
     if (search.value) { search.value = ''; letterFocusIndex.value = 0; }
