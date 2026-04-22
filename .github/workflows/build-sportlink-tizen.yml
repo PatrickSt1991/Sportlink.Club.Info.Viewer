@@ -200,7 +200,12 @@ jobs:
               return document.elementFromPoint(cx, cy);
             }
 
+            function popupOpen() {
+              return !!document.querySelector('.popup-overlay');
+            }
+
             window.addEventListener('keydown', function (e) {
+              if (popupOpen()) return;
               var wasMoving = keys[37] || keys[38] || keys[39] || keys[40];
               keys[e.keyCode] = true;
               if (!wasMoving && (keys[37] || keys[38] || keys[39] || keys[40])) {
@@ -234,6 +239,7 @@ jobs:
             });
 
             setInterval(function () {
+              if (popupOpen()) { keys = {}; holdStart = 0; return; }
               if (!keys[37] && !keys[38] && !keys[39] && !keys[40]) return;
               var s = getSpd();
               if (keys[37]) x = Math.max(0, x - s);
