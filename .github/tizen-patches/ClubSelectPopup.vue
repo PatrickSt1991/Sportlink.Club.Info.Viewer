@@ -1,11 +1,11 @@
 <template>
-  <div v-if="visible" class="popup-overlay" @keydown="onKeydown" tabindex="0" ref="popupOverlay">
+  <div v-if="visible" class="popup-overlay" tabindex="-1" ref="popupOverlay">
     <div class="popup" role="dialog" aria-modal="true" aria-labelledby="popup-title">
       <h3 id="popup-title">Selecteer je club</h3>
 
-      <!-- Letter/Number Grid -->
+      <!-- Letter/Number keyboard -->
       <div class="letter-grid">
-        <!-- Letters A-Z: 13-column grid → exactly 2 rows -->
+        <!-- A-Z: 13-column CSS grid → exactly 2 rows, no wrapping -->
         <div class="grid-row letters">
           <button
             v-for="letter in alphabet"
@@ -14,12 +14,10 @@
             :class="{ focused: letterFocusIndex === alphabet.indexOf(letter) }"
             tabindex="-1"
             @click.stop="handleLetterClick(letter)"
-          >
-            {{ letter }}
-          </button>
+          >{{ letter }}</button>
         </div>
 
-        <!-- Numbers 0-9 -->
+        <!-- 0-9: 10-column CSS grid -->
         <div class="grid-row numbers">
           <button
             v-for="num in numbers"
@@ -28,30 +26,23 @@
             :class="{ focused: letterFocusIndex === alphabet.length + numbers.indexOf(num) }"
             tabindex="-1"
             @click.stop="handleLetterClick(num)"
-          >
-            {{ num }}
-          </button>
+          >{{ num }}</button>
         </div>
 
-        <!-- Clear Button -->
-        <div class="grid-row">
+        <!-- Clear -->
+        <div class="grid-row clean-row">
           <button
             class="grid-key clean-btn"
             :class="{ focused: letterFocusIndex === alphabet.length + numbers.length }"
             tabindex="-1"
             @click.stop="handleCleanClick"
-          >
-            WISSEN
-          </button>
+          >WISSEN</button>
         </div>
 
-        <!-- Current Filter Display -->
-        <div class="filter-display" v-if="search">
-          Zoeken op: {{ search }}
-        </div>
+        <div class="filter-display" v-if="search">Zoeken op: {{ search }}</div>
       </div>
 
-      <!-- Club List -->
+      <!-- Club list -->
       <div class="list-container">
         <div v-if="filteredClubs.length === 0" class="no-results">
           <span v-if="search">Geen clubs gevonden voor "{{ search }}"</span>
@@ -75,7 +66,6 @@
           </div>
         </div>
 
-        <!-- Scroll indicators -->
         <div v-if="filteredClubs.length > itemsPerPage" class="scroll-indicators">
           <div class="scroll-info">
             {{ Math.min(startIndex + 1, filteredClubs.length) }}-{{ Math.min(startIndex + itemsPerPage, filteredClubs.length) }}
@@ -87,68 +77,55 @@
         </div>
       </div>
 
-      <!-- Actions -->
+      <!-- Action buttons -->
       <div class="buttons">
-        <button
-          class="btn-cancel"
-          :class="{ focused: focusMode === 'cancel' }"
-          tabindex="-1"
-          @click.stop="cancel"
-        >
-          ← Terug
-        </button>
-        <button
-          class="btn-select"
-          :class="{ focused: focusMode === 'select', disabled: !selectedClub }"
-          :disabled="!selectedClub"
-          tabindex="-1"
-          @click.stop="save"
-        >
-          Kies →
-        </button>
+        <button class="btn-cancel" :class="{ focused: focusMode === 'cancel' }" tabindex="-1" @click.stop="cancel">← Terug</button>
+        <button class="btn-select" :class="{ focused: focusMode === 'select', disabled: !selectedClub }" :disabled="!selectedClub" tabindex="-1" @click.stop="save">Kies →</button>
       </div>
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref, computed, watch, nextTick, onMounted } from 'vue';
+import { ref, computed, watch, nextTick, onMounted, onUnmounted } from 'vue';
 import { useRemoteControl } from '@/composables/useRemoteControl.js';
 
 useRemoteControl();
 
+// Remote keyCodes (Samsung TV uses keyCode, e.key is unreliable on older Tizen)
+var KEY_ENTER  = 13;
+var KEY_BACK   = 10009;
+var KEY_ESC    = 27;
+var KEY_LEFT   = 37;
+var KEY_UP     = 38;
+var KEY_RIGHT  = 39;
+var KEY_DOWN   = 40;
+
 const props = defineProps({
-  clubs: {
-    type: Array,
-    default: () => [],
-  },
-  visible: {
-    type: Boolean,
-    default: false,
-  },
+  clubs: { type: Array, default: () => [] },
+  visible: { type: Boolean, default: false },
 });
 
 const emit = defineEmits(['close', 'save', 'opened', 'closed']);
 
 const popupOverlay = ref(null);
 const alphabet = ['A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z'];
-const numbers = ['0','1','2','3','4','5','6','7','8','9'];
+const numbers   = ['0','1','2','3','4','5','6','7','8','9'];
 const itemsPerPage = 8;
 
-const search = ref('');
+const search        = ref('');
 const selectedClubId = ref(null);
-const focusedIndex = ref(0);
-const startIndex = ref(0);
-const focusMode = ref('list');
+const focusedIndex  = ref(0);
+const startIndex    = ref(0);
+const focusMode     = ref('list');
 const letterFocusIndex = ref(0);
 
 const filteredClubs = computed(() => {
   if (!search.value) return props.clubs;
-  const term = search.value.toLowerCase();
-  return props.clubs.filter(c =>
-    c.ClubName.toLowerCase().startsWith(term) ||
-    c.City.toLowerCase().startsWith(term)
-  );
+  var term = search.value.toLowerCase();
+  return props.clubs.filter(function(c) {
+    return c.ClubName.toLowerCase().startsWith(term) || c.City.toLowerCase().startsWith(term);
+  });
 });
 
 const visibleClubs = computed(() =>
@@ -156,54 +133,56 @@ const visibleClubs = computed(() =>
 );
 
 const selectedClub = computed(() =>
-  props.clubs.find(c => c.ClubId === selectedClubId.value)
+  props.clubs.find(function(c) { return c.ClubId === selectedClubId.value; })
 );
 
-const scrollThumbStyle = computed(() => {
-  const total = filteredClubs.value.length;
+const scrollThumbStyle = computed(function() {
+  var total = filteredClubs.value.length;
   if (total <= itemsPerPage) return { height: '100%', top: '0%' };
-  const thumbHeight = Math.max((itemsPerPage / total) * 100, 10);
-  const thumbTop = (startIndex.value / total) * 100;
-  return { height: `${thumbHeight}%`, top: `${thumbTop}%` };
+  return {
+    height: Math.max((itemsPerPage / total) * 100, 10) + '%',
+    top:    (startIndex.value / total) * 100 + '%'
+  };
 });
 
-watch(() => props.visible, (newVal) => {
+// Attach/detach global key capture when popup opens/closes
+watch(() => props.visible, function(newVal) {
   if (newVal) {
+    document.addEventListener('keydown', onKeydown, true);
     emit('opened');
     resetState();
-    nextTick(focusOverlay);
+    nextTick(function() { if (popupOverlay.value) popupOverlay.value.focus(); });
   } else {
+    document.removeEventListener('keydown', onKeydown, true);
     emit('closed');
   }
 });
 
-watch(search, () => {
-  focusedIndex.value = 0;
-  startIndex.value = 0;
+watch(search, function() {
+  focusedIndex.value  = 0;
+  startIndex.value    = 0;
   selectedClubId.value = null;
-  focusMode.value = 'list';
+  focusMode.value     = 'list';
 });
 
 function resetState() {
-  search.value = '';
+  search.value         = '';
   selectedClubId.value = null;
-  focusedIndex.value = 0;
-  startIndex.value = 0;
-  focusMode.value = 'list';
+  focusedIndex.value   = 0;
+  startIndex.value     = 0;
+  focusMode.value      = 'list';
   letterFocusIndex.value = 0;
 }
 
-function focusOverlay() {
-  popupOverlay.value?.focus();
-}
-
 function onKeydown(e) {
-  if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'Enter', 'Back', 'Escape'].includes(e.key)) {
+  var code = e.keyCode || e.which;
+  var navCodes = [KEY_UP, KEY_DOWN, KEY_LEFT, KEY_RIGHT, KEY_ENTER, KEY_BACK, KEY_ESC];
+  if (navCodes.indexOf(code) !== -1) {
     e.preventDefault();
     e.stopPropagation();
   }
 
-  if (e.key === 'Back' || e.key === 'Escape') {
+  if (code === KEY_BACK || code === KEY_ESC) {
     if (search.value) {
       search.value = '';
       letterFocusIndex.value = 0;
@@ -213,82 +192,51 @@ function onKeydown(e) {
     return;
   }
 
-  handleSearchModeKeys(e);
-}
+  var total = alphabet.length + numbers.length + 1;
 
-function handleSearchModeKeys(e) {
-  const total = alphabet.length + numbers.length + 1;
-
-  switch (e.key) {
-    case 'ArrowLeft':
-      letterFocusIndex.value = Math.max(0, letterFocusIndex.value - 1);
-      break;
-    case 'ArrowRight':
-      letterFocusIndex.value = Math.min(total - 1, letterFocusIndex.value + 1);
-      break;
-    case 'ArrowDown':
-      if (letterFocusIndex.value < 13) {
-        // row 1 → row 2 (same column)
-        letterFocusIndex.value += 13;
-      } else if (letterFocusIndex.value <= 25) {
-        // row 2 → numbers (map column: 13 letters → 10 numbers, clamp)
-        letterFocusIndex.value = 26 + Math.min(letterFocusIndex.value - 13, 9);
-      } else if (letterFocusIndex.value <= 35) {
-        // numbers → clean
-        letterFocusIndex.value = 36;
-      } else {
-        // clean → row 1 (wrap)
-        letterFocusIndex.value = 0;
-      }
-      break;
-    case 'ArrowUp':
-      if (letterFocusIndex.value < 13) {
-        // row 1 → clean (wrap)
-        letterFocusIndex.value = 36;
-      } else if (letterFocusIndex.value <= 25) {
-        // row 2 → row 1 (same column)
-        letterFocusIndex.value -= 13;
-      } else if (letterFocusIndex.value <= 35) {
-        // numbers → row 2 (same column, clamp to 12)
-        letterFocusIndex.value = 13 + Math.min(letterFocusIndex.value - 26, 12);
-      } else {
-        // clean → last number
-        letterFocusIndex.value = 35;
-      }
-      break;
-    case 'Enter':
-      if (letterFocusIndex.value < alphabet.length) {
-        handleLetterClick(alphabet[letterFocusIndex.value]);
-      } else if (letterFocusIndex.value < alphabet.length + numbers.length) {
-        handleLetterClick(numbers[letterFocusIndex.value - alphabet.length]);
-      } else {
-        handleCleanClick();
-      }
-      break;
+  if (code === KEY_LEFT) {
+    letterFocusIndex.value = Math.max(0, letterFocusIndex.value - 1);
+  } else if (code === KEY_RIGHT) {
+    letterFocusIndex.value = Math.min(total - 1, letterFocusIndex.value + 1);
+  } else if (code === KEY_DOWN) {
+    if (letterFocusIndex.value < 13) {
+      letterFocusIndex.value += 13;                                    // row1 → row2
+    } else if (letterFocusIndex.value <= 25) {
+      letterFocusIndex.value = 26 + Math.min(letterFocusIndex.value - 13, 9); // row2 → numbers
+    } else if (letterFocusIndex.value <= 35) {
+      letterFocusIndex.value = 36;                                     // numbers → clean
+    } else {
+      letterFocusIndex.value = 0;                                      // clean → row1 (wrap)
+    }
+  } else if (code === KEY_UP) {
+    if (letterFocusIndex.value < 13) {
+      letterFocusIndex.value = 36;                                     // row1 → clean (wrap)
+    } else if (letterFocusIndex.value <= 25) {
+      letterFocusIndex.value -= 13;                                    // row2 → row1
+    } else if (letterFocusIndex.value <= 35) {
+      letterFocusIndex.value = 13 + Math.min(letterFocusIndex.value - 26, 12); // numbers → row2
+    } else {
+      letterFocusIndex.value = 35;                                     // clean → last number
+    }
+  } else if (code === KEY_ENTER) {
+    if (letterFocusIndex.value < alphabet.length) {
+      handleLetterClick(alphabet[letterFocusIndex.value]);
+    } else if (letterFocusIndex.value < alphabet.length + numbers.length) {
+      handleLetterClick(numbers[letterFocusIndex.value - alphabet.length]);
+    } else {
+      handleCleanClick();
+    }
   }
 }
 
-function updateVisibleRange() {
-  if (focusedIndex.value < startIndex.value) {
-    startIndex.value = focusedIndex.value;
-  } else if (focusedIndex.value >= startIndex.value + itemsPerPage) {
-    startIndex.value = focusedIndex.value - itemsPerPage + 1;
-  }
-  startIndex.value = Math.min(startIndex.value, Math.max(0, filteredClubs.value.length - itemsPerPage));
-}
-
-function cancel() {
-  emit('close');
-}
+function cancel() { emit('close'); }
 
 function save() {
-  if (selectedClub.value) {
-    emit('save', selectedClub.value);
-  }
+  if (selectedClub.value) emit('save', selectedClub.value);
 }
 
-function handleLetterClick(letter) {
-  search.value += letter;
+function handleLetterClick(ch) {
+  search.value += ch;
   letterFocusIndex.value = 0;
 }
 
@@ -302,8 +250,15 @@ function selectClub(club) {
   focusMode.value = 'select';
 }
 
-onMounted(() => {
-  if (props.visible) nextTick(focusOverlay);
+onMounted(function() {
+  if (props.visible) {
+    document.addEventListener('keydown', onKeydown, true);
+    nextTick(function() { if (popupOverlay.value) popupOverlay.value.focus(); });
+  }
+});
+
+onUnmounted(function() {
+  document.removeEventListener('keydown', onKeydown, true);
 });
 </script>
 
@@ -317,14 +272,14 @@ onMounted(() => {
   justify-content: center;
   align-items: center;
   z-index: 1000;
-  opacity: 0;
-  animation: fadeIn 0.3s ease-out forwards;
   outline: none;
+  opacity: 0;
+  animation: fadeIn 0.25s ease-out forwards;
 }
 
 .popup {
   background: #1a1a1a;
-  color: #ffffff;
+  color: #fff;
   padding: 1.25rem;
   border-radius: 12px;
   width: 90%;
@@ -336,7 +291,7 @@ onMounted(() => {
   border: 3px solid #333;
   display: flex;
   flex-direction: column;
-  gap: 0.75rem;
+  gap: 0.6rem;
 }
 
 h3 {
@@ -346,7 +301,7 @@ h3 {
   font-weight: 600;
 }
 
-/* ── Letter / number keyboard ── */
+/* ── Keyboard grid ── */
 .letter-grid {
   padding: 0.6rem;
   background: #2a2a2a;
@@ -357,33 +312,30 @@ h3 {
   gap: 0.4rem;
 }
 
-/* 13 columns → A-M on row 1, N-Z on row 2 — no wrapping chaos */
+/* 13 columns → A-M row 1, N-Z row 2 */
 .grid-row.letters {
   display: grid;
   grid-template-columns: repeat(13, 1fr);
   gap: 4px;
   padding-bottom: 0.4rem;
-  border-bottom: 1px solid #444;
+  border-bottom: 1px solid #555;
 }
 
-/* 10 numbers, centred */
+/* 10 columns → one clean row of digits */
 .grid-row.numbers {
-  display: flex;
-  justify-content: center;
+  display: grid;
+  grid-template-columns: repeat(10, 1fr);
   gap: 4px;
   padding-bottom: 0.4rem;
-  border-bottom: 1px solid #444;
+  border-bottom: 1px solid #555;
 }
 
-/* WISSEN row */
-.grid-row {
+.grid-row.clean-row {
   display: flex;
-  justify-content: center;
-  gap: 4px;
 }
 
 .grid-key {
-  height: 2.4rem;
+  height: 2.3rem;
   background: #333;
   border: 1px solid #555;
   border-radius: 4px;
@@ -395,7 +347,7 @@ h3 {
   justify-content: center;
   cursor: pointer;
   padding: 0;
-  transition: background 0.12s ease, transform 0.1s ease;
+  transition: background 0.1s ease, transform 0.08s ease;
   user-select: none;
   -webkit-user-select: none;
 }
@@ -408,25 +360,23 @@ h3 {
 }
 
 .clean-btn {
-  width: 100%;
-  background: #cc0000;
-  border-color: #ff0000;
-  height: 2.2rem;
-  font-size: 0.85rem;
+  flex: 1;
+  font-size: 0.82rem;
+  background: #8b0000;
+  border-color: #cc0000;
 }
 
 .clean-btn.focused {
-  background: #ff0000;
+  background: #cc0000;
   border-color: #ff3333;
 }
 
 .filter-display {
   text-align: center;
-  padding: 0.3rem 0.5rem;
+  padding: 0.3rem;
   background: #333;
   border-radius: 4px;
-  color: #fff;
-  font-size: 0.95rem;
+  font-size: 0.9rem;
 }
 
 /* ── Club list ── */
@@ -444,30 +394,21 @@ h3 {
 }
 
 .club-item {
-  padding: 0.6rem 1rem;
+  padding: 0.55rem 0.9rem;
   border-bottom: 1px solid #333;
   cursor: pointer;
-  transition: background 0.12s ease;
+  transition: background 0.1s ease;
   user-select: none;
   -webkit-user-select: none;
 }
 
 .club-item:last-child { border-bottom: none; }
+.club-item.focused    { background: #0066cc; }
+.club-item.selected   { background: #006600; }
+.club-item.focused.selected { background: #0077bb; }
 
-.club-item.focused  { background: #0066cc; }
-.club-item.selected { background: #006600; }
-.club-item.focused.selected { background: #0088cc; }
-
-.club-name {
-  font-size: 1.05rem;
-  font-weight: 600;
-  margin-bottom: 0.15rem;
-}
-
-.club-city {
-  color: #ccc;
-  font-size: 0.9rem;
-}
+.club-name { font-size: 1rem;  font-weight: 600; margin-bottom: 0.1rem; }
+.club-city { font-size: 0.88rem; color: #bbb; }
 
 .no-results {
   padding: 1.5rem;
@@ -483,53 +424,38 @@ h3 {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 0.35rem 0.5rem;
+  padding: 0.3rem 0.5rem;
   background: #333;
   border-radius: 6px;
 }
 
-.scroll-info { color: #ccc; font-size: 0.82rem; }
+.scroll-info { color: #bbb; font-size: 0.8rem; }
 
 .scroll-bar {
-  width: 160px;
-  height: 6px;
-  background: #444;
-  border-radius: 4px;
-  position: relative;
+  width: 140px; height: 5px;
+  background: #444; border-radius: 4px; position: relative;
 }
 
 .scroll-thumb {
-  background: #0066cc;
-  border-radius: 4px;
-  position: absolute;
+  background: #0066cc; border-radius: 4px; position: absolute;
 }
 
 /* ── Action buttons ── */
-.buttons {
-  display: flex;
-  gap: 0.75rem;
-}
+.buttons { display: flex; gap: 0.6rem; }
 
 .buttons button {
   flex: 1;
-  padding: 0.7rem 1.2rem;
+  padding: 0.65rem 1rem;
   border: 2px solid #444;
   border-radius: 8px;
-  font-size: 1rem;
-  font-weight: 600;
-  background: #333;
-  color: #fff;
+  font-size: 1rem; font-weight: 600;
+  background: #333; color: #fff;
   cursor: pointer;
-  transition: background 0.12s ease;
-  user-select: none;
-  -webkit-user-select: none;
+  transition: background 0.1s ease;
+  user-select: none; -webkit-user-select: none;
 }
 
-.buttons button.focused {
-  border-color: #0066cc;
-  background: #0066cc;
-}
-
+.buttons button.focused { border-color: #0066cc; background: #0066cc; }
 .buttons button.disabled { opacity: 0.5; }
 .buttons button.disabled.focused { border-color: #666; background: #555; }
 
