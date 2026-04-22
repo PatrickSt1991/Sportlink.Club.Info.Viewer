@@ -40,7 +40,7 @@ jobs:
         run: |
           mkdir -p release
           cd dist
-          zip -r "../release/ClubInfoBoard-v${{ steps.version.outputs.version }}-web.zip" .
+          zip -r "../release/Sportlink-Club-Viewer-v${{ steps.version.outputs.version }}-web.zip" .
 
       - name: Override vite.config.js for Tizen
         run: |
@@ -103,7 +103,7 @@ jobs:
                   id="https://github.com/PatrickSt1991/Sportlink.Club.Info.Viewer"
                   version="${VERSION}" viewmodes="fullscreen">
             <access origin="*" subdomains="true"/>
-            <tizen:application id="Lt8KPyCeb1.ClubInfoBoard" package="Lt8KPyCeb1" required_version="2.3"/>
+            <tizen:application id="Lt8KPyCeb1.SportlinkClubViewer" package="Lt8KPyCeb1" required_version="2.3"/>
             <author href="https://github.com/PatrickSt1991/Sportlink.Club.Info.Viewer"
                     email="patrick@madebypatrick.nl">Patrick Stel</author>
             <content src="index.html"/>
@@ -113,7 +113,7 @@ jobs:
             <icon src="logo.png"/>
             <license href="https://github.com/PatrickSt1991/Sportlink.Club.Info.Viewer/blob/main/LICENSE">MIT</license>
             <tizen:metadata key="http://samsung.com/tv/metadata/prelaunch.support" value="true"/>
-            <name>ClubInfoBoard</name>
+            <name>SportlinkClubViewer</name>
             <tizen:privilege name="http://tizen.org/privilege/internet"/>
             <tizen:privilege name="http://tizen.org/privilege/application.launch"/>
             <tizen:privilege name="http://tizen.org/privilege/tv.inputdevice"/>
@@ -203,19 +203,19 @@ jobs:
         run: |
           ./package.exp
           WGT=$(find tizen-app/.buildResult -name "*.wgt" | head -1)
-          cp "$WGT" "release/ClubInfoBoard-v${{ steps.version.outputs.version }}.wgt"
+          cp "$WGT" "release/Sportlink-Club-Viewer-v${{ steps.version.outputs.version }}.wgt"
           echo "Packaged: $WGT"
 
       - name: Create release on viewer repo
         uses: softprops/action-gh-release@v2
         with:
           tag_name: v${{ steps.version.outputs.version }}
-          name: Sportlink Club Info Viewer v${{ steps.version.outputs.version }}
+          name: Sportlink Club Viewer v${{ steps.version.outputs.version }}
           files: |
-            release/ClubInfoBoard-v${{ steps.version.outputs.version }}.wgt
-            release/ClubInfoBoard-v${{ steps.version.outputs.version }}-web.zip
+            release/Sportlink-Club-Viewer-v${{ steps.version.outputs.version }}.wgt
+            release/Sportlink-Club-Viewer-v${{ steps.version.outputs.version }}-web.zip
           body: |
-            ## Sportlink Club Info Viewer v${{ steps.version.outputs.version }}
+            ## Sportlink Club Viewer v${{ steps.version.outputs.version }}
 
             Samsung Smart TV application – Tizen `.wgt` package
 
@@ -233,7 +233,7 @@ jobs:
         run: |
           VERSION=${{ steps.version.outputs.version }}
           WP_REPO="PatrickSt1991/Sportlink.Club.Info.Viewer.WordPress"
-          WGT_FILE="release/ClubInfoBoard-v${VERSION}.wgt"
+          WGT_FILE="release/Sportlink-Club-Viewer-v${VERSION}.wgt"
 
           if gh release view "v${VERSION}" --repo "$WP_REPO" > /dev/null 2>&1; then
             TARGET_TAG="v${VERSION}"
@@ -245,6 +245,6 @@ jobs:
 
           gh release upload "$TARGET_TAG" \
             "$WGT_FILE" \
-            "release/ClubInfoBoard-v${VERSION}-web.zip" \
+            "release/Sportlink-Club-Viewer-v${VERSION}-web.zip" \
             --repo "$WP_REPO" \
             --clobber
