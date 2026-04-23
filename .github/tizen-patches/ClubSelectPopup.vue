@@ -20,7 +20,7 @@
         <div class="scroll-track">
           <div class="scroll-thumb" :style="scrollThumbStyle"></div>
         </div>
-        <div class="position">{{ focusedIndex + 1 }} / {{ sortedClubs.length }}</div>
+        <div class="position">{{ positionText }}</div>
       </div>
 
       <div class="hints">
@@ -46,10 +46,19 @@ const emit = defineEmits(['close', 'save', 'opened', 'closed']);
 const popupOverlay = ref(null);
 const itemsPerPage = 8;
 const focusedIndex = ref(0);
-const startIndex   = ref(0);
+const startIndex = ref(0);
+
+function getClubName(club) {
+  return (club?.ClubName || '').trim();
+}
+
+function getFirstLetter(club) {
+  const name = getClubName(club);
+  return name ? name.charAt(0).toUpperCase() : '';
+}
 
 const sortedClubs = computed(() =>
-  [...props.clubs].sort((a, b) => a.ClubName.localeCompare(b.ClubName))
+  [...props.clubs].sort((a, b) => getClubName(a).localeCompare(getClubName(b)))
 );
 
 const visibleClubs = computed(() =>
@@ -58,7 +67,10 @@ const visibleClubs = computed(() =>
 
 const scrollThumbStyle = computed(() => {
   const total = sortedClubs.value.length;
-  if (total === 0) return { height: '100%', top: '0%' };
+  if (total === 0) {
+    return { height: '100%', top: '0%' };
+  }
+
   return {
     height: Math.max((itemsPerPage / total) * 100, 4) + '%',
     top: (startIndex.value / total) * 100 + '%',
@@ -67,14 +79,36 @@ const scrollThumbStyle = computed(() => {
 
 const currentLetter = computed(() => {
   const club = sortedClubs.value[focusedIndex.value];
-  return club ? club.ClubName[0].toUpperCase() : '';
+  return getFirstLetter(club);
 });
 
-const KC = { ENTER: 13, BACK: 10009, ESC: 27, LEFT: 37, UP: 38, RIGHT: 39, DOWN: 40 };
+const positionText = computed(() => {
+  const total = sortedClubs.value.length;
+  if (total === 0) return '0 / 0';
+  return `${focusedIndex.value + 1} / ${total}`;
+});
+
+const KC = {
+  ENTER: 13,
+  BACK: 10009,
+  ESC: 27,
+  LEFT: 37,
+  UP: 38,
+  RIGHT: 39,
+  DOWN: 40,
+};
 
 function setFocus(index) {
   const total = sortedClubs.value.length;
+
+  if (total === 0) {
+    focusedIndex.value = 0;
+    startIndex.value = 0;
+    return;
+  }
+
   focusedIndex.value = Math.max(0, Math.min(total - 1, index));
+
   if (focusedIndex.value < startIndex.value) {
     startIndex.value = focusedIndex.value;
   } else if (focusedIndex.value >= startIndex.value + itemsPerPage) {
@@ -85,58 +119,93 @@ function setFocus(index) {
 function jumpByLetter(direction) {
   const clubs = sortedClubs.value;
   if (clubs.length === 0) return;
-  const currentLtr = clubs[focusedIndex.value].ClubName[0].toUpperCase();
+
+  const currentLtr = getFirstLetter(clubs[focusedIndex.value]);
+  if (!currentLtr) return;
 
   if (direction > 0) {
-    // First club whose name starts with a letter after currentLtr
-    const next = clubs.findIndex((c, i) => i > focusedIndex.value && c.ClubName[0].toUpperCase() !== currentLtr);
+    const next = clubs.findIndex(
+      (c, i) => i > focusedIndex.value && getFirstLetter(c) && getFirstLetter(c) !== currentLtr
+    );
     setFocus(next !== -1 ? next : clubs.length - 1);
   } else {
-    // Find the letter before currentLtr, then jump to the first club of that letter
     let prevLetter = null;
+
     for (let i = focusedIndex.value - 1; i >= 0; i--) {
-      const l = clubs[i].ClubName[0].toUpperCase();
-      if (l !== currentLtr) { prevLetter = l; break; }
+      const l = getFirstLetter(clubs[i]);
+      if (l && l !== currentLtr) {
+        prevLetter = l;
+        break;
+      }
     }
-    if (prevLetter === null) { setFocus(0); return; }
-    const first = clubs.findIndex(c => c.ClubName[0].toUpperCase() === prevLetter);
+
+    if (prevLetter === null) {
+      setFocus(0);
+      return;
+    }
+
+    const first = clubs.findIndex((c) => getFirstLetter(c) === prevLetter);
     setFocus(first !== -1 ? first : 0);
   }
 }
 
 const onKeydown = (e) => {
   const code = e.keyCode || e.which;
-  const isNav = [KC.UP, KC.DOWN, KC.LEFT, KC.RIGHT, KC.ENTER, KC.BACK, KC.ESC].indexOf(code) !== -1;
+  const isNav =
+    [KC.UP, KC.DOWN, KC.LEFT, KC.RIGHT, KC.ENTER, KC.BACK, KC.ESC].indexOf(code) !== -1;
+
   if (isNav) e.preventDefault();
 
-  if      (code === KC.UP)                       setFocus(focusedIndex.value - 1);
-  else if (code === KC.DOWN)                     setFocus(focusedIndex.value + 1);
-  else if (code === KC.LEFT)                     jumpByLetter(-1);
-  else if (code === KC.RIGHT)                    jumpByLetter(1);
-  else if (code === KC.BACK || code === KC.ESC)  emit('close');
+  if (code === KC.UP) setFocus(focusedIndex.value - 1);
+  else if (code === KC.DOWN) setFocus(focusedIndex.value + 1);
+  else if (code === KC.LEFT) jumpByLetter(-1);
+  else if (code === KC.RIGHT) jumpByLetter(1);
+  else if (code === KC.BACK || code === KC.ESC) emit('close');
   else if (code === KC.ENTER) {
     const club = sortedClubs.value[focusedIndex.value];
     if (club) emit('save', club);
   }
 };
 
-watch(() => props.visible, (newVal) => {
-  if (newVal) {
-    focusedIndex.value = 0;
-    startIndex.value   = 0;
-    document.addEventListener('keydown', onKeydown, true);
-    emit('opened');
-    nextTick(() => { if (popupOverlay.value) popupOverlay.value.focus(); });
-  } else {
-    document.removeEventListener('keydown', onKeydown, true);
-    emit('closed');
+watch(
+  () => props.visible,
+  (newVal) => {
+    if (newVal) {
+      focusedIndex.value = 0;
+      startIndex.value = 0;
+      document.addEventListener('keydown', onKeydown, true);
+      emit('opened');
+      nextTick(() => {
+        if (popupOverlay.value) popupOverlay.value.focus();
+      });
+    } else {
+      document.removeEventListener('keydown', onKeydown, true);
+      emit('closed');
+    }
   }
-});
+);
+
+watch(
+  () => sortedClubs.value.length,
+  (newLength) => {
+    if (newLength === 0) {
+      focusedIndex.value = 0;
+      startIndex.value = 0;
+      return;
+    }
+
+    if (focusedIndex.value >= newLength) {
+      setFocus(newLength - 1);
+    }
+  }
+);
 
 onMounted(() => {
   if (props.visible) {
     document.addEventListener('keydown', onKeydown, true);
-    nextTick(() => { if (popupOverlay.value) popupOverlay.value.focus(); });
+    nextTick(() => {
+      if (popupOverlay.value) popupOverlay.value.focus();
+    });
   }
 });
 
@@ -148,8 +217,10 @@ onUnmounted(() => {
 <style scoped>
 .popup-overlay {
   position: fixed;
-  top: 0; left: 0;
-  width: 100vw; height: 100vh;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
   background: rgba(0, 0, 0, 0.85);
   display: flex;
   justify-content: center;
@@ -270,7 +341,11 @@ h3 {
 }
 
 @keyframes fadeIn {
-  from { opacity: 0; }
-  to   { opacity: 1; }
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 </style>
