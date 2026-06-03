@@ -97,6 +97,8 @@ Iedereen kan de software gebruiken en aanpassen naar eigen wensen.
 
 [![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/M4M71JOT9R)
 
+<img src="https://raw.githubusercontent.com/PatrickSt1991/Sportlink.Club.Info.Viewer/main/src/assets/ko-fi-qr.webp" width="120" alt="Ko-fi QR code" />
+
 ---
 
 ## 🔐 Ondersteunde gegevensbronnen

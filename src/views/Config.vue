@@ -34,6 +34,7 @@
         :config="config"
         @update:config="updateConfig"
       />
+
     </div>
 
     <NavigationButtons />
@@ -195,6 +196,7 @@ onUnmounted(() => {
         text-align: center;
         font-size: 1.2em;
     }
+
 
     /* Responsive adjustments */
     @media (max-width: 940px) {

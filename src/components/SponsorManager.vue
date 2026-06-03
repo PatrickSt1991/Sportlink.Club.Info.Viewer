@@ -1,5 +1,13 @@
 <template>
     <div class="sponsor-container" id="configTop" style="max-width: 700px;">
+      <div class="support-section">
+        <p class="support-title">Ondersteun het project</p>
+        <div class="support-body">
+          <p class="support-sub">Scan de QR-code om een kleine bijdrage te doen via Ko-fi ☕</p>
+          <img :src="kofiQr" alt="Ko-fi QR code" class="kofi-qr" />
+        </div>
+      </div>
+
       <h2>Sponsoren</h2>
       <p>{{ sponsorHint }}</p>
       <div class="input-container">
@@ -20,6 +28,7 @@
   
   <script setup>
   import { ref, computed } from 'vue';
+  import kofiQr from '@/assets/ko-fi-qr.webp';
   
   const props = defineProps({
     sponsorImages: {
@@ -175,5 +184,41 @@
 
   .form-group {
     margin-bottom: 12px;
+  }
+
+  .support-section {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid #e2e8f0;
+    margin-bottom: 4px;
+  }
+
+  .support-body {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 16px;
+  }
+
+  .kofi-qr {
+    width: 100px;
+    height: 100px;
+    border-radius: 6px;
+    flex-shrink: 0;
+  }
+
+  .support-title {
+    margin: 0 0 4px;
+    font-size: 1.2em;
+    font-weight: 700;
+    color: #0f172a;
+  }
+
+  .support-sub {
+    margin: 0;
+    font-size: 0.78em;
+    color: #475569;
   }
   </style>
