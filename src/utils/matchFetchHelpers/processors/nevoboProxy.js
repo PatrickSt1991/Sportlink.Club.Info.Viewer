@@ -1,35 +1,35 @@
 import { formatCompType } from '@/utils/formatCompType.js';
-import { formatDateTime } from '@/utils/formatDateType.js';
+import { formatDateTime, formatNevoboDate } from '@/utils/formatDateType.js';
 import noImage from '@/assets/no_image.png';
+import { rowId, inWindow } from './shared';
 
-export const processNevoboProxyData = (data, fetchType, dateThreshold, now, formatDateFn) => {
+const lastNamePart = (name) => {
+  const parts = String(name ?? '').split(/\s*\/+\s*/);
+  return parts[parts.length - 1].trim();
+};
+
+export const processNevoboProxyData = (data, fetchType, dateThreshold, now) => {
   try {
-    const filtered = data._embedded.items.filter(item => {
-      const matchDate = new Date(item.datum);
-      return fetchType === 'info'
-        ? matchDate >= now && matchDate <= dateThreshold
-        : matchDate >= dateThreshold && matchDate <= now;
-    });
+    return data._embedded.items
+      .filter((item) => inWindow(new Date(item.datum), fetchType, now, dateThreshold))
+      .map((item) => {
+        const home = item._embedded.pouleindeling_thuis._embedded.team;
+        const away = item._embedded.pouleindeling_uit._embedded.team;
 
-    return filtered.map(item => {
-      const homeParts = item._embedded.pouleindeling_thuis._embedded.team.naam.split(/\s*\/+\s*/);
-      const awayParts = item._embedded.pouleindeling_uit._embedded.team.naam.split(/\s*\/+\s*/);
-
-      return {
-        wedstrijddatum: fetchType === 'info' 
-          ? formatDateTime(item.tijd)
-          : formatDateFn(item.datum),
-        uitslag: fetchType === 'results' ? item.uitslag.code : undefined,
-        datumopgemaakt: fetchType === 'results' ? formatDateFn(item.datum) : undefined,
-        thuisteam: homeParts[homeParts.length - 1].trim(),
-        uitteam: awayParts[awayParts.length - 1].trim(),
-        thuisteamlogo: item._embedded?.pouleindeling_thuis?._embedded.team?._embedded?.vereniging?._links?.logo_url?.href || noImage,
-        uitteamlogo: item._embedded?.pouleindeling_uit?._embedded?.team?._embedded?.vereniging?._links?.logo_url?.href || noImage,
-        competitiesoort: formatCompType(item._embedded?.poule?._embedded?.regio?.omschrijving || ''),
-      };
-    });
+        return {
+          id: rowId(item.uuid ?? item.id ?? item['@id'], item.datum, home.naam, away.naam),
+          wedstrijddatum: fetchType === 'info' ? formatDateTime(item.tijd) : formatNevoboDate(item.datum),
+          uitslag: fetchType === 'results' ? item.uitslag?.code : undefined,
+          datumopgemaakt: fetchType === 'results' ? formatNevoboDate(item.datum) : undefined,
+          thuisteam: lastNamePart(home.naam),
+          uitteam: lastNamePart(away.naam),
+          thuisteamlogo: home._embedded?.vereniging?._links?.logo_url?.href || noImage,
+          uitteamlogo: away._embedded?.vereniging?._links?.logo_url?.href || noImage,
+          competitiesoort: formatCompType(item._embedded?.poule?._embedded?.regio?.omschrijving || ''),
+        };
+      });
   } catch (error) {
-    console.error(`Unexpected data format on Nevobo Proxy:`, error);
+    console.error('Unexpected data format on Nevobo Proxy:', error);
     return [];
   }
 };

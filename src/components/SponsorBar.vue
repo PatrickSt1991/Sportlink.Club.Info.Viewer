@@ -24,22 +24,23 @@
 
 <script setup>
 import { ref, computed, onMounted, onUnmounted } from 'vue';
-import { USER_CONFIG } from '@/config';
+import { useConfigStore } from '@/stores/configStore';
 import { useSponsorStore } from '@/stores/sponsorStore';
 
 const sponsorStore = useSponsorStore();
+const { config } = useConfigStore();
 const year = ref(new Date().getFullYear());
 const imageSrc = ref(null);
 
 const sponsorStyle = computed(() =>
-  USER_CONFIG.value.activeSponsors ? {} : { visibility: 'hidden' }
+  config.activeSponsors ? {} : { visibility: 'hidden' }
 );
 
 function loadBinaryImage() {
   fetch(new URL('../assets/main.bin', import.meta.url).href)
     .then(r => r.arrayBuffer())
     .then(buf => {
-      imageSrc.value = URL.createObjectURL(new Blob([buf], { type: 'image/jpg' }));
+      imageSrc.value = URL.createObjectURL(new Blob([buf], { type: 'image/jpeg' }));
     })
     .catch(err => console.error('Error loading binary image:', err));
 }

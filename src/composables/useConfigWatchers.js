@@ -1,242 +1,136 @@
-import { watch, ref } from 'vue';
-import { APP_CREDENTIALS} from '@/config';
-import { useToast } from "vue-toastification";
+import { watch } from 'vue';
+import { useToast } from 'vue-toastification';
+import { getAppCreds, getJson, proxyJson } from '@/api/client';
 
-export function useConfigWatchers(config, { 
-    sportlinkAuth, 
-    clubData,
-    showClubSelectPopup,
-    updateUserConfig 
-}) {
-    let refreshInterval;
-    let saveTimeout;
-    let handlerTimeout = null;
-    const toast = useToast();
+const ERROR_TOAST = { timeout: 15000, closeOnClick: true, draggable: false, closeButton: 'button' };
+const RESULT_TOAST = {
+  position: 'top-right',
+  timeout: 5000,
+  closeOnClick: true,
+  pauseOnFocusLoss: false,
+  pauseOnHover: false,
+  hideProgressBar: true,
+  closeButton: 'button',
+  icon: true,
+};
 
-    function setupWatchers() {
-        watch(
-            () => JSON.parse(JSON.stringify(config.value)),
-            (newConfig) => {
-              clearTimeout(saveTimeout);
-              saveTimeout = setTimeout(() => {
-                updateUserConfig(newConfig);
-              }, 300);
-            },
-            { deep: true }
-          );
+/**
+ * Reacts to credential/connection changes on the settings page:
+ * validates the Sportlink API client id, logs in to the Sportlink proxy and
+ * opens the club picker when no club has been chosen yet.
+ */
+export function useConfigWatchers(config, { sportlinkAuth, clubData, showClubSelectPopup }) {
+  const toast = useToast();
+  let handlerTimeout = null;
+  let stopWatcher = null;
 
-        watch(
-            () => ({
-                gameType: config.value.gameType,
-                connectionType: config.value.connectionType,
-                username: config.value.username?.trim(),
-                password: config.value.password?.trim(),
-                validUsername: config.value.validUsername,
-                validPassword: config.value.validPassword,
-                fakeCredentials: config.value.fakeCredentials,
-                clientId: config.value.clientId,
-                validClientId: config.value.validClientId
-            }),
-            async ({ 
-                gameType, 
-                connectionType,
-                username, 
-                password, 
-                validUsername, 
-                validPassword, 
-                clientId, 
-                fakeCredentials,
-                validClientId
-            }) => {
-                if(handlerTimeout){
-                    clearTimeout(handlerTimeout);
-                }
+  function setupWatchers() {
+    stopWatcher = watch(
+      () => ({
+        gameLabel: config.gameType?.label ?? null,
+        connectionType: config.connectionType,
+        username: config.username?.trim(),
+        password: config.password?.trim(),
+        validUsername: config.validUsername,
+        validPassword: config.validPassword,
+        fakeCredentials: config.fakeCredentials,
+        clientId: config.clientId,
+        validClientId: config.validClientId,
+        clubIdentifer: config.clubIdentifer,
+      }),
+      (state) => {
+        clearTimeout(handlerTimeout);
+        handlerTimeout = setTimeout(() => handle(state), 300);
+      },
+      { immediate: true }
+    );
+  }
 
-                handlerTimeout = setTimeout(async () => {
-                    if (connectionType === 'Sportlink API' && clientId) {
-                        await handleSportlinkApi(clientId, validClientId);
-                    }
+  async function handle(state) {
+    try {
+      if (state.connectionType === 'Sportlink API' && state.clientId && state.validClientId) {
+        await handleSportlinkApi(state.clientId);
+      } else if (state.connectionType === 'Nevobo Proxy') {
+        await handleNevoboProxy();
+      } else if (state.connectionType === 'Sportlink Proxy') {
+        await handleSportlinkProxy(state);
+      }
+    } catch (error) {
+      console.error('Configuration handler failed:', error);
+    } finally {
+      handlerTimeout = null;
+    }
+  }
 
-                    if (connectionType === 'Nevobo Proxy') {
-                        await handleNevoboProxy();
-                    }
+  async function handleSportlinkApi(clientId) {
+    try {
+      const data = await getJson(`https://data.sportlink.com/clubgegevens?client_id=${clientId}`);
+      if (data?.bezoekadres?.naam) {
+        config.sportLocatie = data.bezoekadres.naam;
+        toast.success('Sportlink API met success ingelogd', RESULT_TOAST);
+      }
+    } catch (error) {
+      if (error.status === 401) {
+        toast.error(`Inloggen bij Sportlink is mislukt met clientId: ${clientId}`, { ...RESULT_TOAST, draggable: true });
+        config.validClientId = false;
+        return;
+      }
+      toast.info('Iets ging fout, controleer de console!', ERROR_TOAST);
+      console.error('Error fetching club data:', error);
+    }
+  }
 
-                    if (connectionType === 'Sportlink Proxy' && (username && password || fakeCredentials)) {
-                        await handleSportlinkProxy({ 
-                            gameType, 
-                            username, 
-                            password, 
-                            validUsername, 
-                            validPassword, 
-                            fakeCredentials
-                        });
-                    }
-
-                    handlerTimeout = null;
-                }, 50);
-            },
-            { deep: true, immediate: true }
-        );
-
+  async function handleNevoboProxy() {
+    if (!config.clubIdentifer) {
+      // No club chosen yet: load the list and let the user pick. The watcher
+      // re-runs once `clubIdentifer` is set.
+      try {
+        await clubData.fetchNevoboClubs();
+        showClubSelectPopup.value = true;
+      } catch (error) {
+        console.error('Error during Nevobo club fetch:', error);
+      }
+      return;
     }
 
-    async function handleSportlinkApi(clientId, validClientId) {
-        if(!validClientId) return;
-        try {
-            const response = await fetch(`https://data.sportlink.com/clubgegevens?client_id=${clientId}`);
-            if(response.status === 401){
-                toast.error(`Inloggen bij Sportlink is mislukt met clientId: ${clientId}`, {
-                    position: "top-right",
-                    timeout: 5000,
-                    closeOnClick: true,
-                    pauseOnFocusLoss: false,
-                    pauseOnHover: false,
-                    draggable: true,
-                    draggablePercent: 0.6,
-                    showCloseButtonOnHover: false,
-                    hideProgressBar: true,
-                    closeButton: "button",
-                    icon: true,
-                    rtl: false
-                });
-
-                config.value.validClientId = false;
-            }
-            if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-            
-            const data = await response.json();
-            if (data?.bezoekadres?.naam) {
-                config.value.sportLocatie = data.bezoekadres.naam;
-                toast.success("Sportlink API met success ingelogd", {
-                    position: "top-right",
-                    timeout: 5000,
-                    closeOnClick: true,
-                    pauseOnFocusLoss: false,
-                    pauseOnHover: false,
-                    draggable: false,
-                    draggablePercent: 0.6,
-                    showCloseButtonOnHover: false,
-                    hideProgressBar: true,
-                    closeButton: "button",
-                    icon: true,
-                    rtl: false
-                  });
-            }
-            
-        } catch (error) {
-            toast.info(`Iets ging fout, controleer de console!`, {
-                timeout: 15,
-                closeOnClick: false,
-                draggable: false,
-                closeButton: false
-            });
-            console.error('Error fetching club data:', error);
-        }
+    try {
+      const data = await proxyJson(`https://api.nevobo.nl/relatiebeheer/verenigingen/${config.clubIdentifer}`);
+      if (data?.naam) config.sportLocatie = data.vestigingsplaats;
+    } catch (error) {
+      toast.info('Iets ging fout, controleer de console!', ERROR_TOAST);
+      console.error('Error fetching vereniging data from Nevobo API:', error);
     }
+  }
 
-    async function handleNevoboProxy() {
-        try {
-            if (!config.value.clubIdentifer) {
-                try {                    
-                    await clubData.fetchNevoboClubs();
-                    showClubSelectPopup.value = true;
-                } catch (error) {
-                    console.error('Error during nevobo club fetch:', error);
-                }
-            }
-            const url = `https://api.nevobo.nl/relatiebeheer/verenigingen/${config.value.clubIdentifer}`;
-            const proxiedUrl = `https://cors-proxy.clubinfoproxy.workers.dev/proxy?url=${encodeURIComponent(url)}`;
+  async function handleSportlinkProxy({ gameLabel, username, password, validUsername, validPassword, fakeCredentials }) {
+    const canLogin = (validUsername && validPassword && username && password) || fakeCredentials;
+    if (!canLogin) return;
 
-            const response = await fetch(proxiedUrl);
-            if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+    const appCreds = getAppCreds(gameLabel);
+    if (!appCreds) return;
 
-            const data = await response.json();
+    try {
+      if (!sportlinkAuth.hasValidToken()) {
+        const ok = fakeCredentials
+          ? await sportlinkAuth.useFakeCredentials(appCreds)
+          : await sportlinkAuth.login(username, password, appCreds);
+        if (!ok) return;
+      }
 
-            if (data?.naam) {
-                config.value.sportLocatie = data.vestigingsplaats;
-            }
-        } catch (error) {
-            toast.info(`Iets ging fout, controleer de console!`, {
-                timeout: 15,
-                closeOnClick: false,
-                draggable: false,
-                closeButton: false
-            });
-            console.error('Error fetching vereniging data from Nevobo API:', error);
-        } finally {
-            config.value.clientId = null;
-        }
+      if (!config.clubId) {
+        await clubData.fetchSportlinkClubs(appCreds);
+        showClubSelectPopup.value = true;
+      }
+    } catch (error) {
+      toast.info('Iets ging fout, controleer de console!', ERROR_TOAST);
+      console.error('Error during login or club fetch:', error);
     }
+  }
 
-    async function handleSportlinkProxy({ 
-        gameType, 
-        username, 
-        password, 
-        validUsername, 
-        validPassword, 
-        fakeCredentials,
-    }) {
-        const tokenExpired = !sportlinkAuth.sportlinkTokenInfo.value.access_token || 
-                            Date.now() >= sportlinkAuth.sportlinkTokenInfo.value.expires_at;
+  function cleanup() {
+    clearTimeout(handlerTimeout);
+    stopWatcher?.();
+  }
 
-        const appCreds = APP_CREDENTIALS.find(cred => 
-            cred.type.toLowerCase() === gameType.label.toLowerCase()
-        );
-
-        if(!appCreds) return;
-
-        if((validUsername && validPassword) || fakeCredentials) {
-            if (tokenExpired || !config.value.clubId) {
-                try {
-                    if (fakeCredentials) {
-                        await sportlinkAuth.useFakeCredentials(appCreds);
-                    } else {
-                        await sportlinkAuth.login(username, password, appCreds);
-                    }
-                    
-                    await clubData.fetchSportlinkClubs(appCreds);
-                    showClubSelectPopup.value = true;
-                } catch (error) {
-                    toast.info(`Iets ging fout, controleer de console!`, {
-                        timeout: 15,
-                        closeOnClick: false,
-                        draggable: false,
-                        closeButton: false
-                    });
-                    console.error('Error during login or club fetch:', error);
-                }
-            }
-
-            if(refreshInterval) {
-                clearInterval(refreshInterval);
-            }
-
-            refreshInterval = setInterval(async () => {
-                if (sportlinkAuth.sportlinkTokenInfo.value.expires_at) {
-                    const timeLeft = sportlinkAuth.sportlinkTokenInfo.value.expires_at - Date.now();
-                    if(timeLeft < 5 * 60 * 1000){
-                        console.log(`Refreshing Sportlink token...`)
-                        await sportlinkAuth.refreshToken(appCreds);
-                    }
-                }
-            }, 60 * 1000);
-        }
-    }
-
-    function cleanup() {
-        if (refreshInterval) {
-            clearInterval(refreshInterval);
-        }
-        if (saveTimeout) {
-            clearTimeout(saveTimeout);
-        }
-        if(handlerTimeout){
-            clearTimeout(handlerTimeout)
-        }
-    }
-
-    return {
-        setupWatchers,
-        cleanup
-    };
+  return { setupWatchers, cleanup };
 }

@@ -1,0 +1,31 @@
+{
+  "ProgramItemMatchClub": [
+    {
+      "Match": {
+        "PublicMatchId": "PM-1",
+        "MatchDateTime": "2026-10-20T14:30:00+02:00",
+        "HomeTeam": { "TeamName": "SV Test 1", "Club": { "ClubId": "CLUB-1", "ClubLogo": { "Bucket": "b", "Hash": "h1" } } },
+        "AwayTeam": { "TeamName": "FC Gast 1", "Club": { "ClubId": "CLUB-9", "ClubLogo": { "Bucket": "b", "Hash": "h2" } } },
+        "Pool": { "CompetitionKind": "DEFAULT_COMPETITION" }
+      }
+    },
+    {
+      "Match": {
+        "PublicMatchId": "PM-2",
+        "MatchDateTime": "2026-10-18T15:00:00+02:00",
+        "HomeTeam": { "TeamName": "SV Test 2", "Club": { "ClubId": "CLUB-1" } },
+        "AwayTeam": { "TeamName": "FC Gast 2", "Club": { "ClubId": "CLUB-8" } },
+        "Pool": { "CompetitionKind": "TROPHY_COMPETITION" }
+      }
+    },
+    {
+      "Match": {
+        "PublicMatchId": "PM-3",
+        "MatchDateTime": "2026-10-18T15:00:00+02:00",
+        "HomeTeam": { "TeamName": "Uit Team", "Club": { "ClubId": "CLUB-7" } },
+        "AwayTeam": { "TeamName": "SV Test 3", "Club": { "ClubId": "CLUB-1" } },
+        "Pool": { "CompetitionKind": "DEFAULT_COMPETITION" }
+      }
+    }
+  ]
+}

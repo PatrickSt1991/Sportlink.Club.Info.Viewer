@@ -1,5 +1,3 @@
-import { ref } from 'vue';
-
 export const FAKE_CREDENTIALS = [
   { 
     username: 'rxxnrextolzwlqsspy@hthlm.com', 
@@ -236,7 +234,7 @@ export const AVAILABLE_HOME_SCREENS = Object.keys(HOME_SCREENS).filter(
   (key) => HOME_SCREENS[key]
 );
 
-const defaultConfig = {
+export const defaultConfig = {
   clientId: null,
   clubIdentifer: null,
   clubId: null,
@@ -284,25 +282,5 @@ const defaultConfig = {
   standingColWidths: { pos: 52, stat: 44, goal: 44, pts: 52 },
 };
 
-export const BASE_URL = defaultConfig.onPrem ? './' : '/Sportlink.Club.Info.Viewer/';
-
-const getInitialConfig = () => {
-  const config = JSON.parse(JSON.stringify(defaultConfig));
-  config.baseUrl = BASE_URL;
-  return config;
-};
-
-const savedConfig = (typeof window !== 'undefined' && window.localStorage)
-  ? JSON.parse(localStorage.getItem('userConfig')) || getInitialConfig()
-  : getInitialConfig();
-
-export const USER_CONFIG = ref(savedConfig);
-
-export const updateUserConfig = (newConfig) => {
-  if (typeof window !== 'undefined' && window.localStorage) {
-    const configToSave = JSON.parse(JSON.stringify(newConfig));
-    localStorage.setItem('userConfig', JSON.stringify(configToSave));
-  }
-
-  Object.assign(USER_CONFIG.value, JSON.parse(JSON.stringify(newConfig)));
-};
+/** Hash-router base. The app is always served relative to its own index.html. */
+export const BASE_URL = './';

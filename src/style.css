@@ -132,12 +132,7 @@ button:focus-visible {
 
 /* All box columns — no font-size here so each context (header/data)
    inherits cleanly: header gets 13px/500, data gets 18px/600 */
-#datumUitslag_fixed,
-#datumProgramma_fixed,
-#thuisteam_fixed,
-#kleedkamer_fixed,
-#uitteam_fixed,
-#wedstrijdveld_fixed {
+.matchCol {
   font-size: inherit;
   font-weight: inherit;
   display: flex;
@@ -147,38 +142,30 @@ button:focus-visible {
   box-shadow: inset -1px 0 0 rgba(0, 0, 0, 0.20);
 }
 
-#datumUitslag_fixed {
+.col-date {
   width: 10%;
   padding: 18px 10px;
   letter-spacing: 0.03em;
 }
 
-#datumProgramma_fixed {
-  width: 10%;
-  padding: 10px 10px;
-  letter-spacing: 0.03em;
-}
-
-#thuisteam_fixed {
+.col-team {
   width: 45%;
   padding: 18px 16px;
 }
 
-#uitteam_fixed {
-  width: 45%;
-  padding: 18px 16px;
-}
-
-#kleedkamer_fixed {
+.col-mid {
   width: 20%;
   padding: 18px 10px;
 }
 
-#wedstrijdveld_fixed {
+.col-comp {
   width: 15%;
   padding: 18px 10px;
   letter-spacing: 0.04em;
-  /* Last column — remove the right separator */
+}
+
+/* Last column — remove the right separator */
+.matchEntry > .matchCol:last-child {
   box-shadow: none;
 }
 
@@ -203,7 +190,7 @@ button:focus-visible {
 }
 
 /* ─── Scrolling container ─────────────────────────────────── */
-#scrollingContainer {
+.scrollingContainer {
   overflow-y: hidden;
   position: relative;
 }

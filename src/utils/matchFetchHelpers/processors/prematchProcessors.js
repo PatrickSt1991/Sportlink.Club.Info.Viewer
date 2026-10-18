@@ -1,94 +1,94 @@
-export const processPreMatchSportlinkApiData = (data, currentDate, laterDate, config, formatTime, formatKleedkamer, formatVeld) => {
-    try {
-      return data
-        .filter(match => {
-          const matchDateTime = new Date(match.wedstrijddatum.replace(/(\+|\-)(\d{2})(\d{2})$/, '$1$2:$3'));
-          const isSameDay = matchDateTime.toDateString() === currentDate.toDateString();
-          const isInWindow = matchDateTime >= currentDate && matchDateTime <= laterDate;
-          const isCorrectLocation = match.accommodatie === config?.sportLocatie;
-          return isCorrectLocation && isSameDay && isInWindow;
-        })
-        .map(match => ({
-          wedstrijddatum: formatTime(match.wedstrijddatum),
-          thuisteam: match.thuisteam,
-          uitteam: match.uitteam,
-          kleedkamerthuisteam: formatKleedkamer(match.kleedkamerthuisteam),
-          kleedkameruitteam: formatKleedkamer(match.kleedkameruitteam),
-          veld: formatVeld(match.veld)
-        }));
-    } catch (error) {
-      console.error("Unexpected data format on Sportlink API:", error);
-      return [];
-    }
-  };
-  
-  export const processPreMatchSportlinkProxyData = async (data, currentDate, laterDate, config, formatTime, formatKleedkamer, formatVeld) => {
-    try {
-      const tokenInfo = JSON.parse(localStorage.getItem('sportlinkTokenInfo'));
-      const matchesRaw = data.ProgramItemMatchClub
-        .filter(item => {
-          const matchDateTime = new Date(item.Match.matchDateTime);
-          const isSameDay = matchDateTime.toDateString() === currentDate.toDateString();
-          const isInWindow = matchDateTime >= currentDate && matchDateTime <= laterDate;
-          const isCorrectLocation = item.Match.HomeTeam.Club.ClubId === config.clubId;
-          return isCorrectLocation && isSameDay && isInWindow;
-        });
-  
-      return await Promise.all(matchesRaw.map(async match => {
-        const matchId = match.Match.PublicMatchId;
-        
-        const fetchMatchDetails = async (matchid) => {
-          const url = `https://app-sportlinked-production.sportlink.com/entity/common/memberportal/app/match/MatchFacility?v=3&PublicMatchId=${matchid}`;
-          const proxyUrl = `https://cors-proxy.clubinfoproxy.workers.dev/proxy?url=${encodeURIComponent(url)}`;
-          const response = await fetch(proxyUrl, {
-            method: 'GET',
-            headers: {
-              'Authorization': `Bearer ${tokenInfo?.access_token}`,
-              'X-Real-User-Agent': `sportlink-app-${config.gameType?.instance.toLowerCase()}/6.26.0-2025017636 android SM-N976N/samsung/25 (6.26.0)`,
-              'X-Navajo-Instance': `${config.gameType?.instance}`,
-              'X-Navajo-Locale': 'nl',
-              'X-Navajo-Version': '3',
-            }
-          });
-          return await response.json();
-        };
-  
-        const matchDetails = matchId ? await fetchMatchDetails(matchId) : null;
-  
-        return {
-          wedstrijddatum: formatTime(match.Match.MatchDateTime),
-          thuisteam: match.Match.HomeTeam.TeamName,
-          kleedkamerthuisteam: formatKleedkamer(matchDetails?.HomeDressingRoom),
-          uitteam: match.Match.AwayTeam.TeamName,
-          kleedkameruitteam: formatKleedkamer(matchDetails?.AwayDressingRoom),
-          veld: formatVeld(matchDetails?.SubFacilityName)
-        };
+import { sportlinkGet } from '@/api/client';
+import { formatCompType } from '@/utils/formatCompType.js';
+import { formatTime } from '@/utils/formatDateType.js';
+import { formatKleedkamer, formatVeld } from '@/utils/formatUtils.js';
+import { getMatchFacilityUrl } from '../urlBuilders';
+import { rowId, inPreMatchWindow } from './shared';
+
+/** Sportlink returns offsets like +0200; make them ISO (+02:00) for Date parsing. */
+const normalizeOffset = (value) => String(value).replace(/([+-])(\d{2})(\d{2})$/, '$1$2:$3');
+
+export const processPreMatchSportlinkApiData = (data, from, to, config) => {
+  try {
+    return data
+      .filter((match) => {
+        const date = new Date(normalizeOffset(match.wedstrijddatum));
+        return match.accommodatie === config?.sportLocatie && inPreMatchWindow(date, from, to);
+      })
+      .map((match) => ({
+        id: rowId(match.wedstrijdcode, match.wedstrijddatum, match.thuisteam, match.uitteam),
+        wedstrijddatum: formatTime(match.wedstrijddatum),
+        thuisteam: match.thuisteam,
+        uitteam: match.uitteam,
+        kleedkamerthuisteam: formatKleedkamer(match.kleedkamerthuisteam),
+        kleedkameruitteam: formatKleedkamer(match.kleedkameruitteam),
+        veld: formatVeld(match.veld),
       }));
-    } catch (error) {
-      console.error("Unexpected data format on Sportlink Proxy:", error);
-      return [];
-    }
-  };
-  
-  export const processPreMatchNevoboProxyData = (data, currentDate, laterDate, config, formatTime, formatCompType) => {
-    try {
-      return data._embedded.items
-        .filter(match => {
-          const matchDateTime = new Date(match.tijd);
-          const isSameDay = matchDateTime.toDateString() === currentDate.toDateString();
-          const isInWindow = matchDateTime >= currentDate && matchDateTime <= laterDate;
-          const isCorrectLocation = match._embedded.pouleindeling_thuis._embedded.team._embedded.vereniging.vestigingsplaats === config?.sportLocatie;
-          return isCorrectLocation && isSameDay && isInWindow;
-        })
-        .map(match => ({
+  } catch (error) {
+    console.error('Unexpected data format on Sportlink API:', error);
+    return [];
+  }
+};
+
+export const processPreMatchSportlinkProxyData = async (data, from, to, config, appCreds) => {
+  try {
+    const matches = (data.ProgramItemMatchClub ?? []).filter((item) => {
+      const date = new Date(item.Match.MatchDateTime);
+      return item.Match.HomeTeam?.Club?.ClubId === config.clubId && inPreMatchWindow(date, from, to);
+    });
+
+    return await Promise.all(
+      matches.map(async ({ Match: match }) => {
+        let details = null;
+        if (match.PublicMatchId) {
+          try {
+            details = await sportlinkGet(getMatchFacilityUrl(appCreds, match.PublicMatchId), appCreds, { version: '3' });
+          } catch (err) {
+            console.warn(`Could not load facility details for match ${match.PublicMatchId}`, err);
+          }
+        }
+
+        return {
+          id: rowId(match.PublicMatchId, match.MatchDateTime, match.HomeTeam?.TeamName, match.AwayTeam?.TeamName),
+          wedstrijddatum: formatTime(match.MatchDateTime),
+          thuisteam: match.HomeTeam?.TeamName,
+          kleedkamerthuisteam: formatKleedkamer(details?.HomeDressingRoom),
+          uitteam: match.AwayTeam?.TeamName,
+          kleedkameruitteam: formatKleedkamer(details?.AwayDressingRoom),
+          veld: formatVeld(details?.SubFacilityName),
+        };
+      })
+    );
+  } catch (error) {
+    console.error('Unexpected data format on Sportlink Proxy:', error);
+    return [];
+  }
+};
+
+export const processPreMatchNevoboProxyData = (data, from, to, config) => {
+  try {
+    return data._embedded.items
+      .filter((match) => {
+        const date = new Date(match.tijd);
+        const city = match._embedded.pouleindeling_thuis._embedded.team._embedded.vereniging.vestigingsplaats;
+        return city === config?.sportLocatie && inPreMatchWindow(date, from, to);
+      })
+      .map((match) => {
+        const home = match._embedded.pouleindeling_thuis._embedded.team;
+        const away = match._embedded.pouleindeling_uit._embedded.team;
+        return {
+          id: rowId(match.uuid ?? match.id ?? match['@id'], match.tijd, home.naam, away.naam),
           wedstrijddatum: formatTime(match.tijd),
-          thuisteam: match._embedded.pouleindeling_thuis._embedded.team.naam,
-          uitteam: match._embedded.pouleindeling_uit._embedded.team.naam,
-          veld: match._embedded.speelveld.aanduiding || "Onbekend",
-          competitiesoort: formatCompType(match._embedded?.poule?._embedded?.regio?.omschrijving || '')
-        }));
-    } catch (error) {
-      console.error("Unexpected data format on Nevobo Proxy:", error);
-      return [];
-    }
-  };
+          thuisteam: home.naam,
+          uitteam: away.naam,
+          kleedkamerthuisteam: formatKleedkamer(null),
+          kleedkameruitteam: formatKleedkamer(null),
+          veld: match._embedded.speelveld?.aanduiding || 'Onbekend',
+          competitiesoort: formatCompType(match._embedded?.poule?._embedded?.regio?.omschrijving || ''),
+        };
+      });
+  } catch (error) {
+    console.error('Unexpected data format on Nevobo Proxy:', error);
+    return [];
+  }
+};
