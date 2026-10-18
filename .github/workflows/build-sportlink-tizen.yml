@@ -11,142 +11,77 @@ permissions:
 
 env:
   TIZEN_STUDIO_VER: 5.5
+  TIZEN_STUDIO_DIR: ${{ github.workspace }}/tizen-studio
   TIZEN_CLI: ${{ github.workspace }}/tizen-studio/tools/ide/bin/tizen
+  TIZEN_CERT_PASS: ${{ secrets.TIZEN_CERT_PASS }}
+  DISTRIBUTOR_PASS: tizenpkcs12passfordsigner
 
 jobs:
   build-and-release:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout main
+      - name: Checkout
         uses: actions/checkout@v4
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '22'
+          cache: npm
 
       - name: Read version from package.json
         id: version
-        run: echo "version=$(jq -r '.version' package.json)" >> $GITHUB_OUTPUT
+        run: echo "version=$(jq -r '.version' package.json)" >> "$GITHUB_OUTPUT"
 
       - name: Install npm dependencies
-        run: npm ci --no-audit
+        run: npm ci --no-audit --no-fund
 
-      - name: Build web app (normal config)
+      - name: Run tests
+        run: npm test
+
+      - name: Build web app
         run: npm run build
 
       - name: Zip web build output
         run: |
           mkdir -p release
-          cd dist
-          zip -r "../release/Sportlink-Club-Viewer-v${{ steps.version.outputs.version }}-web.zip" .
+          (cd dist && zip -r "../release/Sportlink-Club-Viewer-v${{ steps.version.outputs.version }}-web.zip" .)
 
-      - name: Install Tizen build dependencies
-        run: npm install --no-save regenerator-runtime
-
-      - name: Override vite.config.js for Tizen
-        run: |
-          cat > vite.config.js << 'VITEEOF'
-          import { defineConfig } from 'vite';
-          import vue from '@vitejs/plugin-vue';
-          import legacy from '@vitejs/plugin-legacy';
-          import { fileURLToPath, URL } from 'url';
-
-          export default defineConfig({
-            base: './',
-            plugins: [
-              vue(),
-              legacy({
-                targets: ['Chrome >= 56', 'Safari >= 10', 'Android >= 5'],
-                additionalLegacyPolyfills: ['regenerator-runtime/runtime', 'whatwg-fetch'],
-              }),
-            ],
-            build: {
-              target: 'es5',
-              outDir: 'dist',
-              assetsDir: 'assets',
-              rollupOptions: {
-                output: {
-                  manualChunks: undefined,
-                },
-              },
-            },
-            resolve: {
-              alias: {
-                '@': fileURLToPath(new URL('./src', import.meta.url)),
-              },
-            },
-          });
-          VITEEOF
-
-      - name: Apply Tizen-specific source patches
-        run: |
-          mkdir -p src/composables
-          cp .github/tizen-patches/ClubSelectPopup.vue src/components/ClubSelectPopup.vue
-          cp .github/tizen-patches/useRemoteControl.js src/composables/useRemoteControl.js
-
+      # `--mode tizen` emits config.xml, logo.png and tizen-cursor.js next to the bundle
       - name: Build app for Tizen
-        run: npm run build
+        run: npm run build:tizen
 
       - name: Assemble tizen-app/
         run: |
           mkdir -p tizen-app
-          cp -r dist/* tizen-app/
-
-          # Locate app icon – try common paths, skip silently if missing
-          for icon in src/assets/logo.png public/logo.png logo.png src/assets/icon.png; do
-            if [ -f "$icon" ]; then
-              cp "$icon" tizen-app/logo.png
-              echo "Using icon: $icon"
-              break
-            fi
-          done
-
-      - name: Generate config.xml
-        run: |
-          VERSION=${{ steps.version.outputs.version }}
-          cat > tizen-app/config.xml << EOF
-          <?xml version="1.0" encoding="UTF-8"?>
-          <widget xmlns:tizen="http://tizen.org/ns/widgets" xmlns="http://www.w3.org/ns/widgets" id="https://github.com/PatrickSt1991/Sportlink.Club.Info.Viewer" version="${VERSION}" viewmodes="fullscreen">
-              <access origin="*" subdomains="true"/>
-              <tizen:application id="Lt8KPyCeb1.SportlinkClubViewer" package="Lt8KPyCeb1" required_version="2.3"/>
-              <author href="https://github.com/PatrickSt1991/Sportlink.Club.Info.Viewer" email="patrick@madebypatrick.nl">Patrick Stel</author>
-              <content src="index.html"/>
-              <tizen:content-security-policy>default-src * data: blob: filesystem:; script-src * 'unsafe-inline' 'unsafe-eval' data: blob:; connect-src * data: blob:; img-src * data: blob:; style-src * 'unsafe-inline';</tizen:content-security-policy>
-              <description>Kleedkamer/veld indeling, wedstrijd programma &amp; uitslagen weergaven op Samsung Smart TV</description>
-              <feature name="http://tizen.org/feature/screen.size.normal.1080.1920"/>
-              <icon src="logo.png"/>
-              <license href="https://github.com/PatrickSt1991/Sportlink.Club.Info.Viewer/blob/main/LICENSE">MIT</license>
-              <tizen:metadata key="http://samsung.com/tv/metadata/prelaunch.support" value="true"/>
-              <name>SportlinkClubViewer</name>
-              <tizen:privilege name="http://tizen.org/privilege/internet"/>
-              <tizen:privilege name="http://tizen.org/privilege/application.launch"/>
-              <tizen:privilege name="http://tizen.org/privilege/tv.inputdevice"/>
-              <tizen:profile name="tv-samsung"/>
-              <tizen:setting screen-orientation="landscape" context-menu="enable" background-support="disable" encryption="disable" install-location="auto" hwkey-event="enable"/>
-          </widget>
-          EOF
+          cp -r dist-tizen/* tizen-app/
+          ls -la tizen-app
 
       - name: Install system dependencies
         run: sudo apt-get install -y expect
 
-      - name: Download Tizen Studio
+      - name: Cache Tizen Studio
+        id: tizen-cache
+        uses: actions/cache@v4
+        with:
+          path: ${{ env.TIZEN_STUDIO_DIR }}
+          key: tizen-studio-${{ env.TIZEN_STUDIO_VER }}-ubuntu-64
+
+      - name: Install Tizen Studio
+        if: steps.tizen-cache.outputs.cache-hit != 'true'
         run: |
           curl -o tizen-installer \
             "https://download.tizen.org/sdk/Installer/tizen-studio_${TIZEN_STUDIO_VER}/web-cli_Tizen_Studio_${TIZEN_STUDIO_VER}_ubuntu-64.bin"
-
-      - name: Install Tizen Studio
-        run: |
           chmod +x tizen-installer
-          ./tizen-installer --accept-license "${GITHUB_WORKSPACE}/tizen-studio"
+          ./tizen-installer --accept-license "$TIZEN_STUDIO_DIR"
           rm ./tizen-installer
 
       - name: Create Tizen signing certificate
         run: |
           "$TIZEN_CLI" certificate \
             -a SportlinkClub \
-            -p "${{ secrets.TIZEN_CERT_PASS }}" \
+            -p "$TIZEN_CERT_PASS" \
             -c NL -s Groningen -ct Groningen \
             -o SportlinkClub -n SportlinkClub \
             -e patrick@madebypatrick.nl \
@@ -155,103 +90,10 @@ jobs:
           "$TIZEN_CLI" security-profiles add \
             -n SportlinkClub \
             -a "${GITHUB_WORKSPACE}/tizen-studio-data/keystore/author/SportlinkClub.p12" \
-            -p "${{ secrets.TIZEN_CERT_PASS }}"
+            -p "$TIZEN_CERT_PASS"
 
           "$TIZEN_CLI" cli-config \
             "profiles.path=${GITHUB_WORKSPACE}/tizen-studio-data/profile/profiles.xml"
-
-      - name: Inject Tizen cursor navigation
-        run: |
-          cat > tizen-app/tizen-cursor.js << 'CURSOREOF'
-          (function () {
-            var cursor = document.createElement('div');
-            cursor.style.cssText = 'position:fixed;width:24px;height:24px;border-radius:50%;background:rgba(255,255,255,0.9);border:2px solid rgba(0,0,0,0.5);box-shadow:0 2px 6px rgba(0,0,0,0.4);pointer-events:none;z-index:99999;margin-left:-12px;margin-top:-12px';
-            document.body.appendChild(cursor);
-
-            var x = window.innerWidth / 2;
-            var y = window.innerHeight / 2;
-            cursor.style.left = x + 'px';
-            cursor.style.top = y + 'px';
-
-            var keys = {};
-            var holdStart = 0;
-            var BASE = 1;
-            var MAX = 40;
-
-            function getSpd() {
-              var held = holdStart ? Date.now() - holdStart : 0;
-              if (held < 400) return BASE;
-              return Math.min(BASE + Math.floor((held - 400) / 25), MAX);
-            }
-
-            function inputFocused() {
-              var a = document.activeElement;
-              return a && (a.tagName === 'INPUT' || a.tagName === 'TEXTAREA' || a.tagName === 'SELECT' || a.contentEditable === 'true');
-            }
-
-            function getTarget(cx, cy) {
-              var els = document.elementsFromPoint ? document.elementsFromPoint(cx, cy) : [];
-              for (var i = 0; i < els.length; i++) {
-                var el = els[i];
-                if (el === cursor || el === document.body || el === document.documentElement) continue;
-                if (window.getComputedStyle(el).pointerEvents === 'none') continue;
-                return el;
-              }
-              return document.elementFromPoint(cx, cy);
-            }
-
-            function popupOpen() {
-              return !!document.querySelector('.popup-overlay');
-            }
-
-            window.addEventListener('keydown', function (e) {
-              if (popupOpen()) return;
-              var wasMoving = keys[37] || keys[38] || keys[39] || keys[40];
-              keys[e.keyCode] = true;
-              if (!wasMoving && (keys[37] || keys[38] || keys[39] || keys[40])) {
-                holdStart = Date.now();
-              }
-              if (e.keyCode === 13) {
-                if (inputFocused()) { document.activeElement.blur(); return; }
-                var el = getTarget(x, y);
-                if (!el) return;
-                if (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA' || el.tagName === 'SELECT') {
-                  el.focus();
-                  el.click();
-                  return;
-                }
-                ['mousedown', 'mouseup', 'click'].forEach(function (t) {
-                  el.dispatchEvent(new MouseEvent(t, {
-                    bubbles: true, cancelable: true, view: window,
-                    clientX: x, clientY: y, button: 0
-                  }));
-                });
-                if (el.focus) el.focus();
-              }
-              if (e.keyCode === 10009 || e.keyCode === 27) {
-                if (inputFocused()) document.activeElement.blur();
-              }
-            });
-
-            window.addEventListener('keyup', function (e) {
-              delete keys[e.keyCode];
-              if (!keys[37] && !keys[38] && !keys[39] && !keys[40]) holdStart = 0;
-            });
-
-            setInterval(function () {
-              if (popupOpen()) { keys = {}; holdStart = 0; return; }
-              if (!keys[37] && !keys[38] && !keys[39] && !keys[40]) return;
-              var s = getSpd();
-              if (keys[37]) x = Math.max(0, x - s);
-              if (keys[38]) y = Math.max(0, y - s);
-              if (keys[39]) x = Math.min(window.innerWidth, x + s);
-              if (keys[40]) y = Math.min(window.innerHeight, y + s);
-              cursor.style.left = x + 'px';
-              cursor.style.top = y + 'px';
-            }, 16);
-          })();
-          CURSOREOF
-          sed -i 's|</body>|<script src="./tizen-cursor.js"></script></body>|' tizen-app/index.html
 
       - name: Build Tizen web package
         run: |
@@ -261,9 +103,9 @@ jobs:
       - name: Patch profiles.xml with signing passwords
         run: |
           PROFILES="${GITHUB_WORKSPACE}/tizen-studio-data/profile/profiles.xml"
-          sed -i "s|${GITHUB_WORKSPACE}/tizen-studio-data/keystore/author/SportlinkClub.pwd|${{ secrets.TIZEN_CERT_PASS }}|g" "$PROFILES"
-          sed -i "s|${GITHUB_WORKSPACE}/tizen-studio-data/tools/certificate-generator/certificates/distributor/tizen-distributor-signer.pwd|tizenpkcs12passfordsigner|g" "$PROFILES"
-          sed -i 's|password=""|password="tizenpkcs12passfordsigner"|g' "$PROFILES"
+          sed -i "s|${GITHUB_WORKSPACE}/tizen-studio-data/keystore/author/SportlinkClub.pwd|${TIZEN_CERT_PASS}|g" "$PROFILES"
+          sed -i "s|${GITHUB_WORKSPACE}/tizen-studio-data/tools/certificate-generator/certificates/distributor/tizen-distributor-signer.pwd|${DISTRIBUTOR_PASS}|g" "$PROFILES"
+          sed -i "s|password=\"\"|password=\"${DISTRIBUTOR_PASS}\"|g" "$PROFILES"
 
       - name: Create expect script for WGT packaging
         run: |
@@ -281,7 +123,7 @@ jobs:
               exp_continue
             }
             "Distributor1 password:" {
-              send "tizenpkcs12passfordsigner\r"
+              send "$env(DISTRIBUTOR_PASS)\r"
               exp_continue
             }
             "Save distributor1 password" {
@@ -296,7 +138,6 @@ jobs:
       - name: Package WGT
         env:
           BUILD_RESULT: ${{ github.workspace }}/tizen-app/.buildResult
-          TIZEN_CERT_PASS: ${{ secrets.TIZEN_CERT_PASS }}
         run: |
           ./package.exp
           WGT=$(find tizen-app/.buildResult -name "*.wgt" | head -1)

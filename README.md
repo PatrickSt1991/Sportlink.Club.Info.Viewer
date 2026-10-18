@@ -83,8 +83,10 @@ Installeer de app rechtstreeks in je WordPress site
 
 Kloon de repository en bouw je eigen versie van de app.  
 🔗 [Bekijk de broncode op GitHub](https://github.com/PatrickSt1991/Sportlink.Club.Info.Viewer)  
-🛠️ Benodigdheden: Node.js, npm, en een build tool Vite
-📦 Bouw de app met het build-commando (`npm run build`)  
+🛠️ Benodigdheden: Node.js 20.19+ en npm  
+📦 Webversie: `npm run build` (uitvoer in `dist/`)  
+📺 Samsung TV: `npm run build:tizen` (uitvoer in `dist-tizen/`, inclusief `config.xml`)  
+🧪 Tests: `npm test`  
 ✅ Volledige controle over de code en features  
 ❌ Technische kennis vereist  
 

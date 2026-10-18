@@ -1,0 +1,22 @@
+{
+  "MatchResult": [
+    {
+      "PublicMatchId": "PM-10",
+      "MatchDateTime": "2026-10-15T14:30:00+02:00",
+      "HomeTeam": { "TeamName": "SV Test 1", "Club": { "ClubId": "CLUB-1" } },
+      "AwayTeam": { "TeamName": "FC Gast 1", "Club": { "ClubId": "CLUB-9" } },
+      "HomeResult": { "Score": 3 },
+      "AwayResult": { "Score": 1 },
+      "Pool": { "CompetitionKind": "DEFAULT_COMPETITION" }
+    },
+    {
+      "PublicMatchId": "PM-11",
+      "MatchDateTime": "2026-10-16T14:30:00+02:00",
+      "HomeTeam": { "TeamName": "SV Test 2", "Club": { "ClubId": "CLUB-1" } },
+      "AwayTeam": { "TeamName": "FC Gast 2", "Club": { "ClubId": "CLUB-9" } },
+      "HomeResult": {},
+      "AwayResult": {},
+      "Pool": { "CompetitionKind": "POST_COMPETITION" }
+    }
+  ]
+}

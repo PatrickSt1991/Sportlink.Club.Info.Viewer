@@ -1,7 +1,7 @@
 # 🏟️ ClubInfoBoard
 
 Welkom bij **ClubInfoBoard** – dé oplossing voor sportverenigingen om wedstrijdinformatie real-time en overzichtelijk te tonen op schermen binnen de club, zoals in de kantine of op een Smart TV.   
-Neem een kijkje in de [online versie](https://patrickst1991.github.io/Sportlink.Club.Info.Viewer/#/settings)
+Neem een kijkje in de [online versie](https://clubinfoboard.madebypatrick.nl/#/settings)
 ---
 
 ## ⚙️ Wat is ClubInfoBoard?
@@ -44,7 +44,7 @@ De app is geoptimaliseerd voor gebruik op Smart TV's, tablets én computers of l
 
 ### 🌐 Online (gehoste versie)
 
-Gebruik de [online versie](https://patrickst1991.github.io/Sportlink.Club.Info.Viewer/) direct in je browser.  
+Gebruik de [online versie](https://clubinfoboard.madebypatrick.nl/) direct in je browser.  
 ✅ Altijd up-to-date  
 ✅ Geen installatie nodig  
 ❌ Geen offline ondersteuning  

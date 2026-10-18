@@ -1,0 +1,7 @@
+[
+  { "wedstrijdcode": "A1", "wedstrijddatum": "2026-10-20T14:30:00+0200", "thuisteam": "SV Test 1", "uitteam": "FC Gast 1", "competitiesoort": "regulier", "accommodatie": "Sportpark Noord", "kleedkamerthuisteam": "1", "kleedkameruitteam": "2", "veld": "veld 1" },
+  { "wedstrijdcode": "A2", "wedstrijddatum": "2026-10-25T10:00:00+0200", "thuisteam": "SV Test 2", "uitteam": "FC Gast 2", "competitiesoort": "beker", "accommodatie": "Sportpark Noord" },
+  { "wedstrijdcode": "A3", "wedstrijddatum": "2026-11-15T10:00:00+0100", "thuisteam": "SV Test 3", "uitteam": "FC Gast 3", "competitiesoort": "Nationale competitie", "accommodatie": "Elders" },
+  { "wedstrijdcode": "A4", "wedstrijddatum": "2026-10-10T10:00:00+0200", "thuisteam": "SV Test 4", "uitteam": "FC Gast 4", "competitiesoort": "regulier", "accommodatie": "Sportpark Noord" },
+  { "wedstrijdcode": "A5", "wedstrijddatum": "2026-10-18T15:00:00+0200", "thuisteam": "SV Test 5", "uitteam": "FC Gast 5", "competitiesoort": "friendly", "accommodatie": "Sportpark Noord", "kleedkamerthuisteam": null, "veld": "kunstgras" }
+]

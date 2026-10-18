@@ -1,0 +1,30 @@
+{
+  "_embedded": {
+    "items": [
+      {
+        "uuid": "N-1",
+        "datum": "2026-10-20T00:00:00+02:00",
+        "tijd": "2026-10-20T19:30:00+02:00",
+        "uitslag": { "code": "3-1" },
+        "_embedded": {
+          "speelveld": { "aanduiding": "Veld A" },
+          "poule": { "_embedded": { "regio": { "omschrijving": "Regio Noord" } } },
+          "pouleindeling_thuis": { "_embedded": { "team": { "naam": "Sponsor / VC Thuis DS 1", "_embedded": { "vereniging": { "vestigingsplaats": "Groningen", "_links": { "logo_url": { "href": "https://logo/thuis.png" } } } } } } },
+          "pouleindeling_uit": { "_embedded": { "team": { "naam": "VC Uit DS 2", "_embedded": { "vereniging": { "vestigingsplaats": "Assen" } } } } }
+        }
+      },
+      {
+        "uuid": "N-2",
+        "datum": "2026-10-18T00:00:00+02:00",
+        "tijd": "2026-10-18T15:00:00+02:00",
+        "uitslag": { "code": "0-3" },
+        "_embedded": {
+          "speelveld": { "aanduiding": "Veld B" },
+          "poule": { "_embedded": { "regio": { "omschrijving": "Nationale competitie" } } },
+          "pouleindeling_thuis": { "_embedded": { "team": { "naam": "VC Thuis HS 1", "_embedded": { "vereniging": { "vestigingsplaats": "Groningen" } } } } },
+          "pouleindeling_uit": { "_embedded": { "team": { "naam": "VC Uit HS 1", "_embedded": { "vereniging": { "vestigingsplaats": "Leeuwarden" } } } } }
+        }
+      }
+    ]
+  }
+}
