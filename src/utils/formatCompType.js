@@ -1,18 +1,15 @@
+const TYPE_MAP = {
+  regulier: 'Competitie',
+  beker: 'Beker',
+  friendly: 'Vriendschappelijk',
+  'nationale competitie': 'NC',
+  'regio noord': 'Regio Noord',
+  'regio oost': 'Regio Oost',
+  'regio west': 'Regio West',
+  'regio zuid': 'Regio Zuid',
+  trophy_competition: 'Beker',
+  default_competition: 'Competitie',
+  post_competition: 'Nacompetitie',
+};
 
-export const formatCompType = (compType) => {
-    const typeMap = {
-      'regulier': 'Competitie',
-      'beker': 'Beker',
-      'friendly': 'Vriendschappelijk',
-      'nationale competitie': 'NC',
-      'Nationale competitie': 'NC',
-      'Regio Noord': 'Regio Noord',
-      'Regio Oost': 'Regio Oost',
-      'Regio West': 'Regio West',
-      'Regio Zuid': 'Regio Zuid',
-      'TROPHY_COMPETITION': 'Beker',
-      'DEFAULT_COMPETITION': 'Competitie',
-      'POST_COMPETITION': 'Nacompetitie'
-    };
-    return typeMap[compType] ?? 'Onbekend';
-  };
+export const formatCompType = (compType) => TYPE_MAP[String(compType ?? '').trim().toLowerCase()] ?? 'Onbekend';
