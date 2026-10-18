@@ -1,138 +1,48 @@
 <template>
-  <main role="main" class="container-fluid" id="contentBox">
-    <div id="rcorners_matchinfo_fixed">
-      <div class="matchEntry match-header">
-        <div v-if="config.columnVisible?.left !== false" :style="{ background: config.leftBoxColor, color: config.leftBoxText, flex: config.columnWidths?.left ?? 2 }" id="datumUitslag_fixed">Aanvang</div>
-        <div v-if="config.columnVisible?.leftMid !== false" :style="{ background: config.leftMidBoxColor, color: config.leftMidBoxText, flex: config.columnWidths?.leftMid ?? 9 }" id="thuisteam_fixed">Thuis</div>
-        <div v-if="config.columnVisible?.mid !== false" :style="{ background: config.midBoxColor, color: config.midBoxText, flex: config.columnWidths?.mid ?? 4 }" id="kleedkamer_fixed">Kleedkamer</div>
-        <div v-if="config.columnVisible?.rightMid !== false" :style="{ background: config.rightMidBoxColor, color: config.rightMidBoxText, flex: config.columnWidths?.rightMid ?? 9 }" id="uitteam_fixed">Gasten</div>
-        <div v-if="config.columnVisible?.right !== false" :style="{ background: config.rightBoxColor, color: config.rightBoxText, flex: config.columnWidths?.right ?? 4 }" id="kleedkamer_fixed">Kleedkamer</div>
-        <div :style="{ background: config.leftBoxColor, color: config.leftBoxText, flex: config.columnWidths?.left ?? 2 }" id="wedstrijdveld_fixed">Veld</div>
-      </div>
-      <div v-if="loading" id="noMatchMessage">
-        <h1>Wedstrijd Informatie worden geladen...</h1>
-      </div>
-
-      <div v-else-if="error" id="noMatchMessage">
-        <h1>{{ error }}</h1>
-      </div>
-
-      <NoMatchesDisplay 
-        v-else-if="matches.length === 0"
-        title="Geen wedstrijden"
-        :message="dateRangeText" />
-      
-      <div v-else id="scrollingContainer" ref="scrollingContainer" :style="{ height: scrollingContainerHeight }">
-        <transition-group name="fade" tag="div">
-          <div v-for="match in matches" :key="match.id" class="matchEntry">
-            <div v-if="config.columnVisible?.left !== false" :style="{ background: config.leftBoxColor, color: config.leftBoxText, flex: config.columnWidths?.left ?? 2 }" id="datumUitslag_fixed">{{ match.wedstrijddatum }}</div>
-            <div v-if="config.columnVisible?.leftMid !== false" :style="{ background: config.leftMidBoxColor, color: config.leftMidBoxText, flex: config.columnWidths?.leftMid ?? 9 }" id="thuisteam_fixed">{{ match.thuisteam }}</div>
-            <div v-if="config.columnVisible?.mid !== false" :style="{ background: config.midBoxColor, color: config.midBoxText, flex: config.columnWidths?.mid ?? 4 }" id="kleedkamer_fixed">{{ match.kleedkamerthuisteam }}</div>
-            <div v-if="config.columnVisible?.rightMid !== false" :style="{ background: config.rightMidBoxColor, color: config.rightMidBoxText, flex: config.columnWidths?.rightMid ?? 9 }" id="uitteam_fixed">{{ match.uitteam }}</div>
-            <div v-if="config.columnVisible?.right !== false" :style="{ background: config.rightBoxColor, color: config.rightBoxText, flex: config.columnWidths?.right ?? 4 }" id="kleedkamer_fixed">{{ match.kleedkameruitteam }}</div>
-            <div :style="{ background: config.leftBoxColor, color: config.leftBoxText, flex: config.columnWidths?.left ?? 2 }" id="wedstrijdveld_fixed">{{ match.veld }}</div>
-          </div>
-        </transition-group>
-      </div>
-    </div>
-  </main>
+  <MatchTable
+    :columns="PREMATCH_COLUMNS"
+    :rows="rows"
+    :loading="loading"
+    :error="error"
+    loading-text="Wedstrijd informatie wordt geladen..."
+    empty-title="Geen wedstrijden"
+    :empty-message="emptyMessage"
+  />
 </template>
 
 <script setup>
-import { ref, onMounted, onUnmounted, watch, nextTick, computed } from 'vue';
-import { USER_CONFIG } from '@/config';
-import { useRouter } from 'vue-router';
-import { formatKleedkamer, formatVeld } from '@/utils/formatUtils.js';
-import { formatCompType } from '@/utils/formatCompType.js';
-import { formatTime } from '@/utils/formatDateType.js';
-import NoMatchesDisplay from '@/components/NoMatchesDisplay.vue';
-import { useScrollHelper } from '../utils/scrollHelper';
+import { computed, onMounted, onUnmounted, ref, watch } from 'vue';
+import MatchTable from '@/components/MatchTable.vue';
+import { PREMATCH_COLUMNS } from '@/components/matchColumns';
+import { useMatchData } from '@/composables/useMatchData';
 import { fetchPreMatchInfo } from '@/utils/matchFetchHelpers';
 
-const router = useRouter();
+const from = ref('');
+const to = ref('');
 
-const matches = ref([]);
-const error = ref(null);
-const loading = ref(false);
-const refreshInterval = ref(null);
-const config = ref({});
-const now = ref('');
-const threeHoursLater = ref('');
+const { config, rows, loading, error, reload } = useMatchData(
+  async (cfg) => {
+    const result = await fetchPreMatchInfo(cfg);
+    from.value = result.from;
+    to.value = result.to;
+    return result.rows;
+  },
+  { errorMessage: 'Error tijdens het laden van de wedstrijd informatie...' }
+);
 
-const {
-    scrollingContainerHeight,
-    calculateScrollingContainerHeight,
-    startScrolling,
-    tryStartScrolling,
-    stopScrolling
-} = useScrollHelper(router, config);
+const emptyMessage = computed(() => `Er zijn geen wedstrijden gepland tussen ${from.value} en ${to.value}`);
 
-const dateRangeText = computed(() => {
-  return `Er zijn geen wedstrijden gepland tussen ${now.value} en ${threeHoursLater.value}`;
-});
+let refreshTimer = null;
 
-const loadPreMatchInfo = async () => {
-  const result = await fetchPreMatchInfo(
-    config,
-    matches,
-    loading,
-    error,
-    { 
-      formatTime,
-      formatKleedkamer,
-      formatVeld,
-      formatCompType,
-      nextTick,
-      startScrolling
-    }
-  );
-  
-  if (result) {
-    now.value = result.now;
-    threeHoursLater.value = result.threeHoursLater;
-  }
-};
+function startPeriodicRefresh() {
+  clearInterval(refreshTimer);
+  refreshTimer = null;
+  const seconds = Number(config.prematchRefresh);
+  if (!seconds || seconds <= 0) return;
+  refreshTimer = setInterval(reload, seconds * 1000);
+}
 
-const startPeriodicRefresh = () => {
-  if (!config.value?.prematchRefresh) return;
-  
-  const refreshIntervalMs = config.value.prematchRefresh * 1000;
-  refreshInterval.value = setInterval(() => {
-    loadPreMatchInfo();
-  }, refreshIntervalMs);
-};
-
-const stopPeriodicRefresh = () => {
-  clearInterval(refreshInterval.value);
-  refreshInterval.value = null;
-};
-
-watch(() => USER_CONFIG.value, (newConfig) => {
-  if (!newConfig) return;
-  
-  config.value = { ...newConfig };
-  
-  const missingClientId = !newConfig.clientId;
-  const missingClubIdentifier = !newConfig.clubIdentifer;
-  const missingClubId = !newConfig.clubId;
-  
-  if (missingClientId && missingClubIdentifier && missingClubId) {
-    router.push('/settings');
-  } else {
-    loadPreMatchInfo();
-  }
-}, { immediate: true, deep: true });
-
-onMounted(() => {
-  calculateScrollingContainerHeight();
-  window.addEventListener('resize', calculateScrollingContainerHeight);
-  startPeriodicRefresh();
-});
-
-onUnmounted(() => {
-  stopScrolling();
-  stopPeriodicRefresh();
-  window.removeEventListener('resize', calculateScrollingContainerHeight);
-});
+watch(() => config.prematchRefresh, startPeriodicRefresh);
+onMounted(startPeriodicRefresh);
+onUnmounted(() => clearInterval(refreshTimer));
 </script>
-

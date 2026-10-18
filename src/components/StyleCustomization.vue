@@ -3,16 +3,16 @@
 
     <!-- Live preview -->
     <div class="matchEntry">
-      <div v-if="localStyles.columnVisible?.left !== false"
-           :style="{ background: localStyles.leftBoxColor, color: localStyles.leftBoxText, flex: localStyles.columnWidths?.left ?? 2 }">Links</div>
-      <div v-if="localStyles.columnVisible?.leftMid !== false"
-           :style="{ background: localStyles.leftMidBoxColor, color: localStyles.leftMidBoxText, flex: localStyles.columnWidths?.leftMid ?? 9 }">Links-Midden</div>
-      <div v-if="localStyles.columnVisible?.mid !== false"
-           :style="{ background: localStyles.midBoxColor, color: localStyles.midBoxText, flex: localStyles.columnWidths?.mid ?? 4 }">Midden</div>
-      <div v-if="localStyles.columnVisible?.rightMid !== false"
-           :style="{ background: localStyles.rightMidBoxColor, color: localStyles.rightMidBoxText, flex: localStyles.columnWidths?.rightMid ?? 9 }">Midden-Rechts</div>
-      <div v-if="localStyles.columnVisible?.right !== false"
-           :style="{ background: localStyles.rightBoxColor, color: localStyles.rightBoxText, flex: localStyles.columnWidths?.right ?? 3 }">Rechts</div>
+      <div v-if="config.columnVisible?.left !== false"
+           :style="{ background: config.leftBoxColor, color: config.leftBoxText, flex: config.columnWidths?.left ?? 2 }">Links</div>
+      <div v-if="config.columnVisible?.leftMid !== false"
+           :style="{ background: config.leftMidBoxColor, color: config.leftMidBoxText, flex: config.columnWidths?.leftMid ?? 9 }">Links-Midden</div>
+      <div v-if="config.columnVisible?.mid !== false"
+           :style="{ background: config.midBoxColor, color: config.midBoxText, flex: config.columnWidths?.mid ?? 4 }">Midden</div>
+      <div v-if="config.columnVisible?.rightMid !== false"
+           :style="{ background: config.rightMidBoxColor, color: config.rightMidBoxText, flex: config.columnWidths?.rightMid ?? 9 }">Midden-Rechts</div>
+      <div v-if="config.columnVisible?.right !== false"
+           :style="{ background: config.rightBoxColor, color: config.rightBoxText, flex: config.columnWidths?.right ?? 3 }">Rechts</div>
     </div>
 
     <!-- Logo's -->
@@ -20,7 +20,7 @@
     <p class="section-label">Overig</p>
     <div class="form-group">
       <label class="vis-label">Logo's tonen:</label>
-      <input type="checkbox" v-model="localStyles.showLogos" class="vis-check">
+      <input type="checkbox" v-model="config.showLogos" class="vis-check">
     </div>
 
     <template v-for="(sec, key) in SECTIONS" :key="key">
@@ -29,20 +29,20 @@
       <div class="form-group">
         <label>Kolom:</label>
         <div class="color-input-wrapper">
-          <input type="color" :value="localStyles[sec.bg]" @input="updateColor(sec.bg, $event.target.value)">
-          <input type="text" v-model="localStyles[sec.bg]" placeholder="#RRGGBB" @blur="validateColor(sec.bg, sec.bgDefault)">
+          <input type="color" :value="config[sec.bg]" @input="updateColor(sec.bg, $event.target.value)">
+          <input type="text" v-model="config[sec.bg]" placeholder="#RRGGBB" @blur="validateColor(sec.bg, sec.bgDefault)">
         </div>
         <label>Tekst:</label>
         <div class="color-input-wrapper">
-          <input type="color" :value="localStyles[sec.text]" @input="updateColor(sec.text, $event.target.value)">
-          <input type="text" v-model="localStyles[sec.text]" placeholder="#RRGGBB" @blur="validateColor(sec.text, sec.textDefault)">
+          <input type="color" :value="config[sec.text]" @input="updateColor(sec.text, $event.target.value)">
+          <input type="text" v-model="config[sec.text]" placeholder="#RRGGBB" @blur="validateColor(sec.text, sec.textDefault)">
         </div>
       </div>
       <div class="form-group layout-row">
         <label class="vis-label">Breedte:</label>
-        <input type="number" v-model.number="localStyles.columnWidths[key]" min="1" max="20" class="small-number">
+        <input type="number" v-model.number="config.columnWidths[key]" min="1" max="20" class="small-number">
         <label class="vis-label" style="margin-left:14px;">Zichtbaar:</label>
-        <input type="checkbox" v-model="localStyles.columnVisible[key]" class="vis-check">
+        <input type="checkbox" v-model="config.columnVisible[key]" class="vis-check">
       </div>
     </template>
 
@@ -50,7 +50,7 @@
 </template>
 
 <script setup>
-import { ref, watch } from 'vue';
+import { useConfigStore } from '@/stores/configStore';
 
 const SECTIONS = {
   left:     { label: 'Links',         bg: 'leftBoxColor',     text: 'leftBoxText',     bgDefault: '#b40808', textDefault: '#ffffff' },
@@ -60,39 +60,15 @@ const SECTIONS = {
   right:    { label: 'Rechts',        bg: 'rightBoxColor',    text: 'rightBoxText',    bgDefault: '#b40808', textDefault: '#ffffff' },
 };
 
-const props = defineProps({
-  styles: { type: Object, required: true }
-});
-
-const emit = defineEmits(['update:styles']);
-
-function initStyles(src) {
-  const s = JSON.parse(JSON.stringify(src));
-  if (!s.columnWidths)  s.columnWidths  = { left: 2, leftMid: 9, mid: 4, rightMid: 9, right: 3 };
-  if (!s.columnVisible) s.columnVisible = { left: true, leftMid: true, mid: true, rightMid: true, right: true };
-  if (s.showLogos === undefined) s.showLogos = true;
-  return s;
-}
-
-const localStyles = ref(initStyles(props.styles));
-
-watch(() => props.styles, (newStyles) => {
-  if (JSON.stringify(localStyles.value) !== JSON.stringify(newStyles)) {
-    localStyles.value = initStyles(newStyles);
-  }
-}, { deep: true });
-
-watch(localStyles, (newStyles) => {
-  emit('update:styles', newStyles);
-}, { deep: true });
+const { config } = useConfigStore();
 
 function updateColor(field, value) {
-  localStyles.value[field] = value.toUpperCase();
+  config[field] = value.toUpperCase();
 }
 
 function validateColor(field, fallback) {
-  if (!/^#[0-9A-F]{6}$/i.test(localStyles.value[field])) {
-    localStyles.value[field] = fallback;
+  if (!/^#[0-9A-F]{6}$/i.test(config[field] ?? '')) {
+    config[field] = fallback;
   }
 }
 </script>

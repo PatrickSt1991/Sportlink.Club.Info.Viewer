@@ -39,7 +39,7 @@
   
   const filteredClubs = computed(() =>
     props.clubs.filter(c =>
-      c.ClubName.toLowerCase().startsWith(search.value.toLowerCase())
+      (c.ClubName ?? '').toLowerCase().includes(search.value.toLowerCase())
     )
   );
   
